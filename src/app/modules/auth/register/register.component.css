@@ -1,0 +1,511 @@
+/* ===== POLICE & RESET ===== */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.auth-page {
+  min-height: 100vh;
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+  url('/assets/background.jpg.jpeg');
+  background-size: cover;
+  background-position: center;
+  font-family: 'Nunito', sans-serif;
+  color: white;
+}
+
+/* ===== NAVIGATION ===== */
+.auth-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  flex-wrap: wrap;
+}
+
+.auth-nav .logo {
+  height: 50px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.nav-btns {
+  display: flex;
+  gap: 15px;
+}
+
+.btn-green,
+.btn-blue-dark {
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-green {
+  background: #62c391;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-green:hover {
+  background: #4aa97a;
+  transform: translateY(-2px);
+}
+
+.btn-blue-dark {
+  background: #1e2f4b;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-blue-dark:hover {
+  background: #2a3f60;
+  transform: translateY(-2px);
+}
+
+/* ===== CONTENEUR ===== */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.auth-content {
+  width: 100%;
+  max-width: 700px;
+  padding: 10px 0 40px;
+}
+
+/* ===== TITRE : TAILLE ORIGINALE (64px) ===== */
+.auth-content h1 {
+  font-family: 'Nunito';
+  font-weight: 700;
+  font-size: 50px;
+  line-height: 1.2;
+  color: #ffffff;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+/* ===== SOUS-TITRE : RÉDUIT ===== */
+.subtitle {
+  font-family: 'Nunito';
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.3;
+  color: #ffffff;
+  margin-bottom: 32px;
+}
+
+/* ===== CARTES RÔLE : HAUTEUR RÉDUITE ===== */
+.role-selector {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.role-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  gap: 8px;
+  height: 90px;
+  background: #f0f4fe;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.role-card.active {
+  background: #62b98f;
+}
+
+.role-card i {
+  font-size: 26px;
+  color: inherit;
+}
+
+.role-card span {
+  font-family: 'Nunito';
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.3;
+  color: inherit;
+}
+
+.role-card.active i,
+.role-card.active span {
+  color: #ffffff;
+}
+
+.role-card:not(.active) i,
+.role-card:not(.active) span {
+  color: rgba(28, 34, 79, 0.4);
+}
+
+/* ===== FORMULAIRE : GAPS ET PADDINGS RÉDUITS ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.input-group label {
+  font-family: 'Nunito';
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.3;
+  color: #ffffff;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 10px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+}
+
+.input-wrapper i {
+  font-size: 20px;
+  color: #979797;
+  width: 26px;
+  text-align: center;
+  flex-shrink: 0;        /* ← empêche l'icône de rétrécir/disparaître */
+  user-select: none;
+}
+
+.input-wrapper input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: 'Nunito';
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.3;
+  color: #111827;
+  outline: none;
+}
+
+.input-wrapper input::placeholder {
+  color: #979797;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+/* Permis chauffeur */
+.driver-info {
+  animation: fadeSlide 0.3s ease;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== BOUTON ===== */
+.btn-submit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 10px;
+  width: 100%;
+  background: linear-gradient(90deg, #5fc090 0%, #2a388c 100%);
+  border-radius: 98px;
+  border: none;
+  font-family: 'Nunito';
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.3;
+  color: #fef5eb;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+  margin-top: 6px;
+}
+
+.btn-submit:hover {
+  transform: scale(0.98);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ===== LIEN CONNEXION ===== */
+.auth-link {
+  font-family: 'Nunito';
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+  color: #ffffff;
+  text-align: left;
+  margin-top: 6px;
+}
+
+.auth-link a {
+  color: #62c391;
+  font-weight: bold;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.auth-link a:hover {
+  border-bottom-color: #62c391;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 700px) {
+  .auth-content {
+    max-width: 95%;
+  }
+  .auth-content h1 {
+    font-size: 48px;
+  }
+  .subtitle,
+  .input-group label,
+  .role-card span {
+    font-size: 15px;
+  }
+  .role-card {
+    height: 80px;
+    padding: 8px;
+  }
+  .role-card i {
+    font-size: 22px;
+  }
+  .input-wrapper {
+    padding: 10px 12px;
+  }
+  .input-wrapper i {
+    font-size: 18px;
+  }
+  .btn-submit {
+    font-size: 16px;
+    padding: 9px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-nav {
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px 20px;
+  }
+  .nav-btns {
+    width: 100%;
+    justify-content: center;
+  }
+  .auth-content h1 {
+    font-size: 40px;
+  }
+}
+/* ===== PHONE INPUT WITH REAL FLAGS ===== */
+.phone-wrapper {
+  position: relative;
+  padding-left: 10px;
+  gap: 0;
+}
+
+/* Dropdown container */
+.country-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Trigger = what you see when closed */
+.country-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  user-select: none;
+}
+
+.country-trigger:hover {
+  background: #f3f4f6;
+}
+
+.flag-img {
+  width: 20px;
+  height: 14px;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  box-shadow: 0 0 1px rgba(0,0,0,0.15);
+}
+
+.trigger-code {
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+  min-width: 36px;
+}
+
+.country-trigger i {
+  font-size: 10px;
+  color: #979797;
+}
+
+/* Separator between flag and number input */
+.phone-separator {
+  width: 1px;
+  height: 24px;
+  background: #e5e7eb;
+  margin: 0 10px;
+  flex-shrink: 0;
+}
+
+/* ===== DROPDOWN LIST ===== */
+.country-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 100;
+  min-width: 240px;
+  padding: 6px;
+}
+
+.country-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.country-option:hover {
+  background: #f3f4f6;
+}
+
+.country-option .flag-img {
+  width: 22px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.option-code {
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+  min-width: 44px;
+}
+
+.option-name {
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Scrollbar */
+.country-list::-webkit-scrollbar {
+  width: 6px;
+}
+.country-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.country-list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .country-list {
+    min-width: 200px;
+    left: -5px;
+    max-height: 240px;
+  }
+  .option-name {
+    font-size: 12px;
+  }
+  .trigger-code {
+    min-width: 32px;
+  }
+}
+/* ── Password toggle (same design as login) ───────────────────────────── */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 2.8rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  z-index: 2;
+}
+
+.toggle-password:hover {
+  color: #111827;
+}
+
+.toggle-password:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.toggle-password svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}

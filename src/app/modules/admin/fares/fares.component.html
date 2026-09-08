@@ -1,0 +1,242 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- SIDEBAR: moved inside the grid column so it reserves space -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div class="header-left">
+            <h1 class="page-title">Tarifs officiels reglementes</h1>
+            <p class="page-subtitle">Tarifs du Ministere des Transports</p>
+          </div>
+          @if (permissionService.canManageFares()) {
+            <div class="header-actions">
+              <button class="btn btn-outline-secondary btn-sm" (click)="showImport=!showImport">
+                <i class="bi bi-upload"></i> Import JSON/CSV
+              </button>
+              <button class="btn btn-primary btn-sm" (click)="openCreate()">
+                <i class="bi bi-plus-circle"></i> Nouveau tarif
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Import panel -->
+        @if (showImport && permissionService.canManageFares()) {
+          <div class="panel import-panel">
+            <div class="panel-header">Import fichier JSON ou CSV</div>
+            <div class="panel-body">
+              <p class="hint-text">
+                Formats acceptes : <strong>.json</strong> (tableau d'objets) ou <strong>.csv</strong><br>
+                <code>departureCity,arrivalCity,pricePerSeat,distanceKm,effectiveDate,source</code>
+              </p>
+              <div class="file-upload-zone" [class.has-file]="selectedFile">
+                <input type="file" accept=".json,.csv" id="fareFile" (change)="onFileSelected($event)" hidden />
+                <label for="fareFile" class="upload-label">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span class="upload-title">Deposer un fichier ici</span>
+                  <span class="upload-subtitle">ou cliquez pour parcourir</span>
+                  <span class="upload-hint">JSON ou CSV jusqu'a 5 Mo</span>
+                </label>
+              </div>
+              @if (selectedFile) {
+                <div class="file-selected">
+                  <div class="file-info">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span class="file-name">{{ selectedFile.name }}</span>
+                    <span class="file-size">{{ (selectedFile.size / 1024).toFixed(1) }} Ko</span>
+                  </div>
+                  <button class="btn-icon-remove" (click)="removeFile()" title="Retirer">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              }
+              <div class="panel-actions">
+                <button class="btn btn-success btn-sm" (click)="submitImport()" [disabled]="importLoading || !selectedFile">
+                  @if (importLoading) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                  }
+                  Importer
+                </button>
+              </div>
+              @if (importResult) {
+                <div class="import-result">
+                  <span class="result-item success">{{ importResult.created }} crees</span>
+                  <span class="result-item info">{{ importResult.updated }} mis a jour</span>
+                  <span class="result-item warning">{{ importResult.skipped }} ignores</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Filter -->
+        <div class="toolbar filter-bar">
+          <div class="search-box filter-input-group">
+            <span class="input-icon"><i class="bi bi-search"></i></span>
+            <input type="text" [(ngModel)]="filterCity" (input)="load()" placeholder="Filtrer par ville...">
+          </div>
+        </div>
+
+        <!-- Loading -->
+        @if (loading) {
+          <div class="loading-state loading-center">
+            <div class="spinner-modern spinner-border text-primary"></div>
+            <span>Chargement...</span>
+          </div>
+        }
+
+        <!-- Table -->
+        @if (!loading) {
+          <div class="data-grid table-card">
+            <div class="table-container table-responsive">
+              <table class="modern-table data-table">
+                <thead>
+                <tr>
+                  <th class="col-route">Depart</th>
+                  <th class="col-route">Arrivee</th>
+                  <th class="col-price">Prix/place</th>
+                  <th class="col-dist">Distance</th>
+                  <th class="col-source">Source</th>
+                  <th class="col-status">Statut</th>
+                  @if (permissionService.canManageFares()) {
+                    <th class="col-actions">Actions</th>
+                  }
+                </tr>
+                </thead>
+                <tbody>
+                  @for (f of fares; track f.id) {
+                    <tr [class.inactive]="!f.active">
+                      <td class="cell-city">
+                        <div class="route-info">
+                          <div class="route-cities">
+                            <span class="city-dep">{{ f.departureCity }}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="cell-city">
+                        <div class="route-info">
+                          <div class="route-cities">
+                            <span class="city-arr">{{ f.arrivalCity }}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="cell-price price-tag">{{ f.pricePerSeat | number:"1.2-2" }} DT</td>
+                      <td class="cell-distance dist-value">{{ f.distanceKm ?? "&mdash;" }}</td>
+                      <td class="cell-source source-tag">{{ f.source ?? "&mdash;" }}</td>
+                      <td>
+                        <span class="status-pill status-badge" [class.active]="f.active" [class.status-active]="f.active" [class.inactive]="!f.active" [class.status-inactive]="!f.active">
+                          <span class="status-dot"></span>
+                          {{ f.active ? "Actif" : "Inactif" }}
+                        </span>
+                      </td>
+                      @if (permissionService.canManageFares()) {
+                        <td>
+                          <div class="action-menu action-group">
+                            <button class="action-btn btn-action edit" (click)="openEdit(f)" title="Modifier">
+                              <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-btn btn-action toggle"
+                                    [class.pause]="f.active"
+                                    [class.play]="!f.active"
+                                    [class.toggle-active]="f.active"
+                                    [class.toggle-inactive]="!f.active"
+                                    (click)="toggleActive(f)"
+                                    [title]="f.active ? 'Desactiver' : 'Activer'">
+                              <i class="bi" [class.bi-pause-fill]="f.active" [class.bi-play-fill]="!f.active"></i>
+                            </button>
+                            <button class="action-btn btn-action delete" (click)="deleteFare(f.id)" title="Supprimer">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                  @if (fares.length === 0) {
+                    <tr class="empty-row">
+                      <td colspan="7" class="empty-state">
+                        <div class="empty-content">
+                          <i class="bi bi-inbox"></i>
+                          <p>Aucun tarif enregistre.
+                            <button class="btn btn-link" (click)="openCreate()">Creer le premier</button>
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- Form -->
+        @if (showForm && permissionService.canManageFares()) {
+          <div class="panel form-card">
+            <div class="panel-header form-header">{{ editMode ? "Modifier le tarif" : "Nouveau tarif" }}</div>
+            <div class="panel-body form-body">
+              <form [formGroup]="fareForm" (ngSubmit)="onSubmit()">
+                <div class="form-grid form-row">
+                  <div class="form-field form-group">
+                    <label>Ville de depart <span class="required">*</span></label>
+                    <input type="text" class="input-modern form-control" formControlName="departureCity" placeholder="ex: Tunis">
+                  </div>
+                  <div class="form-field form-group">
+                    <label>Ville d'arrivee <span class="required">*</span></label>
+                    <input type="text" class="input-modern form-control" formControlName="arrivalCity" placeholder="ex: Sfax">
+                  </div>
+                  <div class="form-field form-group">
+                    <label>Prix / place (DT) <span class="required">*</span></label>
+                    <input type="number" class="input-modern form-control" formControlName="pricePerSeat" step="0.5" min="0.5">
+                  </div>
+                </div>
+                <div class="form-grid form-row">
+                  <div class="form-field form-group">
+                    <label>Distance (km)</label>
+                    <input type="number" class="input-modern form-control" formControlName="distanceKm" min="1">
+                  </div>
+                  <div class="form-field form-group">
+                    <label>Date d'effet</label>
+                    <input type="date" class="input-modern form-control" formControlName="effectiveDate">
+                  </div>
+                  <div class="form-field form-group">
+                    <label>Source / Reference</label>
+                    <input type="text" class="input-modern form-control" formControlName="source" placeholder="ex: MINISTERE_2026">
+                  </div>
+                  <div class="form-field form-group checkbox-field" style="display: flex; align-items: flex-end;">
+                    <label class="checkbox-modern form-check">
+                      <input type="checkbox" class="form-check-input" formControlName="active">
+                      <span class="checkmark"></span>
+                      <span class="label-text form-check-label">Actif</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="panel-actions form-actions">
+                  <button type="submit" class="btn btn-success" [disabled]="fareForm.invalid || submitting">
+                    @if (submitting) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    }
+                    {{ editMode ? "Enregistrer" : "Creer" }}
+                  </button>
+                  <button type="button" class="btn btn-secondary" (click)="cancelForm()">Annuler</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</div>

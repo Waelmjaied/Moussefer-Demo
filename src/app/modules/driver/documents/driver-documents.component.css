@@ -1,0 +1,712 @@
+/* ============================================
+   DRIVER REGISTRATION - PURPLE PALETTE
+   Aligned with the official maquette
+   (no :root variables, direct hex values)
+   ============================================ */
+
+/* Palette reference (do NOT remove this block — used by every tool that
+   greps for the brand color):
+     primary purple ............. #5b21b6
+     primary purple hover/dark .. #4c1d95
+     medium purple .............. #7c3aed
+     light purple background .... #f3e8ff
+     light purple border ........ #ddd6fe
+     focus ring (rgba purple) ... rgba(124, 58, 237, 0.12)
+*/
+
+/* ---------- LAYOUT ---------- */
+.driver-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f7fb;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.driver-layout .main-col {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 32px 60px;
+  overflow-y: auto;
+  background: #f5f7fb;
+}
+
+@media (max-width: 991px) {
+  .driver-layout .main-col { padding: 20px; }
+}
+@media (max-width: 575px) {
+  .driver-layout .main-col { padding: 16px; }
+}
+
+/* ---------- PAGE HEADER ---------- */
+.driver-layout .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.driver-layout .page-header-left h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #5b21b6;            /* purple title — maquette */
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.driver-layout .page-header-left h1 i {
+  color: #5b21b6;
+  font-size: 24px;
+}
+
+.driver-layout .page-header-left p {
+  font-size: 13px;
+  color: #667085;
+  margin: 0;
+}
+
+/* ---------- SECTION TITLE ---------- */
+.driver-layout .section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px;
+}
+
+/* ---------- STEPPER (TAB-BAR STYLE) ---------- */
+/* Two side-by-side labels with a horizontal bar underneath each.
+   Active tab: purple text + purple bar. Inactive: muted text + gray bar. */
+.driver-layout .stepper-tabs {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.driver-layout .stepper-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: default;
+}
+
+.driver-layout .stepper-tab .tab-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #98a2b3;
+  letter-spacing: 0.2px;
+}
+
+.driver-layout .stepper-tab.active .tab-label {
+  color: #5b21b6;
+  font-weight: 600;
+}
+
+.driver-layout .stepper-tab .tab-bar {
+  height: 3px;
+  background: #e4e7ec;
+  border-radius: 2px;
+  transition: background 0.2s ease;
+}
+
+.driver-layout .stepper-tab.active .tab-bar {
+  background: #5b21b6;
+}
+
+/* Legacy stepper classes — kept so older templates don’t break.
+   The new template uses .stepper-tabs above. */
+.driver-layout .stepper { display: none; }
+
+/* ---------- DCARD ---------- */
+.driver-layout .dcard {
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.driver-layout .dcard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.driver-layout .dcard-header {
+  padding: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 1px solid #e4e7ec;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.driver-layout .dcard-header i {
+  color: #5b21b6;
+  font-size: 18px;
+}
+
+.driver-layout .dcard-body { padding: 0; }
+
+/* Driver license: the entire card is a clickable upload trigger */
+.driver-layout .driver-license-card {
+  display: block;
+  margin-bottom: 0;
+}
+.driver-layout .driver-license-card:hover {
+  border-color: #ddd6fe;
+  background: #faf7ff;
+}
+
+/* ---------- FORM ELEMENTS ---------- */
+.driver-layout .form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #667085;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.driver-layout .form-label.meta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.driver-layout .form-control,
+.driver-layout .form-select {
+  border: 1.5px solid #e4e7ec;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #1e293b;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+  width: 100%;
+  font-family: inherit;
+  outline: none;
+  display: block;
+}
+
+.driver-layout .form-control:focus,
+.driver-layout .form-select:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+  background: white;
+}
+
+.driver-layout .form-control::placeholder {
+  color: #98a2b3;
+}
+
+.driver-layout .form-control.is-invalid {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.driver-layout .form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.driver-layout .invalid-feedback {
+  font-size: 12px;
+  color: #dc2626;
+  margin-top: 4px;
+}
+
+.driver-layout .form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23667085' viewBox='0 0 16 16'%3E%3Cpath d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+
+.driver-layout .input-group {
+  display: flex;
+  align-items: stretch;
+}
+
+.driver-layout .input-group-text {
+  background: #f2f4f7;
+  border: 1.5px solid #e4e7ec;
+  border-right: none;
+  color: #667085;
+  font-size: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px 0 0 8px;
+  font-weight: 500;
+}
+
+.driver-layout .input-group .form-control {
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+}
+
+.driver-layout .input-group .form-control:focus {
+  border-color: #e4e7ec;
+  box-shadow: none;
+}
+
+/* ---------- UPLOAD ZONES ---------- */
+.driver-layout .upload-zone {
+  border: 2px dashed #e4e7ec;
+  border-radius: 14px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+  position: relative;
+  overflow: hidden;
+  display: block;
+}
+
+.driver-layout .upload-zone:hover {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.04);
+}
+
+.driver-layout .upload-zone.dragover {
+  border-color: #5b21b6;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.driver-layout .upload-zone.has-file {
+  border-style: solid;
+  border-color: #12b76a;
+  background: #ecfdf5;
+}
+
+.driver-layout .upload-zone i {
+  font-size: 32px;
+  color: #7c3aed;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.driver-layout .upload-zone .upload-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.driver-layout .upload-zone .upload-hint {
+  font-size: 12px;
+  color: #98a2b3;
+}
+
+.driver-layout .upload-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.driver-layout .file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f3e8ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #5b21b6;
+  margin-top: 12px;
+}
+
+.driver-layout .file-chip i:first-child {
+  font-size: 16px;
+}
+
+.driver-layout .file-chip .remove-file {
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 4px;
+  transition: opacity 0.15s ease;
+}
+
+.driver-layout .file-chip .remove-file:hover { opacity: 0.7; }
+
+/* ---------- PROGRESS BAR (Step 2 header) ---------- */
+.driver-layout .progress-wrapper { margin-bottom: 8px; }
+
+.driver-layout .progress {
+  height: 8px;
+  background: #e4e7ec;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.driver-layout .progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #5b21b6, #7c3aed);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* ---------- BUTTONS ---------- */
+.driver-layout .btn-publish {
+  background: #5b21b6;          /* purple primary — was green */
+  color: #ffffff;
+  border: none;
+  border-radius: 22px;
+  padding: 11px 26px;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-shadow: 0 2px 8px rgba(91, 33, 182, 0.30);
+}
+
+.driver-layout .btn-publish:hover:not(:disabled) {
+  background: #4c1d95;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(91, 33, 182, 0.40);
+}
+
+.driver-layout .btn-publish:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.driver-layout .btn-publish:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.driver-layout .btn-outline-custom {
+  background: #f3e8ff;          /* soft purple tint */
+  color: #5b21b6;
+  border: 1.5px solid #ddd6fe;
+  border-radius: 22px;
+  padding: 11px 26px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.driver-layout .btn-outline-custom:hover {
+  border-color: #7c3aed;
+  color: #4c1d95;
+  background: #ede9fe;
+}
+
+/* ---------- INFO BOX (Pourquoi ces données — peach/orange) ---------- */
+.driver-layout .info-box {
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border: 1px solid #fed7aa;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.driver-layout .info-box-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9a3412;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.driver-layout .info-box-text {
+  font-size: 12px;
+  color: #c2410c;
+  line-height: 1.6;
+}
+
+/* ---------- DOCUMENT CARDS (Step 2 right column) ---------- */
+.driver-layout .doc-card {
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+.driver-layout .doc-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.driver-layout .doc-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.driver-layout .doc-card-header i {
+  width: 36px;
+  height: 36px;
+  background: #f3e8ff;
+  color: #5b21b6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.driver-layout .doc-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* ---------- VEHICLE PHOTO (Step 2 left) ---------- */
+.driver-layout .vehicle-photo-container {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.driver-layout .vehicle-photo-container img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.driver-layout .vehicle-photo-overlay {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;             /* maquette: button anchored bottom-right */
+}
+
+.driver-layout .vehicle-photo-overlay .btn {
+  background: white;
+  color: #1e293b;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.driver-layout .vehicle-photo-overlay .btn:hover {
+  background: #f5f7fb;
+}
+
+/* ---------- VERIFICATION BOX (purple banner — maquette) ---------- */
+.driver-layout .verification-box {
+  background: linear-gradient(135deg, #5b21b6, #4c1d95);
+  color: white;
+  border-radius: 14px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  box-shadow: 0 4px 16px rgba(91, 33, 182, 0.18);
+}
+
+.driver-layout .verification-box i {
+  font-size: 24px;
+  opacity: 0.95;
+  flex-shrink: 0;
+}
+
+.driver-layout .verification-box h6 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 2px;
+}
+
+.driver-layout .verification-box p {
+  font-size: 12px;
+  opacity: 0.85;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ---------- CIN INPUT ---------- */
+.driver-layout .cin-input-wrapper {
+  position: relative;
+}
+
+.driver-layout .cin-input-wrapper .toggle-visibility {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #98a2b3;
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.15s ease;
+}
+
+.driver-layout .cin-input-wrapper .toggle-visibility:hover {
+  color: #5b21b6;
+}
+
+.driver-layout .cin-hint {
+  font-size: 11px;
+  color: #98a2b3;
+  margin-top: 6px;
+}
+
+/* ---------- ICON BOX (small purple square — used by Permis card etc.) ---------- */
+.driver-layout .icon-box {
+  width: 48px;
+  height: 48px;
+  background: #f3e8ff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.driver-layout .icon-box i {
+  font-size: 24px;
+  color: #5b21b6;
+}
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.driver-layout .animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* ---------- UTILITIES ---------- */
+.driver-layout .text-primary-custom {
+  color: #5b21b6 !important;
+}
+
+.driver-layout .fw-semibold { font-weight: 600; }
+
+.driver-layout .text-muted { color: #98a2b3 !important; }
+
+.driver-layout .action-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e4e7ec;
+}
+
+.driver-layout .readonly-field {
+  background: #f9fafb !important;
+  color: #667085 !important;
+  cursor: default;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 991px) {
+  .driver-layout .main-col { padding: 20px; }
+  .driver-layout .action-bar { flex-direction: column-reverse; }
+  .driver-layout .action-bar .btn-publish,
+  .driver-layout .action-bar .btn-outline-custom {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .driver-layout .page-header-left h1 { font-size: 18px; }
+  .driver-layout .stepper-tabs { gap: 12px; }
+  .driver-layout .stepper-tab .tab-label { font-size: 11px; }
+}
+
+@media (max-width: 575px) {
+  .driver-layout .upload-zone { padding: 20px 16px; }
+}
+
+/* ==================== MOBILE FIXES (≤767px) ==================== */
+@media (max-width: 767px) {
+  :host { overflow-x: hidden; }
+
+  .driver-layout {
+    display: block;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .driver-layout .main-col {
+    padding: 80px 14px 30px;
+    width: 100%;
+    max-width: 100vw;
+    min-width: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  .driver-layout .page-header-left {
+    padding-left: 50px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .driver-layout .page-header-left h1 {
+    word-break: break-word;
+  }
+
+  .driver-layout .form-control,
+  .driver-layout .form-select {
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+
+  .driver-layout .input-group { flex-wrap: wrap; }
+  .driver-layout .input-group-text {
+    border-radius: 8px 8px 0 0;
+    border-right: 1.5px solid #e4e7ec;
+    border-bottom: none;
+    width: 100%;
+    justify-content: center;
+  }
+  .driver-layout .input-group .form-control {
+    border-left: 1.5px solid #e4e7ec;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .driver-layout .upload-preview { max-height: 160px; }
+  .driver-layout .vehicle-photo-container img { height: 160px; }
+  .driver-layout .file-chip { max-width: 100%; flex-wrap: wrap; }
+  .driver-layout .doc-card-header { flex-wrap: wrap; }
+  .driver-layout .verification-box { padding: 14px 16px; }
+  .driver-layout .info-box { padding: 16px; }
+  .driver-layout .action-bar { gap: 10px; }
+}
+
+@media (max-width: 380px) {
+  .driver-layout .main-col { padding: 76px 10px 24px; }
+  .driver-layout .page-header-left h1 { font-size: 16px; }
+  .driver-layout .stepper-tab .tab-label { font-size: 10px; }
+  .driver-layout .upload-zone { padding: 16px 12px; }
+  .driver-layout .upload-zone i { font-size: 24px; }
+}

@@ -1,0 +1,185 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Monitoring API & Dashboards</h1>
+            <p class="page-subtitle">Vue temps réel sur les 6 dashboards spécialisés et les KPI agrégés du backend</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <button class="btn-refresh" (click)="refresh()">
+              <i class="bi bi-arrow-clockwise"></i> Actualiser
+            </button>
+          </div>
+        </div>
+
+        <!-- ═════════════════════════════════════════════════════
+             6 DASHBOARDS SPÉCIALISÉS
+             ═════════════════════════════════════════════════════ -->
+        <div class="section-header">
+          <h2 class="section-title">Dashboards spécialisés <span class="section-badge"></span> </h2>
+        </div>
+
+        <div class="dashboards-grid">
+          <div class="dash-card" *ngFor="let card of dashboards">
+            <div class="dash-header">
+              <div class="dash-icon" [style.background]="card.color + '15'" [style.color]="card.color">
+                <i class="bi" [ngClass]="card.icon"></i>
+              </div>
+              <div class="dash-meta">
+                <div class="dash-label">{{ card.label }}</div>
+                <div class="dash-route">/dashboard/{{ card.role }}</div>
+              </div>
+            </div>
+
+            <!-- Loading -->
+            <div *ngIf="card.loading" class="dash-loading">
+              <div class="spinner-border-sm"></div>
+              <span>Chargement...</span>
+            </div>
+
+            <!-- Error -->
+            <div *ngIf="!card.loading && card.error" class="dash-error">
+              <i class="bi bi-exclamation-triangle"></i>
+              {{ card.error }}
+            </div>
+
+            <!-- Data -->
+            <div *ngIf="!card.loading && !card.error && card.data" class="dash-kpis">
+              <div class="dash-kpi" *ngFor="let kpi of getKPIs(card)">
+                <div class="dash-kpi-label">{{ kpi.label }}</div>
+                <div class="dash-kpi-value" [style.color]="card.color">{{ formatValue(kpi.value) }}</div>
+              </div>
+              <div *ngIf="getKPIs(card).length === 0" class="dash-empty">
+                <i class="bi bi-info-circle"></i> Données reçues mais sans KPI standard
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═════════════════════════════════════════════════════
+             STATISTIQUES AGRÉGÉES
+             ═════════════════════════════════════════════════════ -->
+        <div class="section-header">
+          <h2 class="section-title">Statistiques agrégées</h2>
+        </div>
+
+        <div class="kpi-grid three">
+          <!-- Users -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <div class="kpi-icon blue"><i class="bi bi-people-fill"></i></div>
+              <div class="kpi-meta">
+                <div class="kpi-title">Utilisateurs</div>
+                <div class="kpi-route">/admin/dashboard/users/stats</div>
+              </div>
+            </div>
+            <div class="kpi-body" *ngIf="usersStats; else noUsers">
+              <div class="kpi-row" *ngFor="let entry of usersStats | keyvalue">
+                <span class="kpi-row-label">{{ entry.key }}</span>
+                <span class="kpi-row-value">{{ formatValue(entry.value) }}</span>
+              </div>
+            </div>
+            <ng-template #noUsers>
+              <div class="kpi-empty">Données indisponibles</div>
+            </ng-template>
+          </div>
+
+          <!-- Reservations -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <div class="kpi-icon green"><i class="bi bi-ticket-perforated-fill"></i></div>
+              <div class="kpi-meta">
+                <div class="kpi-title">Réservations</div>
+                <div class="kpi-route">/admin/reservations/stats</div>
+              </div>
+            </div>
+            <div class="kpi-body" *ngIf="reservationsStats; else noRes">
+              <div class="kpi-row" *ngFor="let entry of reservationsStats | keyvalue">
+                <span class="kpi-row-label">{{ entry.key }}</span>
+                <span class="kpi-row-value">{{ formatValue(entry.value) }}</span>
+              </div>
+            </div>
+            <ng-template #noRes>
+              <div class="kpi-empty">Données indisponibles</div>
+            </ng-template>
+          </div>
+
+          <!-- Banners -->
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <div class="kpi-icon yellow"><i class="bi bi-megaphone-fill"></i></div>
+              <div class="kpi-meta">
+                <div class="kpi-title">Bannières</div>
+                <div class="kpi-route">/admin/banners/performance</div>
+              </div>
+            </div>
+            <div class="kpi-body" *ngIf="bannerPerformance; else noBanner">
+              <div class="kpi-row" *ngFor="let entry of bannerPerformance | keyvalue">
+                <span class="kpi-row-label">{{ entry.key }}</span>
+                <span class="kpi-row-value">{{ formatValue(entry.value) }}</span>
+              </div>
+            </div>
+            <ng-template #noBanner>
+              <div class="kpi-empty">Données indisponibles</div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- ═════════════════════════════════════════════════════
+             JOURNAL D'ACTIVITÉ RÉCENT
+             ═════════════════════════════════════════════════════ -->
+        <div class="section-header">
+          <h2 class="section-title">Journal d'activité récent</h2>
+        </div>
+
+        <div class="table-card">
+          <div class="table-route">/admin/activity-logs</div>
+          <div class="table-responsive">
+            <table class="data-table" *ngIf="activityLogs.length > 0; else noLogs">
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th>Action</th>
+                <th>Utilisateur</th>
+                <th>Détails</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let log of activityLogs">
+                <td class="cell-date">{{ log.timestamp || log.createdAt | date:'short' }}</td>
+                <td>
+                  <span class="badge-log">{{ log.action || log.eventType }}</span>
+                </td>
+                <td class="cell-user">{{ log.userEmail || log.userId || '—' }}</td>
+                <td class="cell-details" [title]="log.details">{{ log.details || log.description || '—' }}</td>
+              </tr>
+              </tbody>
+            </table>
+            <ng-template #noLogs>
+              <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>Aucune activité récente à afficher</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Info footer -->
+        <div class="info-footer">
+          <i class="bi bi-info-circle"></i>
+          Cette page consomme <strong>10 endpoints backend</strong> simultanément : 6 dashboards spécialisés + utilisateurs/stats + réservations/stats + bannières/performance + activity-logs. Toutes les données sont rafraîchies en temps réel à chaque clic sur "Actualiser".
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

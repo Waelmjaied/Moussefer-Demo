@@ -1,0 +1,243 @@
+<div class="driver-layout">
+  <div class="main-col">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1><i class="bi bi-credit-card me-2"></i>Paiements</h1>
+        <p>Gérez vos paiements et consultez votre historique de transactions</p>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="loading-center">
+        <div class="spinner-border text-primary"></div>
+      </div>
+    } @else {
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="kpi-card green-accent">
+          <div class="kpi-label">Total payé</div>
+          <div class="kpi-value">{{ totalPaid | number:'1.2-2' }} <span style="font-size:18px;">DT</span></div>
+          <div class="kpi-sub up"><i class="bi bi-arrow-up-short"></i> Montant cumulé</div>
+        </div>
+        <div class="kpi-card blue-accent">
+          <div class="kpi-label">Transactions</div>
+          <div class="kpi-value">{{ totalElements }}</div>
+          <div class="kpi-sub"><i class="bi bi-receipt"></i> Paiements effectués</div>
+        </div>
+        <div class="kpi-card purple-accent">
+          <div class="kpi-label">Moyenne</div>
+          <div class="kpi-value">{{ totalElements > 0 ? (totalPaid / totalElements | number:'1.2-2') : '0' }} <span style="font-size:18px;">DT</span></div>
+          <div class="kpi-sub"><i class="bi bi-calculator"></i> Par transaction</div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      @if (rows.length === 0) {
+        <div class="empty-state-card">
+          <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+          <h3>Aucun paiement trouvé</h3>
+          <p>Vos paiements apparaîtront ici une fois que vous aurez effectué une réservation.</p>
+        </div>
+      }
+
+      <!-- Payments Table -->
+      @if (rows.length > 0) {
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title"><i class="bi bi-receipt"></i> Historique des paiements</div>
+            <div class="table-actions">
+              <button class="btn-export" (click)="exportCsv()">
+                <i class="bi bi-download"></i> Exporter CSV
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="modern-table">
+              <thead>
+              <tr>
+                <th>N° Facture</th>
+                <th>Trajet</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (row of rows; track row.payment.paymentId; let i = $index) {
+                  <tr class="table-row" [class.even]="i % 2 === 0">
+                    <td>
+                      <div class="cell-id">
+                        <div class="id-icon"><i class="bi bi-file-earmark-text"></i></div>
+                        <div class="id-text">
+                          <span class="id-code">{{ invoiceNumberFor(row) }}</span>
+                          <span class="id-label">#{{ row.payment.reservationId | slice:0:8 }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-route">
+                        @if (ticketFor(row.payment.reservationId); as t) {
+                          <span class="route-text">
+                            <strong>{{ t.departureCity }}</strong>
+                            <i class="bi bi-arrow-right mx-1"></i>
+                            <strong>{{ t.arrivalCity }}</strong>
+                          </span>
+                        } @else if (row.reservation?.departureCity && row.reservation?.arrivalCity) {
+                          <span class="route-text">
+                            <strong>{{ row.reservation?.departureCity }}</strong>
+                            <i class="bi bi-arrow-right mx-1"></i>
+                            <strong>{{ row.reservation?.arrivalCity }}</strong>
+                          </span>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-amount">
+                        <span class="amount-value">{{ row.payment.amount | number:'1.2-2' }} {{ row.payment.currency }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="status-pill" [class]="statusClass(row.payment.status)">
+                        <i class="bi" [class]="statusIcon(row.payment.status)"></i>
+                        {{ statusLabel(row.payment.status) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="cell-date">
+                        <i class="bi bi-calendar3"></i>
+                        <span>{{ (row.payment.createdAt || row.payment.updatedAt) | date:'dd/MM/yyyy' }}</span>
+                      </div>
+                    </td>
+                    <td style="text-align:right">
+                      <div class="action-group">
+                        <button class="btn-action-secondary"
+                                (click)="toggleDetails(row.payment.reservationId)"
+                                [class.active]="expandedReservationId === row.payment.reservationId">
+                          <i class="bi" [class]="expandedReservationId === row.payment.reservationId ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                          Détails
+                        </button>
+                        @if (['SUCCEEDED','CONFIRMED'].includes(row.payment.status)) {
+                          <button class="btn-receipt"
+                                  [disabled]="downloading.has(row.payment.reservationId)"
+                                  (click)="downloadInvoice(row.payment.reservationId)">
+                            @if (downloading.has(row.payment.reservationId)) {
+                              <span class="spinner-border spinner-border-sm me-1"></span> ...
+                            } @else {
+                              <i class="bi bi-file-earmark-pdf"></i> PDF
+                            }
+                          </button>
+                        } @else {
+                          <span class="text-muted small">—</span>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Expanded detail panel — fetched on demand via /reservations/{id}/ticket -->
+                  @if (expandedReservationId === row.payment.reservationId) {
+                    <tr class="detail-row">
+                      <td colspan="6">
+                        <div class="detail-panel">
+                          @if (ticketLoading.has(row.payment.reservationId)) {
+                            <div class="detail-loading">
+                              <span class="spinner-border spinner-border-sm me-2"></span>
+                              Chargement des détails…
+                            </div>
+                          } @else if (ticketFor(row.payment.reservationId); as t) {
+                            <div class="detail-grid">
+                              <!-- Left : ticket info -->
+                              <div class="detail-info">
+                                <div class="detail-section-title">Détails du billet</div>
+                                <div class="detail-line">
+                                  <span class="detail-label">Passager</span>
+                                  <span class="detail-value">{{ t.passengerName }}</span>
+                                </div>
+                                <div class="detail-line">
+                                  <span class="detail-label">Trajet</span>
+                                  <span class="detail-value">
+                                    <strong>{{ t.departureCity }}</strong>
+                                    <i class="bi bi-arrow-right mx-1"></i>
+                                    <strong>{{ t.arrivalCity }}</strong>
+                                  </span>
+                                </div>
+                                <div class="detail-line">
+                                  <span class="detail-label">Date de départ</span>
+                                  <span class="detail-value">{{ t.departureDate | date:'dd/MM/yyyy à HH:mm' }}</span>
+                                </div>
+                                <div class="detail-line">
+                                  <span class="detail-label">Sièges</span>
+                                  <span class="detail-value">{{ t.seats }}</span>
+                                </div>
+                                <div class="detail-line">
+                                  <span class="detail-label">Total payé</span>
+                                  <span class="detail-value strong">{{ t.totalPrice | number:'1.2-2' }} {{ t.currency }}</span>
+                                </div>
+                                <div class="detail-line">
+                                  <span class="detail-label">N° de facture</span>
+                                  <span class="detail-value mono">{{ t.invoiceNumber || invoiceNumberFor(row) }}</span>
+                                </div>
+                                @if (t.boardedAt) {
+                                  <div class="detail-line">
+                                    <span class="detail-label">Embarqué le</span>
+                                    <span class="detail-value">{{ t.boardedAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+                                  </div>
+                                }
+                              </div>
+
+                              <!-- Right : QR code -->
+                              <div class="detail-qr">
+                                @if (t.qrImageBase64) {
+                                  <img [src]="qrDataUrl(t.qrImageBase64)" alt="QR code billet" class="qr-img" />
+                                  <div class="qr-hint">Présentez ce QR au chauffeur pour l'embarquement.</div>
+                                } @else {
+                                  <div class="qr-placeholder">
+                                    <i class="bi bi-qr-code"></i>
+                                    <span>QR indisponible</span>
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                          } @else {
+                            <div class="detail-loading">
+                              Détails du billet indisponibles pour le moment.
+                            </div>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          @if (totalPages > 1) {
+            <div class="table-footer">
+              <div class="showing-text">
+                Affichage de <strong>{{ page * size + 1 }}</strong> à <strong>{{ (page + 1) * size > totalElements ? totalElements : (page + 1) * size }}</strong> sur <strong>{{ totalElements }}</strong> entrées
+              </div>
+              <div class="pagination">
+                <button class="page-btn" [disabled]="page === 0" (click)="changePage(page - 1)">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+                @for (pageNum of pages; track pageNum) {
+                  <button class="page-btn" [class.active]="pageNum === page" (click)="changePage(pageNum)">
+                    {{ pageNum + 1 }}
+                  </button>
+                }
+                <button class="page-btn" [disabled]="page >= totalPages - 1" (click)="changePage(page + 1)">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

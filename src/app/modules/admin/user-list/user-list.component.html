@@ -1,0 +1,278 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Utilisateurs & Conducteurs</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ moduleCode }} — {{ pageTitle }}</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher" [(ngModel)]="searchQuery" (input)="applyFilter()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs + Create -->
+        <div class="tabs-bar">
+          <div class="tabs">
+            <button
+              *ngFor="let tab of tabs"
+              class="tab"
+              [class.active]="activeTab === tab.value"
+              (click)="setTab(tab.value)">
+              {{ tab.label }}
+            </button>
+          </div>
+          <button class="btn-create" (click)="openCreateModal()">
+            <i class="bi bi-plus-lg"></i> Créer un compte
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card" *ngIf="!loading">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>Utilisateur</th>
+                <th>Rôle</th>
+                <th>Email</th>
+                <th>Inscription</th>
+                <th>Trajets</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let user of filteredUsers" [class.selected]="selectedUser?.id === user.id" (click)="selectUser(user)">
+                <td>
+                  <div class="user-cell">
+                    <!-- CHANGED: single name param -->
+                    <div class="user-avatar" [style.background]="getAvatarColor(user.name)">
+                      {{ getInitials(user.name) }}
+                    </div>
+                    <div class="user-info">
+                      <!-- CHANGED: single name display -->
+                      <div class="user-name">{{ user.name }}</div>
+                      <div class="user-phone" *ngIf="user.phone">{{ user.phone }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="role-badge" [class]="'role-' + getRoleClass(user.type)">{{ user.type }}</span>
+                </td>
+                <td class="cell-email">{{ user.email }}</td>
+                <td class="cell-date">{{ user.registrationDate }}</td>
+                <td class="cell-trips">{{ user.tripCount ?? 0 }}</td>
+                <td>
+                    <span class="status-badge" [class]="'status-' + getStatusClass(user.status)">
+                      <span class="status-dot-sm"></span> {{ user.status }}
+                    </span>
+                </td>
+                <td>
+                  <div class="action-cell">
+                    <button class="btn-action-view" (click)="viewUser(user); $event.stopPropagation()">
+                      <span *ngIf="user.status === 'Actif'">Voir</span>
+                      <span *ngIf="user.status === 'En attente'">Valider</span>
+                      <span *ngIf="user.status === 'Suspendu' || user.status === 'Bloqué'">Restaurer</span>
+                    </button>
+                    <button
+                      *ngIf="user.status === 'Actif' || user.status === 'En attente'"
+                      class="btn-action-suspend"
+                      (click)="openSuspendModal(user); $event.stopPropagation()">
+                      <span *ngIf="user.status === 'Actif'">Suspendre</span>
+                      <span *ngIf="user.status === 'En attente'">Bloquer</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- User Detail Panel -->
+        <div class="detail-card" *ngIf="showDetailPanel && selectedUser">
+          <div class="detail-header">
+            <!-- CHANGED: single name param -->
+            <div class="detail-avatar" [style.background]="getAvatarColor(selectedUser.name)">
+              {{ getInitials(selectedUser.name) }}
+            </div>
+            <div class="detail-meta">
+              <!-- CHANGED: single name display -->
+              <div class="detail-name">{{ selectedUser.name }}</div>
+              <div class="detail-email">{{ selectedUser.email }}</div>
+              <div class="detail-badges">
+                <span class="status-badge" [class]="'status-' + getStatusClass(selectedUser.status)">
+                  <span class="status-dot-sm"></span> {{ selectedUser.status }}
+                </span>
+                <span class="role-badge" [class]="'role-' + getRoleClass(selectedUser.type)">{{ selectedUser.type }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-kpis">
+            <div class="detail-kpi">
+              <div class="detail-kpi-value">{{ selectedUser.tripCount ?? 0 }}</div>
+              <div class="detail-kpi-label">Trajets effectués</div>
+            </div>
+            <div class="detail-kpi">
+              <div class="detail-kpi-value">{{ selectedUser.complaints ?? 0 }}</div>
+              <div class="detail-kpi-label">Plaintes reçues</div>
+            </div>
+          </div>
+
+          <div class="detail-history">
+            <div class="detail-section-title">Historique d'activité</div>
+            <div class="history-row">
+              <span class="history-label">Dernière connexion</span>
+              <span class="history-date">{{ selectedUser.lastLogin ?? "Aujourd'hui, 09:14" }}</span>
+            </div>
+            <div class="history-row">
+              <span class="history-label">Profil mis à jour</span>
+              <span class="history-date">{{ selectedUser.profileUpdated ?? 'Il y a 2 jours' }}</span>
+            </div>
+            <div class="history-row">
+              <span class="history-label">Compte créé</span>
+              <span class="history-date">{{ selectedUser.registrationDate }}</span>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn-message" (click)="sendMessage(selectedUser)">
+              Envoyer un message
+            </button>
+            <button
+              *ngIf="selectedUser.status !== 'Suspendu' && selectedUser.status !== 'Bloqué'"
+              class="btn-suspend"
+              (click)="openSuspendModal(selectedUser)">
+              Suspendre
+            </button>
+            <button
+              *ngIf="selectedUser.status === 'Suspendu' || selectedUser.status === 'Bloqué'"
+              class="btn-restore"
+              (click)="restoreUser(selectedUser)">
+              Restaurer
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="!loading && filteredUsers.length === 0" class="empty-state">
+          <p>Aucun utilisateur trouvé.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Suspend Modal -->
+  <div class="modal-overlay" *ngIf="showSuspendModal" (click)="closeSuspendModal($event)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Suspendre l'utilisateur</h3>
+          <button class="btn-close-modal" (click)="closeSuspendModal()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="modal-body">
+          <!-- CHANGED: single name display -->
+          <p class="modal-user">
+            <strong>{{ suspendTarget?.name }}</strong>
+            <span class="modal-user-email">({{ suspendTarget?.email }})</span>
+          </p>
+          <div class="form-group">
+            <label>Raison de la suspension <span class="required">*</span></label>
+            <textarea rows="3" [(ngModel)]="suspendReason" placeholder="Décrivez la raison..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Durée (en jours)</label>
+            <input type="number" [(ngModel)]="suspendDuration" min="1" max="365">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeSuspendModal()">Annuler</button>
+          <button class="btn-confirm" (click)="confirmSuspend()" [disabled]="!suspendReason.trim()">
+            Confirmer la suspension
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════
+     MODAL : CRÉER UN UTILISATEUR
+     ═════════════════════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal($event)">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Créer un nouveau compte</h3>
+        <button class="btn-close-modal" (click)="closeCreateModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body">
+        <!-- CHANGED: replaced firstName/lastName row with single name field -->
+        <div class="form-group">
+          <label>Nom <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="createForm.name" placeholder="Ex: Agence Travel To DO">
+        </div>
+        <div class="form-group">
+          <label>Email <span class="required">*</span></label>
+          <input type="email" [(ngModel)]="createForm.email" placeholder="rami.b@gmail.com">
+        </div>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Téléphone</label>
+            <input type="tel" [(ngModel)]="createForm.phoneNumber" placeholder="+216 22 111 222">
+          </div>
+          <div class="form-group half">
+            <label>Rôle <span class="required">*</span></label>
+            <select [(ngModel)]="createForm.role">
+              <option value="PASSENGER">Passager</option>
+              <option value="DRIVER">Chauffeur</option>
+              <option value="ORGANIZER">Organisateur</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+        </div>
+        <!-- Admin Role Selection -->
+        <div class="form-group" *ngIf="createForm.role === 'ADMIN' && permissionService.isSuperAdmin()">
+          <label>Type d'administrateur <span class="required">*</span></label>
+          <select [(ngModel)]="createForm.adminRole">
+            <option value="" disabled selected>Sélectionner un type</option>
+            <option *ngFor="let role of availableAdminRoles" [value]="role.name">
+              {{ role.label }}
+            </option>
+          </select>
+          <small class="form-text text-muted">Ce rôle détermine les permissions et l'accès aux modules.</small>
+        </div>
+        <div class="form-group">
+          <label>Mot de passe <span class="required">*</span></label>
+          <input type="password" [(ngModel)]="createForm.password" placeholder="••••••••">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeCreateModal()">Annuler</button>
+        <button class="btn-submit" (click)="submitCreateUser()" [disabled]="!isCreateFormValid() || creating">
+          <span *ngIf="!creating">Créer le compte</span>
+          <span *ngIf="creating"><i class="bi bi-arrow-repeat spin"></i> Création...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

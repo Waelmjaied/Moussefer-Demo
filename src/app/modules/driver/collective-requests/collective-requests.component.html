@@ -1,0 +1,89 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+  <div class="main-col">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Demandes collectifs</h1>
+        <p>Passagers cherchant un départ spécifique</p>
+      </div>
+      <span class="badge-pending" *ngIf="demandes.length > 0">{{ demandes.length }} demandes en attente</span>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner-border text-primary"></div></div>
+    <div class="empty-state" *ngIf="!loading && demandes.length === 0">
+      <i class="bi bi-people" style="font-size:36px;display:block;margin-bottom:10px"></i>
+      Aucune demande collective ouverte
+    </div>
+
+    <div *ngFor="let d of demandes">
+      <div class="collective-card">
+        <!-- Top row -->
+        <div class="collective-top">
+          <div class="d-flex align-items-center gap-2">
+            <div class="coll-avatar">{{ d.initiator?.charAt(0)?.toUpperCase() || 'S' }}</div>
+            <div>
+              <div class="coll-initiator">{{ d.initiatorName || d.departureCity + ' + 1 pers.' }}</div>
+              <div class="coll-time">Demande posté il y a {{ d.minsAgo || 5 }} min</div>
+            </div>
+          </div>
+          <div class="coll-fill-row">
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" [style.width.%]="(d.totalSeatsReserved / (d.totalCapacity || 8)) * 100"></div>
+            </div>
+            <span class="coll-fill-label">{{ d.totalSeatsReserved || 2 }}/{{ d.totalCapacity || 8 }}</span>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <span class="urgent-badge" *ngIf="isUrgent(d)">Urgent !</span>
+            <span class="place-pill">{{ d.totalSeatsReserved || 2 }} places</span>
+          </div>
+        </div>
+
+        <!-- Route -->
+        <div class="coll-section-label">Départ souhaité <span class="float-end" style="color:#1e3a6b">Destination</span></div>
+        <div class="route-display" style="margin:6px 0 12px">
+          <span class="route-city">{{ d.departureCity }}</span>
+          <div class="route-line">
+            <div class="route-line-inner">
+              <span class="duration-pill">{{ d.duration || '3h30' }}</span>
+            </div>
+          </div>
+          <span class="route-city">{{ d.arrivalCity }}</span>
+        </div>
+
+        <!-- Details row -->
+        <div class="coll-details-row">
+          <div class="coll-detail-box">
+            <div class="coll-detail-label">Date prévue</div>
+            <div class="coll-detail-val">{{ d.requestedDate | date:'d MMMM yyyy' }}</div>
+          </div>
+          <div class="coll-detail-box" *ngIf="d.pricePerSeat">
+            <div class="coll-detail-label">Budget / Place</div>
+            <div class="coll-detail-val">{{ d.pricePerSeat }} DT</div>
+          </div>
+          <div class="coll-detail-box" *ngIf="d.totalBudget || d.pricePerSeat">
+            <div class="coll-detail-label">Total proposé</div>
+            <div class="coll-detail-val">{{ getBudgetDisplay(d) }} DT</div>
+          </div>
+          <div class="coll-detail-box" *ngIf="d.options">
+            <div class="coll-detail-label">Options passagers</div>
+            <div class="coll-detail-val">{{ d.options }}</div>
+          </div>
+        </div>
+
+        <!-- Note -->
+        <div class="coll-note" *ngIf="d.notes">
+          Note : "{{ d.notes }}"
+        </div>
+
+        <!-- Budget + CTA -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div>
+            <div style="font-size:12px;color:#667085">Budget proposé :</div>
+            <div style="font-size:18px;font-weight:800;color:#1e3a6b">{{ getBudgetDisplay(d) || 20 }} DT</div>
+          </div>
+          <button class="btn-accept-coll" (click)="acceptDemande(d)">Accepter le trajet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

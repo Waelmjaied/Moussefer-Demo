@@ -1,0 +1,300 @@
+<app-organizer-sidebar></app-organizer-sidebar>
+
+<div class="main-content">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">
+        <i class="bi bi-bar-chart-line me-2"></i>Tableau de bord
+      </h1>
+      <p class="page-subtitle" *ngIf="overview">
+        {{ overview.dateLabel || 'Aujourd\'hui' }} — {{ overview.agencyName || 'Bonjour Tunisia Tours' }}
+      </p>
+    </div>
+    <a routerLink="/organizer/my-voyages" class="btn-publish">
+      <i class="bi bi-plus-lg me-1"></i>Publier un voyage
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <!-- Error state fallback -->
+  <div *ngIf="!loading && !overview" class="text-center py-5">
+    <div style="color: #94a3b8; font-size: 1.1rem;">
+      <i class="bi bi-exclamation-triangle" style="font-size: 3rem; display: block; margin-bottom: 1rem; color: #f59e0b;"></i>
+      Erreur de chargement des données.<br>
+      <button (click)="ngOnInit()" class="btn-publish" style="margin-top: 1rem; display: inline-block;">
+        Réessayer
+      </button>
+    </div>
+  </div>
+
+  <!--
+    `overview as ov` narrows the type inside this block so the compiler
+    knows `ov` is non-null. That removes Error TS2532 on line 37 and the
+    12 NG8107 warnings about redundant optional-chaining (`overview?.x`).
+  -->
+  <div *ngIf="!loading && overview as ov">
+    <!-- Alert Banner -->
+    <div *ngIf="ov.pendingReservations > 0" class="alert-banner">
+      <div class="alert-content">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>
+        <span style="font-weight: 500;">{{ ov.pendingReservations }} réservations en attente</span>
+        <span class="alert-separator">—</span>
+        <span>Validez-les pour que les passagers puissent procéder au paiement.</span>
+      </div>
+      <a routerLink="/organizer/reservations" class="alert-action">Voir les réservations</a>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total réservations</div>
+        <div class="kpi-value">{{ ov.totalReservations }}</div>
+        <div class="kpi-trend up" *ngIf="ov.reservationsTrend">
+          <i class="bi bi-caret-up-fill me-1"></i>+{{ ov.reservationsTrend }} cette semaine
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Voyages actifs</div>
+        <div class="kpi-value">{{ ov.activeVoyages }}</div>
+        <div class="kpi-meta">
+          <span style="color: #22c55e;">{{ ov.fullVoyages }} complets</span>
+          <span style="color: #94a3b8;">{{ ov.ongoingVoyages }} en cours</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Revenue ce mois</div>
+        <div class="kpi-value">{{ ov.monthRevenue }} DT</div>
+        <div class="kpi-trend up" *ngIf="ov.revenueTrend">
+          <i class="bi bi-caret-up-fill me-1"></i>+{{ ov.revenueTrend }}%
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Note moyenne</div>
+        <div class="kpi-value">{{ ov.averageRating }}</div>
+        <div class="kpi-meta" style="color: #94a3b8;">
+          Sur {{ ov.totalReviews }} avis
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+      <!-- Revenue Performance -->
+      <div class="col-lg-7">
+        <div class="chart-card">
+          <div class="card-header-custom">
+            <span style="font-weight: 600;">Performance des Revenus</span>
+            <div class="chart-legend">
+              <span class="legend-item">
+                <span class="legend-dot" style="background:#22c55e"></span>Cette Semaine
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot" style="background:#cbd5e1"></span>Semaine Dernière
+              </span>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div class="revenue-chart-placeholder">
+              <div class="bar-group">
+                <div class="bar-stack">
+                  <div class="bar-current" style="height: 60%"></div>
+                  <div class="bar-previous" style="height: 45%"></div>
+                </div>
+                <span class="bar-label">LUN</span>
+              </div>
+              <div class="bar-group">
+                <div class="bar-stack">
+                  <div class="bar-current" style="height: 75%"></div>
+                  <div class="bar-previous" style="height: 60%"></div>
+                </div>
+                <span class="bar-label">MAR</span>
+              </div>
+              <div class="bar-group">
+                <div class="bar-stack">
+                  <div class="bar-current" style="height: 55%"></div>
+                  <div class="bar-previous" style="height: 70%"></div>
+                </div>
+                <span class="bar-label">MER</span>
+              </div>
+              <div class="bar-group">
+                <div class="bar-stack">
+                  <div class="bar-current" style="height: 80%"></div>
+                  <div class="bar-previous" style="height: 65%"></div>
+                </div>
+                <span class="bar-label">JEU</span>
+              </div>
+              <div class="bar-group">
+                <div class="bar-stack">
+                  <div class="bar-current" style="height: 95%"></div>
+                  <div class="bar-previous" style="height: 50%"></div>
+                </div>
+                <span class="bar-label">VEN</span>
+              </div>
+              <div class="bar-group">
+                <div class="bar-stack">
+                  <div class="bar-current" style="height: 70%"></div>
+                  <div class="bar-previous" style="height: 75%"></div>
+                </div>
+                <span class="bar-label">SAM</span>
+              </div>
+              <div class="bar-group">
+                <div class="bar-stack">
+                  <div class="bar-current" style="height: 78%"></div>
+                  <div class="bar-previous" style="height: 60%"></div>
+                </div>
+                <span class="bar-label">DIM</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="col-lg-5">
+        <div class="chart-card">
+          <div class="card-header-custom">
+            <span style="font-weight: 600;">Flux d'Activité</span>
+          </div>
+          <div style="padding: 0;">
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon icon-success">
+                  <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Réservation R-007 confirmée</div>
+                  <div class="activity-desc">Sana Ben Romdhane a réservé 2 places — Djerba Week-end</div>
+                  <div class="activity-time">Il y a 4 minutes</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon icon-default">
+                  <i class="bi bi-calendar-plus"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Nouvelle réservation</div>
+                  <div class="activity-desc">Client Sarah L. • 1 place Sousse</div>
+                  <div class="activity-time">Il y a 12 minutes</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon icon-phone">
+                  <i class="bi bi-telephone"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Réservation téléphonique</div>
+                  <div class="activity-desc">Client Karim L. • 3 places Tbarka nature</div>
+                  <div class="activity-time">Il y a 1 heure</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon icon-message">
+                  <i class="bi bi-chat-left-text"></i>
+                </div>
+                <div class="activity-content">
+                  <div class="activity-title">Youssef Zghal</div>
+                  <div class="activity-desc">A envoyé un message</div>
+                  <div class="activity-time">Il y a 2 heures</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="row g-4">
+      <!-- Fill Rate -->
+      <div class="col-lg-7">
+        <div class="chart-card">
+          <div class="card-header-custom">
+            <span style="font-weight: 600;">Voyages - Taux de remplissage</span>
+          </div>
+          <div style="padding: 1.25rem;">
+            <div class="fill-rate-list">
+              <div class="fill-item">
+                <div class="fill-header">
+                  <span class="fill-name">Djerba Week-end</span>
+                  <span class="fill-ratio">19/20 places</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 95%; background: #22c55e;"></div>
+                </div>
+              </div>
+              <div class="fill-item">
+                <div class="fill-header">
+                  <span class="fill-name">Désert Touzeur</span>
+                  <span class="fill-ratio">9/15 places</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 60%; background: #667eea;"></div>
+                </div>
+              </div>
+              <div class="fill-item">
+                <div class="fill-header">
+                  <span class="fill-name">Tbarka nature</span>
+                  <span class="fill-ratio">6/12 places</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 50%; background: #60a5fa;"></div>
+                </div>
+              </div>
+              <div class="fill-item">
+                <div class="fill-header">
+                  <span class="fill-name">Sousse</span>
+                  <span class="fill-ratio">11/12 places</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 91.6%; background: #22c55e;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reservation Sources -->
+      <div class="col-lg-5">
+        <div class="chart-card">
+          <div class="card-header-custom" style="justify-content: center;">
+            <span style="font-weight: 600;">Sources de réservation</span>
+          </div>
+          <div style="padding: 1.25rem;">
+            <div class="source-list">
+              <div class="source-item">
+                <span class="source-name">Via Moussefer</span>
+                <div class="source-bar-track">
+                  <div class="source-bar" style="width: 75%; background: #667eea;"></div>
+                </div>
+                <span class="source-value">21</span>
+              </div>
+              <div class="source-item">
+                <span class="source-name">Via téléphone</span>
+                <div class="source-bar-track">
+                  <div class="source-bar" style="width: 55%; background: #22c55e;"></div>
+                </div>
+                <span class="source-value">15</span>
+              </div>
+              <div class="source-item">
+                <span class="source-name">Agence physique</span>
+                <div class="source-bar-track">
+                  <div class="source-bar" style="width: 40%; background: #60a5fa;"></div>
+                </div>
+                <span class="source-value">10</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

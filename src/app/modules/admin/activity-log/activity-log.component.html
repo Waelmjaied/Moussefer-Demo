@@ -1,0 +1,117 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Journal d'activité</h1>
+            <p class="page-subtitle">{{ currentDate }} — Historique de toutes les actions administratives</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher" [(ngModel)]="searchQuery" (input)="applyFilters()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <select [(ngModel)]="filterAdmin" (change)="applyFilters()">
+              <option value="">Tous les admins</option>
+              <option *ngFor="let admin of uniqueAdmins" [value]="admin">{{ admin }}</option>
+            </select>
+            <i class="bi bi-chevron-down filter-chevron"></i>
+          </div>
+          <div class="filter-group">
+            <select [(ngModel)]="filterAction" (change)="applyFilters()">
+              <option value="">Toutes les actions</option>
+              <option *ngFor="let action of uniqueActions" [value]="action">{{ action }}</option>
+            </select>
+            <i class="bi bi-chevron-down filter-chevron"></i>
+          </div>
+          <div class="filter-group date-filter">
+            <input type="date" [(ngModel)]="filterDate" (change)="applyFilters()" placeholder="JJ/mm/aaaa">
+            <i class="bi bi-calendar"></i>
+          </div>
+          <button class="btn-export" (click)="exportLogs()">
+            <i class="bi bi-download"></i> Exporter
+          </button>
+        </div>
+
+        <!-- Section title -->
+        <h2 class="section-title">Journal complet des modifications</h2>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card" *ngIf="!loading">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>Date / Heure</th>
+                <th>Administrateur</th>
+                <th>Rôle</th>
+                <th>Action</th>
+                <th>Cible</th>
+                <th>Détails</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let log of filteredLogs">
+                <td class="cell-date">{{ log.displayDate }}</td>
+                <td class="cell-admin">{{ log.adminName }}</td>
+                <td>
+                    <span class="role-badge" [class]="'role-' + log.roleClass">
+                      {{ log.roleLabel }}
+                    </span>
+                </td>
+                <td>
+                    <span class="action-badge" [class]="'action-' + log.actionClass">
+                      {{ log.actionLabel }}
+                    </span>
+                </td>
+                <td class="cell-target">{{ log.target }}</td>
+                <td class="cell-details">{{ log.details }}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-bar" *ngIf="totalPages > 1">
+            <div class="pagination-info">
+              Affichage de {{ currentPage * pageSize + 1 }} à {{ Math.min((currentPage + 1) * pageSize, totalElements) }} sur {{ totalElements }} entrées
+            </div>
+            <div class="pagination-controls">
+              <button class="btn-page" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <span class="page-indicator">Page {{ currentPage + 1 }} / {{ totalPages }}</span>
+              <button class="btn-page" (click)="goToPage(currentPage + 1)" [disabled]="currentPage + 1 >= totalPages">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!loading && filteredLogs.length === 0" class="empty-state">
+          <p>Aucune activité trouvée.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

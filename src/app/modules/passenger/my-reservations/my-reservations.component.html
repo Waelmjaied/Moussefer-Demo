@@ -1,0 +1,101 @@
+<div class="reservations-page">
+  <div class="page-header">
+    <h1 class="page-title">Mes réservations</h1>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-tabs">
+    <button class="ftab" [class.active]="filterTab==='all'"       (click)="setFilterTab('all')">Toutes</button>
+    <button class="ftab" [class.active]="filterTab==='upcoming'"  (click)="setFilterTab('upcoming')">À venir</button>
+    <button class="ftab" [class.active]="filterTab==='pending'"   (click)="setFilterTab('pending')">En attente</button>
+    <button class="ftab" [class.active]="filterTab==='completed'" (click)="setFilterTab('completed')">Terminées</button>
+    <button class="ftab" [class.active]="filterTab==='cancelled'" (click)="setFilterTab('cancelled')">Annulées</button>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" style="color:#12b76a"></div>
+  </div>
+
+  <div class="empty-reservations" *ngIf="!loading && filtered.length === 0">
+    <div class="empty-icon-large"><i class="bi bi-calendar-x"></i></div>
+    <div class="empty-title">Aucune réservation</div>
+    <div class="empty-sub">Vous n'avez pas encore de réservations dans cette catégorie.</div>
+    <button class="btn-search-now" routerLink="/passenger/search">
+      <i class="bi bi-search me-2"></i>Rechercher un trajet
+    </button>
+  </div>
+
+  <div *ngFor="let res of filtered">
+    <div class="res-card">
+
+      <!-- Header -->
+      <div class="res-card-header">
+        <div>
+          <div class="res-route">
+            Réservation {{ res.id | slice:0:8 }}…
+            <span class="res-type-tag type-trajet" *ngIf="res.type === 'trajet'">Trajet</span>
+            <span class="res-type-tag type-voyage" *ngIf="res.type === 'voyage'">Voyage</span>
+          </div>
+        </div>
+        <span class="status-badge {{ statusClass(res.status) }}">{{ statusLabel(res.status) }}</span>
+      </div>
+
+      <!-- Body -->
+      <div class="res-card-body">
+        <div class="res-info">
+          <div class="res-detail">
+            <i class="bi bi-calendar3"></i>
+            {{ res.createdAt | date:'EEEE dd MMMM yyyy' }}
+          </div>
+          <div class="res-detail">
+            <i class="bi bi-people-fill"></i>
+            {{ res.seatsReserved }} place(s) réservée(s)
+          </div>
+          <div class="res-detail">
+            <i class="bi bi-hash"></i>
+            Réf. {{ res.id | slice:0:12 }}…
+          </div>
+        </div>
+        <div>
+          <div class="res-amount-label">Total payé</div>
+          <div class="res-amount">{{ res.totalPrice | number:'1.2-2' }} DT</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="res-actions">
+        <button class="btn-action btn-msg-action"
+                (click)="openMessage(res)">
+          <i class="bi bi-chat-dots me-1"></i>Message
+        </button>
+        <button class="btn-action btn-pay-action"
+                *ngIf="res.status === 'ACCEPTED'"
+                (click)="goToPay(res)">
+          <i class="bi bi-credit-card me-1"></i>Payer
+        </button>
+        <button class="btn-action btn-avis-action"
+                *ngIf="res.status === 'PAID' && res.type === 'trajet' && !reviewedIds.has(res.id)"
+                (click)="openAvis(res)">
+          <i class="bi bi-star me-1"></i>Laisser un avis
+        </button>
+        <span class="reviewed-badge"
+              *ngIf="res.status === 'PAID' && res.type === 'trajet' && reviewedIds.has(res.id)">
+          <i class="bi bi-check-circle-fill me-1"></i>Avis envoyé
+        </span>
+        <button class="btn-action btn-cancel-action"
+                *ngIf="res.status !== 'PAID' && res.status !== 'CANCELLED' && res.status !== 'REFUSED'"
+                (click)="cancelReservation(res.id)">
+          <i class="bi bi-x-circle me-1"></i>Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────── Avis modal ───────────── -->
+<app-avis-modal
+  *ngIf="avisOpen && avisReservation"
+  [reservation]="avisReservation"
+  (close)="onAvisClosed()"
+  (submitted)="onAvisSubmitted()">
+</app-avis-modal>

@@ -1,0 +1,225 @@
+<!-- Layout wrapper (same as your working pages) -->
+<div class="driver-layout">
+
+  <!-- Sidebar (external component) -->
+  <app-driver-sidebar></app-driver-sidebar>
+
+  <!-- Main Column -->
+  <div class="main-col">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Inscription chauffeur</h1>
+        <p>Mardi 30 mars 2026 - 24 trajets effectués ce mois</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+
+    <div *ngIf="!loading">
+
+      <!-- ========== PROGRESS HEADER ========== -->
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h2 class="section-title mb-1">
+            Étape {{ currentStep + 1 }} : {{ currentStepDef.label }}
+          </h2>
+          <p class="text-muted" style="font-size:13px;">
+            {{ currentStepDef.description }}
+          </p>
+        </div>
+        <div class="text-end">
+          <div class="text-muted" style="font-size:12px;">Progression finale :</div>
+          <div class="fw-semibold text-primary-custom" style="font-size:20px;">
+            {{ progressPercent }}%
+          </div>
+        </div>
+      </div>
+      <div class="progress-wrapper">
+        <div class="progress">
+          <div class="progress-bar" [style.width.%]="progressPercent"></div>
+        </div>
+      </div>
+
+      <!-- ========== STEPPER TABS ========== -->
+      <div class="stepper-tabs">
+        <div *ngFor="let step of steps; let i = index"
+             class="stepper-tab"
+             [class.active]="currentStep === i"
+             (click)="goToStep(i)"
+             style="cursor: pointer;">
+          <span class="tab-label">
+            Étape {{ i + 1 }}
+            <span *ngIf="currentStep === i">(actif)</span>
+            <span *ngIf="currentStep !== i && getStepStatus(step.type) !== 'missing'">(fait)</span>
+            <span *ngIf="currentStep !== i && getStepStatus(step.type) === 'missing'">(en attente)</span>
+          </span>
+          <div class="tab-bar"></div>
+        </div>
+      </div>
+
+      <!-- ========== STEP CONTENT ========== -->
+      <div class="step-content-panel animate-fade-in">
+
+        <!-- Status Badge -->
+        <div *ngIf="currentStepDoc" class="mb-3">
+          <span class="badge"
+                [class.bg-success]="currentStepDoc.status === 'APPROVED'"
+                [class.bg-warning]="currentStepDoc.status === 'PENDING_REVIEW'"
+                [class.bg-danger]="currentStepDoc.status === 'REJECTED'"
+                [class.bg-secondary]="currentStepDoc.status === 'EXPIRED'">
+            <i class="bi" [class]="getStepStatusIcon(currentStepDef.type)"></i>
+            {{ getDocStatusLabel(currentStepDoc.status) }}
+          </span>
+          <span *ngIf="currentStepDoc.rejectionReason" class="text-danger d-block mt-1" style="font-size:12px;">
+            Motif : {{ currentStepDoc.rejectionReason }}
+          </span>
+          <span *ngIf="currentStepDoc.expiryDate" class="text-muted d-block mt-1" style="font-size:12px;">
+            Expire le : {{ formatDate(currentStepDoc.expiryDate) }}
+          </span>
+        </div>
+
+        <!-- Upload Form -->
+        <form [formGroup]="stepForm">
+
+          <!-- Document Upload Card -->
+          <div class="dcard mb-4">
+            <div class="dcard-header">
+              <i class="bi" [class]="'bi-' + currentStepDef.icon"></i>
+              {{ currentStepDef.label }}
+            </div>
+            <div class="dcard-body">
+
+              <!-- Existing Document Info -->
+              <div *ngIf="currentStepDoc && currentStepDoc.status !== 'REJECTED'"
+                   class="mb-3 p-3 bg-light rounded d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-check text-success"></i>
+                <span class="fw-semibold">{{ currentStepDoc.fileName }}</span>
+                <span class="text-muted" style="font-size:12px;">
+                  {{ formatFileSize(currentStepDoc.sizeBytes) }}
+                </span>
+              </div>
+
+              <!-- Upload Zone -->
+              <label class="upload-zone d-block" style="cursor:pointer;">
+                <input type="file" hidden [accept]="currentStepDef.acceptedTypes"
+                       (change)="onFileSelected($event)">
+
+                <ng-container *ngIf="!stepForm.value.file; else filePreview">
+                  <i class="bi bi-cloud-upload" style="font-size:32px;"></i>
+                  <div class="upload-title" style="font-size:16px;">
+                    {{ currentStepDoc ? 'Remplacer le document' : 'Téléverser le document' }}
+                  </div>
+                  <div class="upload-hint">
+                    <span *ngIf="currentStepDef.acceptedTypes === 'image/*'">PNG, JPG jusqu'à 10MB</span>
+                    <span *ngIf="currentStepDef.acceptedTypes !== 'image/*'">PNG, JPG, PDF jusqu'à 10MB</span>
+                  </div>
+                </ng-container>
+
+                <ng-template #filePreview>
+                  <div class="file-chip" (click)="$event.stopPropagation()">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span>{{ stepForm.value.file?.name }}</span>
+                    <span class="text-muted" style="font-size:11px;">
+                      {{ formatFileSize(stepForm.value.file?.size || 0) }}
+                    </span>
+                    <i class="bi bi-trash remove-file"
+                       (click)="stepForm.patchValue({file: null}); $event.preventDefault()"></i>
+                  </div>
+                </ng-template>
+              </label>
+
+              <!-- Error Message -->
+              <div *ngIf="uploadError" class="alert alert-danger mt-3" style="font-size:13px;">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                {{ uploadError }}
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Expiry Date Card (if required) -->
+          <div *ngIf="currentStepDef.requiresExpiry" class="dcard mb-4">
+            <div class="dcard-header">
+              <i class="bi bi-calendar-event"></i>
+              {{ currentStepDef.expiryLabel }}
+            </div>
+            <div class="dcard-body">
+              <input type="date" class="form-control" formControlName="expiryDate"
+                     [class.is-invalid]="uploadError && !stepForm.value.expiryDate">
+              <div *ngIf="uploadError && !stepForm.value.expiryDate" class="invalid-feedback">
+                La date d'expiration est obligatoire.
+              </div>
+            </div>
+          </div>
+
+          <!-- Info Box -->
+          <div class="info-box mt-4">
+            <div class="info-box-title">
+              <i class="bi bi-info-circle"></i>
+              Pourquoi ce document ?
+            </div>
+            <div class="info-box-text">
+              Ce document est nécessaire pour la validation légale de votre compte chauffeur et la synchronisation avec le réseau national Louage. Tous vos documents sont traités de manière confidentielle.
+            </div>
+          </div>
+
+          <!-- ========== ACTION BAR ========== -->
+          <div class="action-bar">
+
+            <!-- Previous Button -->
+            <button type="button" class="btn-outline-custom"
+                    (click)="prevStep()"
+                    [disabled]="isFirstStep || uploading">
+              <i class="bi bi-arrow-left"></i>
+              Étape précédente
+            </button>
+
+            <!-- Upload / Next Button -->
+            <button *ngIf="!isLastStep"
+                    type="button"
+                    class="btn-publish"
+                    (click)="uploadCurrentStep()"
+                    [disabled]="uploading || stepForm.invalid">
+              <span *ngIf="uploading" class="spinner-border spinner-border-sm me-2"></span>
+              <span *ngIf="!uploading">
+                {{ currentStepDoc ? 'Mettre à jour' : 'Télécharger' }}
+                <i class="bi bi-arrow-right"></i>
+              </span>
+              <span *ngIf="uploading">Envoi...</span>
+            </button>
+
+            <!-- Final Submit Button -->
+            <button *ngIf="isLastStep"
+                    type="button"
+                    class="btn-publish"
+                    (click)="uploadCurrentStep()"
+                    [disabled]="uploading || stepForm.invalid">
+              <span *ngIf="uploading" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!uploading" class="bi bi-check-lg"></i>
+              {{ uploading ? 'Envoi...' : 'Soumettre le dossier' }}
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+      <!-- ========== ALL DONE SUMMARY ========== -->
+      <div *ngIf="kycStatus?.complete" class="verification-box mt-4 text-center">
+        <i class="bi bi-patch-check-fill text-success" style="font-size:48px;"></i>
+        <h5 class="mt-3">Votre profil KYC est complet !</h5>
+        <p class="text-muted">Tous vos documents ont été validés par notre équipe. Vous pouvez maintenant publier des trajets et commencer à recevoir des réservations.</p>
+        <button type="button" class="btn-publish" (click)="finish()">
+          <i class="bi bi-check-lg"></i> Accéder au tableau de bord
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,365 @@
+<div class="search-page">
+  <app-header> </app-header>
+
+  <!-- Hero background with trajets -->
+  <div class="search-hero">
+    <div class="search-hero-overlay">
+      <div class="search-strip">
+        <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+          <div class="search-card">
+            <div class="search-field">
+              <label>Départ</label>
+              <div class="inp-icon">
+                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5ec090" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <input class="inp" type="text" formControlName="departureCity" placeholder="Ville de départ">
+              </div>
+            </div>
+            <div class="search-field">
+              <label>Destination</label>
+              <div class="inp-icon">
+                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2a358e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <input class="inp" type="text" formControlName="arrivalCity" placeholder="Ville d'arrivée">
+              </div>
+            </div>
+            <div class="search-field" style="max-width:180px">
+              <label>Date</label>
+              <div class="inp-icon">
+                <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2a358e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <input class="inp" type="date" formControlName="date">
+              </div>
+            </div>
+            <button type="submit" class="btn-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Rechercher
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body-wrap">
+    <!-- Filter panel - full height -->
+    <div class="filter-panel">
+      <h3>Filtres</h3>
+
+      <div class="filter-section-label">Heure de départ</div>
+      <label class="filter-check">
+        <span class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="filterMorning" (change)="applyFilters()">
+          <span class="checkmark"></span>
+        </span>
+        <span>Matin (6h-12h)</span>
+      </label>
+      <label class="filter-check">
+        <span class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="filterAfternoon" (change)="applyFilters()">
+          <span class="checkmark"></span>
+        </span>
+        <span>Après-midi (12h-18h)</span>
+      </label>
+      <label class="filter-check">
+        <span class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="filterEvening" (change)="applyFilters()">
+          <span class="checkmark"></span>
+        </span>
+        <span>Soir (18h+)</span>
+      </label>
+
+      <div class="filter-section-label">Options</div>
+      <label class="filter-check">
+        <span class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="filterAirCond" (change)="applyFilters()">
+          <span class="checkmark"></span>
+        </span>
+        <span>Climatisé</span>
+      </label>
+      <label class="filter-check">
+        <span class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="filterBags" (change)="applyFilters()">
+          <span class="checkmark"></span>
+        </span>
+        <span>Bagages volumineux</span>
+      </label>
+      <label class="filter-check">
+        <span class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="filterPets" (change)="applyFilters()">
+          <span class="checkmark"></span>
+        </span>
+        <span>Animaux acceptés</span>
+      </label>
+      <label class="filter-check">
+        <span class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="filterDirect" (change)="applyFilters()">
+          <span class="checkmark"></span>
+        </span>
+        <span>Trajet direct</span>
+      </label>
+
+      <div class="filter-section-label">Places disponibles</div>
+      <label class="filter-check">
+        <span class="custom-radio">
+          <input type="radio" name="seats" value="1" [(ngModel)]="filterMinSeats" (change)="applyFilters()">
+          <span class="radiomark"></span>
+        </span>
+        <span>1 place</span>
+      </label>
+      <label class="filter-check">
+        <span class="custom-radio">
+          <input type="radio" name="seats" value="2" [(ngModel)]="filterMinSeats" (change)="applyFilters()">
+          <span class="radiomark"></span>
+        </span>
+        <span>2+ places</span>
+      </label>
+      <label class="filter-check">
+        <span class="custom-radio">
+          <input type="radio" name="seats" value="4" [(ngModel)]="filterMinSeats" (change)="applyFilters()">
+          <span class="radiomark"></span>
+        </span>
+        <span>4+ places</span>
+      </label>
+
+      <button class="btn-reset-filter" (click)="resetFilters()">Réinitialiser les filtres</button>
+    </div>
+
+    <!-- Results -->
+    <div class="results-area">
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border" style="color:#12b76a"></div>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && filteredTrajetList.length === 0">
+        <div class="empty-icon modern-sad">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="36" stroke="#2A358E" stroke-width="3" fill="#F5F7FA"/>
+            <circle cx="29" cy="34" r="3.5" fill="#2A358E"/>
+            <circle cx="51" cy="34" r="3.5" fill="#2A358E"/>
+            <path d="M28 52C28 52 32 46 40 46C48 46 52 52 52 52" stroke="#2A358E" stroke-width="3" stroke-linecap="round"/>
+            <path d="M48 28C48 28 52 30 55 28" stroke="#CFEDDE" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h4>Aucun trajet trouvé</h4>
+        <p>Essayez de modifier vos critères ou créez une demande collective pour être notifié.</p>
+        <div class="empty-actions">
+          <button class="btn-reset-empty" (click)="resetFilters()">Réinitialiser les filtres</button>
+          <button class="btn-collective" (click)="goToCollectiveDemand()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Demande collective
+          </button>
+        </div>
+      </div>
+
+      <!-- NEW CARD DESIGN -->
+      <div *ngFor="let trajet of filteredTrajetList">
+        <div class="trajet-card-v2" [class.trajet-card-locked]="!trajet.reservable && trajet.status === 'LOCKED'">
+
+          <!-- Centered red lock badge — the single visual cue for queued trajets -->
+          <div *ngIf="!trajet.reservable && trajet.status === 'LOCKED'" class="locked-center-badge" aria-label="Trajet verrouillé, en file d'attente">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span class="locked-center-label">VERROUILLÉ</span>
+            <span class="locked-center-sub" *ngIf="trajet.priorityOrder">Position #{{ trajet.priorityOrder }}</span>
+          </div>
+
+          <div class="card-top">
+            <div class="timeline-section">
+              <div class="timeline">
+                <div class="timeline-dot green"></div>
+                <div class="timeline-line"></div>
+                <div class="timeline-dot blue"></div>
+              </div>
+              <div class="timeline-info">
+                <div class="timeline-row">
+                  <span class="station-label">Départ</span>
+                  <div class="station-name">{{ trajet.departureCity }} : Bab saadoun</div>
+                  <div class="station-time">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#979797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    {{ trajet.departureDate | date:'HH:mm' }} · {{ trajet.departureDate | date:'d MMM' }}
+                  </div>
+                </div>
+                <div class="timeline-row">
+                  <span class="station-label">Arrivée</span>
+                  <div class="station-name">{{ trajet.arrivalCity }} : Bab saadoun</div>
+                  <div class="station-time">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#979797" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    {{ trajet.departureDate | date:'HH:mm' }} · {{ trajet.departureDate | date:'d MMM' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="price-badge">
+              <div class="price-label">TOTAL PAR SIÈGE</div>
+              <div class="price-value">{{ trajet.pricePerSeat }} <span class="currency">TND</span></div>
+            </div>
+          </div>
+
+          <div class="card-middle">
+            <div class="driver-card">
+              <div class="driver-avatar">
+                <img *ngIf="trajet.driverPhoto" [src]="trajet.driverPhoto" alt="">
+                <div *ngIf="!trajet.driverPhoto" class="avatar-placeholder">{{ getInitial(trajet.driverId) }}</div>
+              </div>
+              <div class="driver-info">
+                <div class="driver-name">{{ trajet.driverName || 'Chauffeur Moussefer' }}</div>
+                @if (trajet.driverRating && trajet.reviewCount) {
+                  <div class="driver-rating" style="cursor:pointer" (click)="viewDriverReviews(trajet); $event.stopPropagation()" title="Voir les avis">
+                    <span class="stars">★</span>
+                    <span class="rating-value">{{ trajet.driverRating }}</span>
+                    <span class="rating-count">({{ trajet.reviewCount }} avis)</span>
+                  </div>
+                } @else {
+                  <div class="driver-rating" style="color:#98a2b3;font-style:italic;font-size:12px">
+                    Nouveau chauffeur
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="vehicle-card">
+              <div class="vehicle-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667085" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+                  <circle cx="7" cy="17" r="2"/>
+                  <circle cx="17" cy="17" r="2"/>
+                </svg>
+              </div>
+              <div class="vehicle-info">
+                <div class="vehicle-label">VÉHICULE</div>
+                <div class="vehicle-name">{{ trajet.vehicleName || 'Louage Peugeot 508' }}</div>
+                <div class="vehicle-features">
+                  <span *ngIf="trajet.airConditioned">Climatisé</span>
+                  <span *ngIf="trajet.wifi">Wifi gratuit</span>
+                  <span *ngIf="!trajet.airConditioned && !trajet.wifi">Climatisé · Wifi gratuit</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="availability-section">
+            <div class="availability-header">
+              <div class="availability-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5ec090" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Disponibilité
+              </div>
+              <div class="seats-badge" *ngIf="trajet.availableSeats > 0">
+                <span class="seats-number">{{ trajet.availableSeats }}</span>
+                <span class="seats-text">PLACES RESTANT</span>
+              </div>
+            </div>
+            <div class="progress-wrapper">
+              <div class="progress-track">
+                <div class="progress-fill" [style.width.%]="((trajet.availableSeats || 3) / 8) * 100"></div>
+              </div>
+              <div class="progress-labels">
+                <span class="reserved">{{ 8 - (trajet.availableSeats || 3) }} RÉSERVÉS</span>
+                <span class="total">8 SIÈGES AU TOTAL</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-reserve"
+                  [class.btn-reserve-disabled]="!trajet.reservable"
+                  [disabled]="!trajet.reservable"
+                  (click)="reserveTrajet(trajet)">
+            <ng-container *ngIf="trajet.reservable">
+              <span *ngIf="trajet.availableSeats > 0">Réserver</span>
+              <span *ngIf="trajet.availableSeats === 0">Continuer vers le paiement</span>
+            </ng-container>
+            <ng-container *ngIf="!trajet.reservable">
+              <span *ngIf="trajet.status === 'LOCKED'">Verrouillé — non réservable</span>
+              <span *ngIf="trajet.status === 'FULL'">Complet</span>
+              <span *ngIf="trajet.status !== 'LOCKED' && trajet.status !== 'FULL'">Non réservable</span>
+            </ng-container>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <app-footer></app-footer>
+</div>
+
+<!-- ─── DRIVER REVIEWS MODAL (Fix #3) ─── -->
+@if (showReviewsModal && selectedTrajetForReviews) {
+  <div class="reviews-modal-backdrop" (click)="closeReviewsModal()">
+    <div class="reviews-modal" (click)="$event.stopPropagation()">
+      <div class="reviews-modal-header">
+        <div>
+          <h3 style="font-size:18px;font-weight:700;color:#101828;margin:0">
+            Avis sur {{ selectedTrajetForReviews.driverName || 'ce chauffeur' }}
+          </h3>
+          <div style="font-size:13px;color:#667085;margin-top:4px" *ngIf="selectedTrajetForReviews.driverRating">
+            <span style="color:#f79009">★</span>
+            <strong>{{ selectedTrajetForReviews.driverRating }}</strong>
+            sur 5 — {{ selectedTrajetForReviews.reviewCount }} avis
+          </div>
+        </div>
+        <button type="button" class="reviews-modal-close" (click)="closeReviewsModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="reviews-modal-body">
+        @if (loadingReviews) {
+          <div style="text-align:center;padding:40px 20px">
+            <div class="spinner-border" style="color:#12b76a"></div>
+            <div style="margin-top:12px;color:#667085;font-size:13px">Chargement des avis…</div>
+          </div>
+        } @else if (driverReviews.length === 0) {
+          <div style="text-align:center;padding:40px 20px;color:#98a2b3">
+            <i class="bi bi-chat-square-text" style="font-size:36px;display:block;margin-bottom:12px"></i>
+            <div style="font-size:14px">Aucun avis pour ce chauffeur pour le moment.</div>
+          </div>
+        } @else {
+          @for (avis of driverReviews; track avis.id) {
+            <div class="review-item">
+              <div class="review-header">
+                <div class="review-stars">
+                  @for (s of [1,2,3,4,5]; track s) {
+                    <span [style.color]="s <= avis.rating ? '#f79009' : '#e5e7eb'">★</span>
+                  }
+                </div>
+                <div class="review-date">{{ avis.createdAt | date:'dd MMM yyyy' }}</div>
+              </div>
+              @if (avis.comment) {
+                <p class="review-comment">{{ avis.comment }}</p>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <div class="reviews-modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="closeReviewsModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,163 @@
+<div class="driver-layout">
+  <div class="main-col">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1><i class="bi bi-shield-exclamation me-2"></i>Mes litiges</h1>
+        <p>Gérez vos litiges et suivez leur statut en temps réel</p>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-center">
+      <div class="spinner-border"></div>
+    </div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- ========== OPEN DISPUTE FORM (Inline) ========== -->
+      <div class="form-card" [class.expanded]="showForm()">
+        <div class="form-card-header" (click)="toggleForm()">
+          <div class="form-card-title">
+            <div class="form-icon">
+              <i class="bi bi-plus-circle"></i>
+            </div>
+            <div>
+              <span>Ouvrir un nouveau litige</span>
+              <small>Signalez un problème avec votre réservation</small>
+            </div>
+          </div>
+          <i class="bi toggle-icon" [class.bi-chevron-down]="!showForm()" [class.bi-chevron-up]="showForm()"></i>
+        </div>
+
+        <div class="form-card-body" *ngIf="showForm()">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">ID de la réservation *</label>
+              <input type="text" class="modern-input" [(ngModel)]="newReservationId"
+                     placeholder="Ex: RES-12345678">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Motif *</label>
+              <select class="modern-input" [(ngModel)]="newReason">
+                <option value="">Sélectionner un motif...</option>
+                <option value="DRIVER_NO_SHOW">Chauffeur absent</option>
+                <option value="PAYMENT_ISSUE">Problème de paiement</option>
+                <option value="VEHICLE_CONDITION">État du véhicule</option>
+                <option value="SAFETY_CONCERN">Problème de sécurité</option>
+                <option value="OVERCHARGE">Surfacturation</option>
+                <option value="OTHER">Autre</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description (≥ 10 caractères) *</label>
+              <textarea class="modern-input" rows="3" [(ngModel)]="newDescription"
+                        placeholder="Décrivez le problème en détail..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-cancel" (click)="toggleForm()">Annuler</button>
+            <button class="btn-submit" (click)="submit()" [disabled]="submitting">
+              <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!submitting" class="bi bi-send-fill"></i>
+              {{ submitting ? 'Envoi...' : 'Soumettre le litige' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== STATS BAR ========== -->
+      <div class="stats-bar" *ngIf="disputes.length > 0">
+        <div class="stat-item">
+          <span class="stat-value">{{ disputes.length }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value stat-open">{{ openCount() }}</span>
+          <span class="stat-label">En cours</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value stat-resolved">{{ resolvedCount() }}</span>
+          <span class="stat-label">Clôturés</span>
+        </div>
+      </div>
+
+      <!-- ========== EMPTY STATE ========== -->
+      <div *ngIf="disputes.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <h3>Aucun litige pour le moment</h3>
+        <p>Vous n'avez aucun litige en cours. Tout semble en ordre.</p>
+        <button class="btn-open-form" (click)="toggleForm()">
+          <i class="bi bi-plus-circle me-2"></i>Ouvrir un litige
+        </button>
+      </div>
+
+      <!-- ========== DISPUTES LIST ========== -->
+      <div class="disputes-list" *ngIf="disputes.length > 0">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="bi bi-list-ul"></i>
+            Historique des litiges
+          </h2>
+        </div>
+
+        <div class="dispute-item" *ngFor="let d of disputes; let i = index"
+             [class.resolved]="isDone(d)">
+
+          <!-- Status colored line -->
+          <div class="dispute-status-line" [class]="'status-' + d.status.toLowerCase()"></div>
+
+          <div class="dispute-content">
+            <!-- Top Row -->
+            <div class="dispute-top">
+              <div class="dispute-id">
+                <i class="bi bi-receipt"></i>
+                <span>#{{ d.reservationId.substring(0,12) }}</span>
+              </div>
+              <span class="status-pill" [class]="'s-' + d.status.toLowerCase()">
+                <i class="bi"
+                   [class.bi-hourglass-split]="d.status === 'OPEN'"
+                   [class.bi-arrow-repeat]="d.status === 'IN_PROGRESS'"
+                   [class.bi-check-circle-fill]="d.status === 'RESOLVED'"
+                   [class.bi-x-circle-fill]="d.status === 'REJECTED'"
+                   [class.bi-archive-fill]="d.status === 'CLOSED'"></i>
+                {{ statusLabel(d.status) }}
+              </span>
+            </div>
+
+            <!-- Reason -->
+            <div class="dispute-reason">
+              <strong>Motif :</strong> {{ categoryLabel(d.category) }}
+            </div>
+
+            <!-- Description -->
+            <p class="dispute-desc" *ngIf="d.description">{{ d.description }}</p>
+
+            <!-- Resolution -->
+            <div class="resolution-box" *ngIf="d.resolution">
+              <i class="bi"
+                 [class.bi-check-circle-fill]="d.status === 'RESOLVED'"
+                 [class.bi-x-circle-fill]="d.status === 'REJECTED'"
+                 [class.bi-archive-fill]="d.status === 'CLOSED'"></i>
+              <div>
+                <strong>{{ d.status === 'REJECTED' ? 'Rejet' : 'Résolution' }}</strong>
+                <p>{{ d.resolution }}</p>
+                <small *ngIf="d.resolvedAt">le {{ d.resolvedAt | date:'dd/MM/yyyy HH:mm' }}</small>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="dispute-footer">
+              <span><i class="bi bi-calendar3"></i> Ouvert le {{ d.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

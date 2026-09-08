@@ -1,0 +1,246 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+
+  <div class="main-col">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Publier un trajet</h1>
+        <p>Créez un nouveau trajet pour vos passagers</p>
+      </div>
+      <div class="header-right">
+        <span class="online-badge">
+          <span class="online-dot"></span>
+          En ligne
+        </span>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+      <div class="form-card-body">
+        <form [formGroup]="trajetForm" (ngSubmit)="onSubmit()">
+
+          <!-- Route Section -->
+          <div class="section-label">
+            <i class="bi bi-geo-alt-fill"></i>
+            Itinéraire
+          </div>
+
+          <!-- 🔴 Alerte si le chargement des villes a échoué -->
+          <div *ngIf="citiesError" class="alert alert-error" style="margin-bottom: 16px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {{ citiesError }}
+          </div>
+
+          <div class="form-row">
+            <!-- Departure City -->
+            <div class="form-group">
+              <label class="form-label">Ville de départ <span class="required">*</span></label>
+              <div class="input-icon-wrapper">
+                <i class="bi bi-geo-alt input-icon"></i>
+                <select
+                  formControlName="departureCity"
+                  class="form-control select-control"
+                  [class.is-invalid]="trajetForm.get('departureCity')?.invalid && trajetForm.get('departureCity')?.touched"
+                  (change)="onDepartureChange()"
+                  [disabled]="citiesLoading">
+                  <option value="" disabled selected>
+                    {{ citiesLoading ? 'Chargement…' : (departureCities.length ? 'Choisir une ville' : 'Aucune ville') }}
+                  </option>
+                  <option *ngFor="let city of departureCities" [value]="city">{{ city }}</option>
+                </select>
+                <i class="bi bi-chevron-down select-chevron"></i>
+              </div>
+              <div class="invalid-feedback" *ngIf="trajetForm.get('departureCity')?.invalid && trajetForm.get('departureCity')?.touched">
+                Ville de départ requise.
+              </div>
+            </div>
+
+            <!-- Arrival City -->
+            <div class="form-group">
+              <label class="form-label">Ville d'arrivée <span class="required">*</span></label>
+              <div class="input-icon-wrapper">
+                <i class="bi bi-geo-alt-fill input-icon"></i>
+                <select
+                  formControlName="arrivalCity"
+                  class="form-control select-control"
+                  [class.is-invalid]="trajetForm.get('arrivalCity')?.invalid && trajetForm.get('arrivalCity')?.touched"
+                  [disabled]="!trajetForm.get('departureCity')?.value || citiesLoading">
+                  <option value="" disabled selected>
+                    {{ !trajetForm.get('departureCity')?.value ? 'D\'abord la ville de départ' : (arrivalCities.length ? 'Choisir une ville' : 'Aucune destination') }}
+                  </option>
+                  <option *ngFor="let city of arrivalCities" [value]="city">{{ city }}</option>
+                </select>
+                <i class="bi bi-chevron-down select-chevron"></i>
+              </div>
+              <div class="invalid-feedback" *ngIf="trajetForm.get('arrivalCity')?.invalid && trajetForm.get('arrivalCity')?.touched">
+                Ville d'arrivée requise.
+              </div>
+            </div>
+          </div>
+
+          <!-- Details Section -->
+          <div class="section-label">
+            <i class="bi bi-calendar-event"></i>
+            Détails du trajet
+          </div>
+
+          <div class="form-row three-cols">
+            <div class="form-group">
+              <label class="form-label">Date et heure <span class="required">*</span></label>
+              <div class="input-icon-wrapper">
+                <i class="bi bi-calendar input-icon"></i>
+                <input
+                  type="datetime-local"
+                  formControlName="departureDate"
+                  class="form-control"
+                  [class.is-invalid]="trajetForm.get('departureDate')?.invalid && trajetForm.get('departureDate')?.touched">
+              </div>
+              <div class="invalid-feedback" *ngIf="trajetForm.get('departureDate')?.invalid && trajetForm.get('departureDate')?.touched">
+                Date requise.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Capacité</label>
+              <div class="capacity-badge">
+                <i class="bi bi-people-fill"></i>
+                <div class="capacity-info">
+                  <strong>8 places</strong>
+                  <small>Réglementaire</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tarif réglementé (DT)</label>
+              <div class="regulated-fare" [class.fare-loading]="fareLoading" [class.fare-missing]="fareError">
+                <i class="bi bi-shield-check fare-icon"></i>
+                <div class="fare-info">
+                  <ng-container *ngIf="!fareLoading && !fareError && regulatedFare !== null">
+                    <strong>{{ regulatedFare }} DT</strong>
+                    <small>Tarif officiel du Ministère</small>
+                  </ng-container>
+                  <ng-container *ngIf="fareLoading">
+                    <strong>—</strong>
+                    <small>Recherche du tarif…</small>
+                  </ng-container>
+                  <ng-container *ngIf="!fareLoading && fareError">
+                    <strong style="color:#b42318">Aucun tarif</strong>
+                    <small>{{ fareError }}</small>
+                  </ng-container>
+                  <ng-container *ngIf="!fareLoading && !fareError && regulatedFare === null">
+                    <strong>—</strong>
+                    <small>Sélectionnez les deux villes</small>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Options Section -->
+          <div class="section-label">
+            <i class="bi bi-sliders"></i>
+            Options du trajet
+          </div>
+
+          <div class="options-grid">
+            <label class="option-card" [class.active]="trajetForm.get('acceptsPets')?.value">
+              <input type="checkbox" formControlName="acceptsPets" class="option-input">
+              <div class="option-icon">
+                <i class="bi bi-emoji-smile"></i>
+              </div>
+              <div class="option-text">
+                <span class="option-title">Animaux</span>
+                <span class="option-desc">Acceptés</span>
+              </div>
+              <div class="option-check">
+                <i class="bi bi-check-circle-fill" *ngIf="trajetForm.get('acceptsPets')?.value"></i>
+                <i class="bi bi-circle" *ngIf="!trajetForm.get('acceptsPets')?.value"></i>
+              </div>
+            </label>
+
+            <label class="option-card" [class.active]="trajetForm.get('allowsLargeBags')?.value">
+              <input type="checkbox" formControlName="allowsLargeBags" class="option-input">
+              <div class="option-icon">
+                <i class="bi bi-bag"></i>
+              </div>
+              <div class="option-text">
+                <span class="option-title">Bagages</span>
+                <span class="option-desc">Volumineux</span>
+              </div>
+              <div class="option-check">
+                <i class="bi bi-check-circle-fill" *ngIf="trajetForm.get('allowsLargeBags')?.value"></i>
+                <i class="bi bi-circle" *ngIf="!trajetForm.get('allowsLargeBags')?.value"></i>
+              </div>
+            </label>
+
+            <label class="option-card" [class.active]="trajetForm.get('airConditioned')?.value">
+              <input type="checkbox" formControlName="airConditioned" class="option-input">
+              <div class="option-icon">
+                <i class="bi bi-wind"></i>
+              </div>
+              <div class="option-text">
+                <span class="option-title">Climatisation</span>
+                <span class="option-desc">Incluse</span>
+              </div>
+              <div class="option-check">
+                <i class="bi bi-check-circle-fill" *ngIf="trajetForm.get('airConditioned')?.value"></i>
+                <i class="bi bi-circle" *ngIf="!trajetForm.get('airConditioned')?.value"></i>
+              </div>
+            </label>
+
+            <label class="option-card" [class.active]="trajetForm.get('hasIntermediateStops')?.value">
+              <input type="checkbox" formControlName="hasIntermediateStops" class="option-input">
+              <div class="option-icon">
+                <i class="bi bi-signpost-2"></i>
+              </div>
+              <div class="option-text">
+                <span class="option-title">Arrêts</span>
+                <span class="option-desc">Intermédiaires</span>
+              </div>
+              <div class="option-check">
+                <i class="bi bi-check-circle-fill" *ngIf="trajetForm.get('hasIntermediateStops')?.value"></i>
+                <i class="bi bi-circle" *ngIf="!trajetForm.get('hasIntermediateStops')?.value"></i>
+              </div>
+            </label>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group full-width">
+            <label class="form-label">Notes (optionnel)</label>
+            <textarea
+              formControlName="notes"
+              class="form-control textarea"
+              rows="3"
+              placeholder="Informations supplémentaires pour vos passagers..."></textarea>
+          </div>
+
+          <!-- Alerts -->
+          <div *ngIf="errorMessage" class="alert alert-error">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="alert alert-success">
+            <i class="bi bi-check-circle-fill"></i>
+            {{ successMessage }}
+          </div>
+
+          <!-- Submit -->
+          <div class="submit-row">
+            <button
+              type="submit"
+              class="btn-publish"
+              [disabled]="loading || trajetForm.invalid || citiesLoading">
+              <span *ngIf="loading" class="spinner"></span>
+              <i *ngIf="!loading" class="bi bi-send-fill"></i>
+              {{ loading ? 'Publication en cours...' : 'Publier le trajet' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

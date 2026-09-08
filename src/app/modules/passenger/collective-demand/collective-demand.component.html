@@ -1,0 +1,475 @@
+<div class="collective-page">
+  <!-- HEADER -->
+  <app-header> </app-header>
+  <div class="search-hero">
+  </div>
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <div class="container">
+
+      <!-- Page title -->
+      <div class="page-header" *ngIf="!submissionSuccess">
+        <h1 class="page-title"><i class="bi bi-people-fill"></i> Demande collective</h1>
+        <button *ngIf="!showWizard" class="btn-open-create" (click)="openCreateWizard()">
+          <i class="bi bi-plus-circle me-2"></i>Proposer une demande
+        </button>
+      </div>
+
+      <div class="success-overlay" *ngIf="submissionSuccess && createdDemand">
+        <div class="success-modal">
+          <div class="success-icon"><i class="bi bi-check-circle-fill"></i></div>
+          <h2 class="success-title">Demande publiée</h2>
+          <p class="success-desc">
+            Votre demande collective est maintenant visible par les chauffeurs.<br>
+            Vous recevrez une notification dès qu'un chauffeur se manifeste.
+          </p>
+
+          <div class="success-details">
+            <h4>Détails de la réservation</h4>
+            <div class="detail-row">
+              <span>Trajet</span>
+              <strong>{{ createdDemand.departureCity }} → {{ createdDemand.arrivalCity }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Date</span>
+              <strong>{{ createdDemand.requestedDate | date:'dd/MM/yyyy' }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Places</span>
+              <strong>{{ createdDemand.totalSeatsReserved || createdDemand.seats || '—' }} place(s)</strong>
+            </div>
+            <div class="detail-row">
+              <span>Budget max</span>
+              <strong>{{ createForm.value.maxBudget }} DT / place</strong>
+            </div>
+            <div class="detail-row">
+              <span>Statut</span>
+              <span class="status-badge">En attente de chauffeurs</span>
+            </div>
+          </div>
+
+          <button class="btn-notify" (click)="goBackToForm()">
+            <i class="bi bi-bell me-2"></i> Parfait, me notifier
+          </button>
+        </div>
+      </div>
+
+      <!-- WIZARD -->
+      <ng-container *ngIf="showWizard && !submissionSuccess">
+        <div class="wizard-layout">
+
+          <!-- LEFT : form -->
+          <div class="wizard-main">
+            <!-- Stepper -->
+            <div class="stepper">
+              <div class="step" [class.active]="currentStep === 1">
+                <div class="step-circle">1</div>
+                <span class="step-label">Trajet</span>
+              </div>
+              <div class="step-line" [class.active]="currentStep >= 2"></div>
+              <div class="step" [class.active]="currentStep === 2">
+                <div class="step-circle">2</div>
+                <span class="step-label">Préférences</span>
+              </div>
+              <div class="step-line" [class.active]="currentStep >= 3"></div>
+              <div class="step" [class.active]="currentStep === 3">
+                <div class="step-circle">3</div>
+                <span class="step-label">Confirmation</span>
+              </div>
+            </div>
+
+            <!-- Form card -->
+            <div class="form-card">
+              <div class="form-card-header">
+                <div>
+                  <span class="badge-demand">Demande collective</span>
+                  <h2 class="form-title">Proposer un trajet</h2>
+                  <p class="form-subtitle">
+                    Créez une demande et regroupez d'autres passagers. Les chauffeurs seront notifiés automatiquement dès que le seuil est atteint.
+                  </p>
+                </div>
+                <button type="button" class="btn-cancel" (click)="showWizard = false; currentStep = 1">Annuler</button>
+              </div>
+
+              <form [formGroup]="createForm" (ngSubmit)="onSubmit()">
+
+                <!-- ── STEP 1 : Trajet ── -->
+                <ng-container *ngIf="currentStep === 1">
+                  <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-geo-alt"></i> Itinéraire</h3>
+                    <div class="form-row two-col">
+                      <div class="form-group">
+                        <label>Ville de départ *</label>
+                        <div class="input-wrap">
+                          <i class="bi bi-geo-alt"></i>
+                          <input type="text" formControlName="departureCity" placeholder="ex: Tunis"
+                                 [class.is-invalid]="createForm.get('departureCity')?.invalid && createForm.get('departureCity')?.touched">
+                        </div>
+                        <div class="invalid-msg" *ngIf="createForm.get('departureCity')?.invalid && createForm.get('departureCity')?.touched">Champ requis.</div>
+                      </div>
+                      <div class="form-group">
+                        <label>Ville d'arrivée *</label>
+                        <div class="input-wrap">
+                          <i class="bi bi-geo-alt"></i>
+                          <input type="text" formControlName="arrivalCity" placeholder="ex: Sousse"
+                                 [class.is-invalid]="createForm.get('arrivalCity')?.invalid && createForm.get('arrivalCity')?.touched">
+                        </div>
+                        <div class="invalid-msg" *ngIf="createForm.get('arrivalCity')?.invalid && createForm.get('arrivalCity')?.touched">Champ requis.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-calendar3"></i> Date & Heure souhaitées</h3>
+                    <div class="form-row two-col">
+                      <div class="form-group">
+                        <label>Date de départ *</label>
+                        <div class="input-wrap">
+                          <i class="bi bi-calendar"></i>
+                          <input type="date" formControlName="requestedDate"
+                                 [class.is-invalid]="createForm.get('requestedDate')?.invalid && createForm.get('requestedDate')?.touched">
+                        </div>
+                        <div class="invalid-msg" *ngIf="createForm.get('requestedDate')?.invalid && createForm.get('requestedDate')?.touched">Champ requis.</div>
+                      </div>
+                      <div class="form-group">
+                        <label>Créneau horaire</label>
+                        <div class="input-wrap">
+                          <i class="bi bi-clock"></i>
+                          <select formControlName="timeSlot">
+                            <option value="">Peu importe</option>
+                            <option value="morning">Matin (6h-12h)</option>
+                            <option value="afternoon">Après-midi (12h-18h)</option>
+                            <option value="evening">Soir (18h-0h)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-person-check"></i> Nombre de places souhaitées *</h3>
+                    <div class="form-row">
+                      <div class="form-group max-w-xs">
+                        <div class="input-wrap">
+                          <i class="bi bi-people"></i>
+                          <input type="number" formControlName="seats" min="1" max="8" placeholder="Combien de places ?">
+                        </div>
+                        <div class="invalid-msg" *ngIf="createForm.get('seats')?.invalid && createForm.get('seats')?.touched">Minimum 1 place, maximum 8.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-chat-left-text"></i> Message aux chauffeurs <small class="text-muted">(optionnel)</small></h3>
+                    <div class="input-wrap textarea-wrap">
+                      <textarea formControlName="message" rows="3" placeholder="Ex: Nous sommes 2 personnes avec des bagages moyens, disponibles dès 7h du matin..."></textarea>
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="button" class="btn-next" (click)="nextStep()">Suivant <i class="bi bi-arrow-right ms-2"></i></button>
+                  </div>
+                </ng-container>
+
+                <!-- ── STEP 2 : Préférences ── -->
+                <ng-container *ngIf="currentStep === 2">
+                  <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-sliders"></i> Préférences <small class="text-muted">(optionnel)</small></h3>
+                    <div class="options-grid">
+                      <div class="option-pill" [class.active]="optionsGroup.get('climatise')?.value" (click)="toggleOption('climatise')">
+                        <i class="bi" [class.bi-check-circle-fill]="optionsGroup.get('climatise')?.value" [class.bi-circle]="!optionsGroup.get('climatise')?.value"></i>
+                        <span>Véhicule climatisé</span>
+                      </div>
+                      <div class="option-pill" [class.active]="optionsGroup.get('direct')?.value" (click)="toggleOption('direct')">
+                        <i class="bi" [class.bi-check-circle-fill]="optionsGroup.get('direct')?.value" [class.bi-circle]="!optionsGroup.get('direct')?.value"></i>
+                        <span>Trajet direct</span>
+                      </div>
+                      <div class="option-pill" [class.active]="optionsGroup.get('bagages')?.value" (click)="toggleOption('bagages')">
+                        <i class="bi" [class.bi-check-circle-fill]="optionsGroup.get('bagages')?.value" [class.bi-circle]="!optionsGroup.get('bagages')?.value"></i>
+                        <span>Bagages volumineux</span>
+                      </div>
+                      <div class="option-pill" [class.active]="optionsGroup.get('animaux')?.value" (click)="toggleOption('animaux')">
+                        <i class="bi" [class.bi-check-circle-fill]="optionsGroup.get('animaux')?.value" [class.bi-circle]="!optionsGroup.get('animaux')?.value"></i>
+                        <span>Animaux acceptés</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-cash-stack"></i> Budget maximum *</h3>
+                    <div class="form-row">
+                      <div class="form-group max-w-xs">
+                        <div class="input-wrap">
+                          <i class="bi bi-currency-dollar"></i>
+                          <input type="number" formControlName="maxBudget" placeholder="ex: 40"
+                                 [class.is-invalid]="createForm.get('maxBudget')?.invalid && createForm.get('maxBudget')?.touched">
+                          <span class="input-suffix">DT / place</span>
+                        </div>
+                        <div class="invalid-msg" *ngIf="createForm.get('maxBudget')?.invalid && createForm.get('maxBudget')?.touched">Champ requis.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-clock-history"></i> Urgence du trajet</h3>
+                    <p class="section-desc">Indiquez à quelle urgence vous avez besoin de ce trajet.</p>
+                    <div class="urgency-grid">
+                      <div class="urgency-card" [class.active]="createForm.value.urgency === 'FLEXIBLE'" (click)="setUrgency('FLEXIBLE')">
+                        <h4>Flexible</h4>
+                        <p>Dans les prochains jours</p>
+                      </div>
+                      <div class="urgency-card" [class.active]="createForm.value.urgency === 'MODERATE'" (click)="setUrgency('MODERATE')">
+                        <h4>Modéré</h4>
+                        <p>Dans les 24 heures</p>
+                      </div>
+                      <div class="urgency-card" [class.active]="createForm.value.urgency === 'URGENT'" (click)="setUrgency('URGENT')">
+                        <h4>Urgent</h4>
+                        <p>Le plus tôt possible</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-actions split">
+                    <button type="button" class="btn-back" (click)="prevStep()"><i class="bi bi-arrow-left me-2"></i> Retour</button>
+                    <button type="button" class="btn-next" (click)="nextStep()">Suivant <i class="bi bi-arrow-right ms-2"></i></button>
+                  </div>
+                </ng-container>
+
+                <!-- ── STEP 3 : Confirmation ── -->
+                <ng-container *ngIf="currentStep === 3">
+                  <div class="summary-banner">
+                    <h4>Votre demande de trajet</h4>
+                    <p class="route">{{ createForm.value.departureCity }} → {{ createForm.value.arrivalCity }}</p>
+                    <div class="meta-row">
+                      <span><i class="bi bi-calendar"></i> {{ createForm.value.requestedDate | date:'dd MMM yyyy' }}</span>
+                      <span *ngIf="createForm.value.timeSlot"><i class="bi bi-clock"></i> {{ createForm.value.timeSlot === 'morning' ? 'Matin (6h-12h)' : createForm.value.timeSlot === 'afternoon' ? 'Après-midi (12h-18h)' : 'Soir (18h-0h)' }}</span>
+                      <span><i class="bi bi-people"></i> {{ createForm.value.seats }} Places</span>
+                    </div>
+                  </div>
+
+                  <div class="form-section" *ngIf="selectedOptions.length > 0">
+                    <h3 class="section-title">Options sélectionnées</h3>
+                    <div class="selected-tags">
+                      <span class="tag" *ngFor="let opt of selectedOptions">{{ opt }}</span>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <h3 class="section-title">Détails du voyage</h3>
+                    <div class="details-card">
+                      <div class="detail-row"><span><i class="bi bi-cash-stack"></i> Budget maximum</span><strong>{{ createForm.value.maxBudget }} DT / place</strong></div>
+                      <div class="detail-row"><span><i class="bi bi-clock-history"></i> Urgence</span><strong>{{ urgencyLabel }}</strong></div>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <h3 class="section-title">Visibilité & durée</h3>
+                    <div class="details-card flat">
+                      <div class="detail-row"><span><i class="bi bi-eye"></i> Visible par</span><strong>Tous les chauffeurs</strong></div>
+                      <div class="detail-row"><span><i class="bi bi-clock"></i> Expiration automatique</span><strong>24h avant le départ</strong></div>
+                      <div class="detail-row"><span><i class="bi bi-bell"></i> Notifications</span><strong>Activées</strong></div>
+                    </div>
+                  </div>
+
+                  <div class="terms-box">
+                    <label class="checkbox-label">
+                      <input type="checkbox" formControlName="acceptTerms">
+                      <span class="checkmark"></span>
+                      <span class="label-text">J'accepte les conditions d'utilisation de Moussefer. Ma demande sera visible par les chauffeurs partenaires jusqu'à expiration ou annulation.</span>
+                    </label>
+                    <div class="invalid-msg" *ngIf="createForm.get('acceptTerms')?.invalid && createForm.get('acceptTerms')?.touched">Vous devez accepter les conditions.</div>
+                  </div>
+
+                  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+                  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+                  <div class="form-actions split">
+                    <button type="button" class="btn-back" (click)="prevStep()"><i class="bi bi-arrow-left me-2"></i> Retour</button>
+                    <button type="submit" class="btn-publish" [disabled]="loading">
+                      <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                      <i *ngIf="!loading" class="bi bi-people me-2"></i>
+                      Publier la demande collective
+                    </button>
+                  </div>
+                </ng-container>
+
+              </form>
+            </div>
+          </div>
+
+          <!-- RIGHT : Sidebar -->
+          <aside class="wizard-sidebar">
+
+            <ng-container *ngIf="currentStep !== 3; else recapSidebar">
+              <div class="side-card">
+                <h4><i class="bi bi-check2-square"></i> Votre trajet</h4>
+                <div class="side-info">
+                  <div class="info-row"><span class="label">Trajet</span><span class="value">{{ createForm.value.departureCity || '—' }} → {{ createForm.value.arrivalCity || 'Destination' }}</span></div>
+                  <div class="info-row"><span class="label">Date</span><span class="value">{{ createForm.value.requestedDate ? (createForm.value.requestedDate | date:'dd MMM yyyy') : '—' }}</span></div>
+                  <div class="info-row"><span class="label">Heure</span><span class="value">{{ createForm.value.timeSlot === 'morning' ? 'Matin' : createForm.value.timeSlot === 'afternoon' ? 'Après-midi' : createForm.value.timeSlot === 'evening' ? 'Soir' : 'Peu importe' }}</span></div>
+                  <div class="info-row"><span class="label">Places</span><span class="value">{{ createForm.value.seats || '—' }} places</span></div>
+                  <div class="info-row"><span class="label">Budget</span><span class="value">{{ createForm.value.maxBudget ? createForm.value.maxBudget + ' DT max' : '—' }}</span></div>
+                </div>
+              </div>
+
+              <div class="side-card">
+                <h4><i class="bi bi-lightbulb"></i> Conseil</h4>
+                <p class="advice-text">Plus vous précisez vos préférences, plus les chauffeurs correspondent à vos attentes. Vous pouvez modifier avant de publier.</p>
+              </div>
+
+              <div class="side-card">
+                <h4><i class="bi bi-megaphone"></i> Après publication</h4>
+                <ul class="checklist">
+                  <li><i class="bi bi-check-circle-fill"></i> Notification aux chauffeurs disponibles</li>
+                  <li><i class="bi bi-check-circle-fill"></i> Alerte quand des passagers rejoignent</li>
+                  <li><i class="bi bi-check-circle-fill"></i> Annulation possible à tout moment</li>
+                </ul>
+              </div>
+            </ng-container>
+
+            <ng-template #recapSidebar>
+              <div class="side-card">
+                <h4><i class="bi bi-check2-square"></i> Récapitulatif complet</h4>
+                <div class="side-info">
+                  <div class="info-row"><span class="label">Trajet</span><span class="value">{{ createForm.value.departureCity }} → {{ createForm.value.arrivalCity }}</span></div>
+                  <div class="info-row"><span class="label">Date</span><span class="value">{{ createForm.value.requestedDate | date:'dd MMM yyyy' }}</span></div>
+                  <div class="info-row"><span class="label">Places</span><span class="value">{{ createForm.value.seats }} places</span></div>
+                  <div class="info-row"><span class="label">Budget</span><span class="value">{{ createForm.value.maxBudget }} DT max</span></div>
+                </div>
+              </div>
+
+              <div class="side-card">
+                <h4><i class="bi bi-megaphone"></i> Après publication</h4>
+                <ul class="checklist">
+                  <li><i class="bi bi-check-circle-fill"></i> Notification aux chauffeurs disponibles</li>
+                  <li><i class="bi bi-check-circle-fill"></i> Alerte quand des passagers rejoignent</li>
+                  <li><i class="bi bi-check-circle-fill"></i> Annulation possible à tout moment</li>
+                </ul>
+              </div>
+            </ng-template>
+
+          </aside>
+        </div>
+      </ng-container>
+
+      <!-- LIST VIEW WITH FILTERS -->
+      <ng-container *ngIf="!showWizard && !submissionSuccess">
+        <div class="list-view">
+          <div class="list-card">
+
+            <!-- ← AJOUTÉ: Filter bar -->
+            <div class="filter-bar">
+              <button
+                [class.active]="currentFilter === 'ACTIVE'"
+                (click)="setFilter('ACTIVE')"
+                class="filter-btn">
+                <i class="bi bi-lightning-charge"></i>
+                Actives ({{ activeCount }})
+              </button>
+              <button
+                [class.active]="currentFilter === 'HISTORY'"
+                (click)="setFilter('HISTORY')"
+                class="filter-btn">
+                <i class="bi bi-clock-history"></i>
+                Historique ({{ historyCount }})
+              </button>
+              <button
+                [class.active]="currentFilter === 'ALL'"
+                (click)="setFilter('ALL')"
+                class="filter-btn">
+                <i class="bi bi-list-ul"></i>
+                Toutes ({{ totalCount }})
+              </button>
+            </div>
+
+            <div class="list-header">
+              <h3>
+                <i class="bi bi-list-ul me-2"></i>
+                <span *ngIf="currentFilter === 'ACTIVE'">Demandes actives</span>
+                <span *ngIf="currentFilter === 'HISTORY'">Historique</span>
+                <span *ngIf="currentFilter === 'ALL'">Toutes les demandes</span>
+                ({{ filteredDemands.length }})
+              </h3>
+            </div>
+
+            <div class="list-body">
+              <div *ngIf="filteredDemands.length === 0" class="empty-state">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="40" cy="40" r="36" stroke="#2A358E" stroke-width="3" fill="#F5F7FA"/>
+                  <circle cx="29" cy="34" r="3.5" fill="#2A358E"/>
+                  <circle cx="51" cy="34" r="3.5" fill="#2A358E"/>
+                  <path d="M28 52C28 52 32 46 40 46C48 46 52 52 52 52" stroke="#2A358E" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M48 28C48 28 52 30 55 28" stroke="#CFEDDE" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <p *ngIf="currentFilter === 'ACTIVE'">Aucune demande active pour l'instant.</p>
+                <p *ngIf="currentFilter === 'HISTORY'">Aucune demande dans l'historique.</p>
+                <p *ngIf="currentFilter === 'ALL'">Aucune demande collective pour l'instant.</p>
+                <button class="btn-create-empty" (click)="openCreateWizard()">
+                  <i class="bi bi-plus-circle me-2"></i>Proposer une demande
+                </button>
+              </div>
+
+              <div *ngFor="let d of filteredDemands" class="demand-item">
+                <div class="demand-main">
+                  <div class="demand-info">
+                    <div class="route">{{ d.departureCity }} → {{ d.arrivalCity }}</div>
+                    <div class="meta">
+                      <span><i class="bi bi-calendar me-1"></i>{{ d.requestedDate | date:'dd/MM/yyyy HH:mm' }}</span>
+                      <span><i class="bi bi-people me-1"></i>{{ d.totalSeatsReserved }} / {{ d.totalCapacity }} places</span>
+                    </div>
+                  </div>
+                  <div class="demand-actions">
+                    <!-- Status badge -->
+                    <span class="badge-status"
+                          [class.open]="d.status === 'OPEN'"
+                          [class.triggered]="d.status === 'TRIGGERED'"
+                          [class.converted]="d.status === 'CLOSED'"
+                          [class.cancelled]="d.status === 'CANCELLED'">
+                      {{ statusLabel(d.status) }}
+                    </span>
+
+                    <!-- Creator badge -->
+                    <span *ngIf="d.createurId === currentUserId" class="badge bg-info ms-2">
+                      <i class="bi bi-person-check"></i> Votre demande
+                    </span>
+
+                    <div class="action-btns">
+                      <!-- Join button - only for OPEN and not creator -->
+                      <button *ngIf="d.status === 'OPEN' && d.createurId !== currentUserId"
+                              class="btn-sm btn-outline"
+                              (click)="joinDemand(d.id)">
+                        <i class="bi bi-person-plus"></i> Rejoindre
+                      </button>
+
+                      <!-- Convert button - for OPEN + driver/admin -->
+                      <button *ngIf="d.status === 'OPEN' && isDriverOrAdmin && d.createurId !== currentUserId"
+                              class="btn-sm btn-outline-success"
+                              (click)="convertDemand(d.id)">
+                        <i class="bi bi-arrow-repeat"></i> Convertir
+                      </button>
+
+                      <!-- Confirm trajet - for TRIGGERED + driver -->
+                      <button *ngIf="d.status === 'TRIGGERED' && isDriver"
+                              class="btn-sm btn-outline-success"
+                              (click)="convertToTrajet(d.id)">
+                        <i class="bi bi-check2-circle"></i> Confirmer trajet
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-bar" style="height:6px">
+                  <div class="progress-fill" [style.width.%]="(d.totalSeatsReserved / d.totalCapacity) * 100"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <app-footer></app-footer>
+</div>

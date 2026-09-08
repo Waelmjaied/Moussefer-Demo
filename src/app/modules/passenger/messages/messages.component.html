@@ -1,0 +1,184 @@
+<div class="messages-page">
+
+  <!-- ═══ Sessions List ═══ -->
+  <div class="sessions-col">
+    <div class="sessions-header">
+      <div class="sessions-title">
+        <i class="bi bi-chat-square-dots-fill"></i>
+        Messagerie
+      </div>
+      <div class="sessions-sub">Vos conversations avec les chauffeurs</div>
+    </div>
+
+    <div class="search-wrapper">
+      <i class="bi bi-search"></i>
+      <input class="search-conv" type="text" placeholder="Rechercher..."
+             [(ngModel)]="searchQuery" (input)="filterSessions()">
+    </div>
+
+    <div class="sessions-list">
+      <div *ngIf="sessions.length === 0" class="empty-sessions">
+        <i class="bi bi-inbox"></i>
+        <p>Aucune conversation</p>
+      </div>
+
+      <div *ngFor="let s of filteredSessions"
+           class="session-item"
+           [class.active]="active?.reservationId === s.reservationId"
+           (click)="selectSession(s)">
+        <div class="session-avatar {{ s.avatarClass }}">
+          {{ s.initials }}
+          <span class="online-dot-sm" *ngIf="s.online"></span>
+        </div>
+        <div class="session-info">
+          <div class="session-name-row">
+            <span class="session-name">{{ s.label }}</span>
+            <span class="session-time">{{ s.lastTime }}</span>
+          </div>
+          <div class="session-preview">
+            <i class="bi bi-image" *ngIf="s.lastMsg.includes('image')"></i>
+            <i class="bi bi-mic-fill" *ngIf="s.lastMsg.includes('vocal')"></i>
+            {{ s.lastMsg || 'Démarrer la conversation…' }}
+          </div>
+        </div>
+        <div class="session-meta">
+          <div class="unread-badge" *ngIf="s.unread > 0">{{ s.unread }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Chat Area ═══ -->
+  <div class="chat-col">
+
+    <!-- Empty state -->
+    <div class="chat-empty" *ngIf="!active">
+      <div class="empty-illustration">
+        <i class="bi bi-chat-square-text"></i>
+      </div>
+      <h3>Sélectionnez une conversation</h3>
+      <p>Choisissez un chauffeur pour commencer à discuter</p>
+    </div>
+
+    <ng-container *ngIf="active">
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <div class="session-avatar {{ active.avatarClass }}" style="width:44px;height:44px;font-size:16px">
+            {{ active.initials }}
+            <span class="online-dot-sm" *ngIf="active.online"></span>
+          </div>
+          <div class="chat-header-info">
+            <div class="chat-driver-name">{{ active.label }}</div>
+            <div class="chat-driver-sub">
+              <span class="status-dot" *ngIf="active.online"></span>
+              {{ active.online ? 'En ligne · ' : '' }}{{ active.routeLabel }}
+            </div>
+          </div>
+        </div>
+        <button class="btn-icon" title="Plus d'options">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages-area" #scrollAnchor>
+        <div *ngIf="loading" class="loading-messages">
+          <div class="spinner-border"></div>
+        </div>
+
+        <div *ngFor="let m of active.messages"
+             class="msg-group"
+             [class.mine]="m.senderId === myId">
+
+          <!-- Avatar (theirs) -->
+          <div class="msg-avatar-sm {{ active.avatarClass }}" *ngIf="m.senderId !== myId">
+            {{ active.initials }}
+          </div>
+
+          <div class="message-wrapper">
+            <!-- TEXT -->
+            <div *ngIf="m.type === 'TEXT' || !m.type" class="msg-bubble">
+              {{ m.content }}
+            </div>
+
+            <!-- IMAGE -->
+            <div *ngIf="m.type === 'IMAGE'" class="msg-bubble media-bubble">
+              <img [src]="m.mediaUrl" alt="Image" class="chat-image" (click)="openImage(m.mediaUrl!)">
+              <p *ngIf="m.content" class="media-caption">{{ m.content }}</p>
+            </div>
+
+            <!-- VOICE -->
+            <div *ngIf="m.type === 'VOICE'" class="msg-bubble voice-bubble">
+              <button class="voice-play-btn" (click)="toggleAudio($event)">
+                <i class="bi bi-play-fill"></i>
+              </button>
+              <div class="voice-wave">
+                <span *ngFor="let bar of [1,2,3,4,5,6,7,8,9,10]" class="wave-bar"></span>
+              </div>
+              <span class="voice-duration">{{ m.duration || 0 }}s</span>
+              <audio [src]="m.mediaUrl" class="voice-audio"></audio>
+            </div>
+
+            <div class="msg-time">
+              {{ m.sentAt | date:'HH:mm' }}
+              <i class="bi bi-check2-all" *ngIf="m.senderId === myId" class="read-status"></i>
+            </div>
+          </div>
+
+          <!-- Avatar (mine) -->
+          <div class="msg-avatar-sm av-me" *ngIf="m.senderId === myId">
+            {{ myInitials }}
+          </div>
+        </div>
+
+        <div *ngIf="!loading && active.messages.length === 0" class="empty-chat">
+          <i class="bi bi-send"></i>
+          <p>Aucun message — écrivez le premier !</p>
+        </div>
+      </div>
+
+      <!-- Recording Bar -->
+      <div class="recording-bar" *ngIf="isRecording">
+        <span class="recording-pulse"></span>
+        <span class="recording-text">Enregistrement en cours</span>
+        <span class="recording-timer">{{ recordingDuration }}s</span>
+      </div>
+
+      <!-- Input -->
+      <div class="chat-input-row">
+        <input type="file" #imageInput accept="image/*" style="display:none" (change)="onImageSelected($event)">
+
+        <button class="input-btn attach" (click)="imageInput.click()" title="Image">
+          <i class="bi bi-image"></i>
+        </button>
+
+        <button class="input-btn voice"
+                (mousedown)="startRecording()"
+                (mouseup)="stopRecording()"
+                (touchstart)="startRecording()"
+                (touchend)="stopRecording()"
+                [class.recording]="isRecording"
+                title="Message vocal">
+          <i class="bi" [class.bi-mic-fill]="!isRecording" [class.bi-stop-fill]="isRecording"></i>
+        </button>
+
+        <div class="input-wrapper">
+          <input class="chat-input" type="text" [(ngModel)]="newMessage"
+                 placeholder="Écrire un message..." (keyup.enter)="send()">
+          <button class="input-btn emoji" title="Emoji">😊</button>
+        </div>
+
+        <button class="btn-send" (click)="send()" [disabled]="!newMessage.trim()">
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<!-- Image Lightbox -->
+<div class="lightbox" *ngIf="lightboxImage" (click)="closeLightbox()">
+  <img [src]="lightboxImage" alt="Aperçu">
+  <button class="lightbox-close"><i class="bi bi-x-lg"></i></button>
+</div>

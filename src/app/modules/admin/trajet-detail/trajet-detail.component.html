@@ -1,0 +1,249 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+
+      <div class="col-md-9 col-lg-10 main-col">
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <button class="btn-back" (click)="goBack()" aria-label="Retour">
+              <i class="bi bi-arrow-left"></i> Retour
+            </button>
+            <h1 class="page-title">Détail trajet</h1>
+            <p class="page-subtitle">
+              <code>#{{ trajetId }}</code>
+            </p>
+          </div>
+        </div>
+
+        <!-- LOADING -->
+        <div *ngIf="loading" class="state-card">
+          <div class="spinner-border" role="status"></div>
+          <p>Chargement…</p>
+        </div>
+
+        <!-- ERROR -->
+        <div *ngIf="!loading && error" class="state-card state-error">
+          <i class="bi bi-exclamation-triangle"></i>
+          <p>{{ error }}</p>
+          <button class="btn-primary" (click)="loadData()">Réessayer</button>
+        </div>
+
+        <!-- CONTENT -->
+        <div *ngIf="!loading && !error && trajet" class="detail-grid">
+
+          <!-- Status badge -->
+          <div class="status-row">
+            <span class="badge" [ngClass]="getStatusClass(trajet.status)">
+              {{ getStatusLabel(trajet.status) }}
+            </span>
+            <span class="text-muted">
+              Créé le {{ trajet.createdAt | date: 'dd MMM yyyy à HH:mm' }}
+            </span>
+            <span *ngIf="trajet.priorityOrder !== undefined" class="text-muted">
+              · Priorité <strong>#{{ trajet.priorityOrder }}</strong>
+            </span>
+          </div>
+
+          <!-- Itinéraire -->
+          <section class="card">
+            <h3>Itinéraire</h3>
+            <dl>
+              <dt>Départ</dt>
+              <dd><strong>{{ trajet.departureCity }}</strong></dd>
+
+              <dt>Arrivée</dt>
+              <dd><strong>{{ trajet.arrivalCity }}</strong></dd>
+
+              <dt>Date & heure</dt>
+              <dd>{{ trajet.departureDate | date: 'dd MMM yyyy à HH:mm' }}</dd>
+
+              <dt>Prix / place</dt>
+              <dd class="amount">{{ trajet.pricePerSeat | number: '1.2-2' }} TND</dd>
+            </dl>
+          </section>
+
+          <!-- Occupation -->
+          <section class="card">
+            <h3>Occupation</h3>
+            <dl>
+              <dt>Places</dt>
+              <dd>
+                <strong>{{ occupiedSeats }}</strong> / {{ trajet.totalSeats }}
+                <small class="text-muted">({{ trajet.availableSeats }} libres)</small>
+              </dd>
+              <dt>Remplissage</dt>
+              <dd>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="fillPercent"></div>
+                </div>
+                <small>{{ fillPercent }}%</small>
+              </dd>
+              <dt>Réservable</dt>
+              <dd>
+                <span [class]="trajet.reservable ? 'badge badge-success' : 'badge badge-default'">
+                  {{ trajet.reservable ? 'Oui' : 'Non' }}
+                </span>
+              </dd>
+            </dl>
+          </section>
+
+          <!-- Chauffeur -->
+          <section class="card">
+            <h3>Chauffeur</h3>
+            <dl>
+              <dt>Nom</dt>
+              <dd>{{ trajet.driverName || '—' }}</dd>
+
+              <dt>ID</dt>
+              <dd><code>{{ trajet.driverId }}</code></dd>
+
+              <dt *ngIf="trajet.vehicleName">Véhicule</dt>
+              <dd *ngIf="trajet.vehicleName">{{ trajet.vehicleName }}</dd>
+
+              <dt *ngIf="trajet.avgRating !== undefined">Note moyenne</dt>
+              <dd *ngIf="trajet.avgRating !== undefined">
+                ★ {{ trajet.avgRating | number: '1.1-1' }}
+              </dd>
+            </dl>
+          </section>
+
+          <!-- Options -->
+          <section class="card">
+            <h3>Options</h3>
+            <ul class="option-list">
+              <li>
+                <i class="bi" [class.bi-check-circle-fill]="trajet.airConditioned" [class.bi-x-circle]="!trajet.airConditioned"
+                   [class.text-success]="trajet.airConditioned" [class.text-muted]="!trajet.airConditioned"></i>
+                Climatisation
+              </li>
+              <li>
+                <i class="bi" [class.bi-check-circle-fill]="trajet.allowsLargeBags" [class.bi-x-circle]="!trajet.allowsLargeBags"
+                   [class.text-success]="trajet.allowsLargeBags" [class.text-muted]="!trajet.allowsLargeBags"></i>
+                Gros bagages
+              </li>
+              <li>
+                <i class="bi" [class.bi-check-circle-fill]="trajet.acceptsPets" [class.bi-x-circle]="!trajet.acceptsPets"
+                   [class.text-success]="trajet.acceptsPets" [class.text-muted]="!trajet.acceptsPets"></i>
+                Animaux acceptés
+              </li>
+              <li>
+                <i class="bi" [class.bi-check-circle-fill]="!trajet.hasIntermediateStops" [class.bi-x-circle]="trajet.hasIntermediateStops"
+                   [class.text-success]="!trajet.hasIntermediateStops" [class.text-muted]="trajet.hasIntermediateStops"></i>
+                Trajet direct
+              </li>
+            </ul>
+
+            <div *ngIf="trajet.notes" class="notes">
+              <h4>Notes du chauffeur</h4>
+              <p>{{ trajet.notes }}</p>
+            </div>
+          </section>
+
+          <!-- Actions -->
+          <section class="card card-actions">
+            <h3>Actions administrateur</h3>
+
+            <button
+              *ngIf="canReassign"
+              class="btn-primary"
+              (click)="openReassignModal()"
+            >
+              <i class="bi bi-person-gear"></i> Réassigner un chauffeur
+            </button>
+
+            <button
+              *ngIf="canCancel"
+              class="btn-danger"
+              (click)="openCancelModal()"
+            >
+              <i class="bi bi-x-circle"></i> Annuler ce trajet
+            </button>
+
+            <p *ngIf="!canCancel && !canReassign" class="text-muted">
+              Aucune action disponible (statut courant : {{ getStatusLabel(trajet.status) }}).
+            </p>
+          </section>
+
+        </div>
+
+        <!-- ─── CANCEL MODAL ─── -->
+        <div *ngIf="showCancelModal" class="modal-overlay" (click)="closeCancelModal($event)">
+          <div class="modal-dialog">
+            <h3>Annuler le trajet</h3>
+            <p class="text-muted">
+              Trajet <code>#{{ trajetId }}</code> · {{ trajet?.departureCity }} → {{ trajet?.arrivalCity }}
+            </p>
+
+            <label>
+              Motif (obligatoire)
+              <textarea
+                [(ngModel)]="cancelReason"
+                name="cancelReason"
+                rows="3"
+                placeholder="Ex: Véhicule en panne, conducteur indisponible…"
+              ></textarea>
+            </label>
+
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="notifyPassenger" name="notifyPassenger" />
+              Notifier les passagers réservés
+            </label>
+
+            <div class="modal-actions">
+              <button type="button" (click)="closeCancelModal()" [disabled]="cancelling">
+                Retour
+              </button>
+              <button
+                type="button"
+                class="btn-danger"
+                (click)="confirmCancel()"
+                [disabled]="cancelling || !cancelReason.trim()"
+              >
+                {{ cancelling ? 'Annulation…' : "Confirmer l'annulation" }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── REASSIGN MODAL ─── -->
+        <div *ngIf="showReassignModal" class="modal-overlay" (click)="closeReassignModal($event)">
+          <div class="modal-dialog">
+            <h3>Réassigner le trajet</h3>
+            <p class="text-muted">
+              Chauffeur actuel : <strong>{{ trajet?.driverName || trajet?.driverId }}</strong>
+            </p>
+
+            <label>
+              Nouveau chauffeur
+              <select [(ngModel)]="selectedDriverId" name="selectedDriverId">
+                <option value="">— Choisir —</option>
+                <option *ngFor="let d of drivers" [value]="d.userId">
+                  {{ d.name }} ({{ d.email }})
+                </option>
+              </select>
+            </label>
+
+            <div class="modal-actions">
+              <button type="button" (click)="closeReassignModal()" [disabled]="reassigning">
+                Annuler
+              </button>
+              <button
+                type="button"
+                class="btn-primary"
+                (click)="confirmReassign()"
+                [disabled]="reassigning || !selectedDriverId"
+              >
+                {{ reassigning ? 'Réassignation…' : 'Confirmer' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

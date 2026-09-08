@@ -1,0 +1,158 @@
+.admin-dashboard { background: #f1f5f9; min-height: 100vh; }
+.container-fluid { width: 100%; padding: 0; margin: 0; }
+.row { display: flex; flex-wrap: wrap; margin: 0; }
+.sidebar-col { flex: 0 0 16.666667%; max-width: 16.666667%; padding: 0; }
+.main-col { flex: 0 0 83.333333%; max-width: 83.333333%; padding: 1.5rem 2rem; min-width: 0; }
+
+/* Header */
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+.page-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem; }
+.page-subtitle { color: #94a3b8; font-size: 0.95rem; margin: 0; }
+.header-actions { display: flex; align-items: center; gap: 0.75rem; }
+.status-badge-online { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; background: #dcfce7; color: #16a34a; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+.btn-icon { width: 40px; height: 40px; border-radius: 10px; border: none; background: white; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.search-box { position: relative; }
+.search-box i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+.search-box input { padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.9rem; width: 180px; }
+
+/* Liste */
+.litige-list { display: flex; flex-direction: column; gap: 1rem; }
+
+/* Card */
+.litige-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(226,232,240,0.6); overflow: hidden; }
+.litige-card.urgent { border-left: 4px solid #ef4444; }
+
+/* Header card */
+.litige-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #f8fafc; }
+.litige-tags { display: flex; align-items: center; gap: 0.75rem; }
+.tag { padding: 0.25rem 0.75rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.tag-urgent { background: #fee2e2; color: #dc2626; }
+.tag-modere { background: #fef3c7; color: #d97706; }
+.tag-en-attente { background: #dbeafe; color: #2563eb; }
+.litige-id { font-family: monospace; font-size: 0.85rem; color: #64748b; font-weight: 600; }
+.litige-title { font-size: 0.9rem; font-weight: 600; color: #1e293b; }
+.litige-time { font-size: 0.8rem; color: #94a3b8; }
+
+/* ═════════════════════════════════════════════════════
+   LAYOUT 2 COLONNES : body (gauche) + actions (droite)
+   ═════════════════════════════════════════════════════ */
+.litige-content { display: flex; align-items: stretch; }
+
+.litige-body { flex: 1; min-width: 0; padding: 1.25rem 1.5rem; }
+
+.litige-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 220px;
+  max-width: 240px;
+  padding: 1.25rem 1.5rem;
+  justify-content: flex-start;
+}
+
+/* Description */
+.litige-desc { font-size: 0.9rem; color: #475569; line-height: 1.6; margin-bottom: 1rem; padding-left: 1rem; border-left: 3px solid #e2e8f0; }
+.litige-card.urgent .litige-desc { border-left-color: #ef4444; }
+.litige-desc strong { color: #1e293b; font-weight: 600; }
+
+/* Détails 4 colonnes */
+.litige-details { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.detail-item { display: flex; flex-direction: column; gap: 0.25rem; }
+.detail-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+.detail-value { font-size: 0.85rem; font-weight: 600; color: #1e293b; }
+.detail-value.route { color: #1e3a8a; }
+.detail-value.red { color: #dc2626; }
+.detail-value.blue { color: #2563eb; }
+
+/* Historique */
+.litige-history { margin-bottom: 0.5rem; }
+.history-title { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+.history-list { display: flex; flex-direction: column; gap: 0.35rem; }
+.history-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #64748b; }
+.history-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.history-dot.green { background: #22c55e; }
+.history-dot.blue { background: #3b82f6; }
+.history-dot.red { background: #ef4444; }
+.history-user strong { color: #1e293b; font-weight: 600; }
+
+/* ═════════════════════════════════════════════════════
+   BOUTONS D'ACTION (variantes couleur)
+   ═════════════════════════════════════════════════════ */
+.btn-action {
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+/* Vert remboursement / indemnisation */
+.btn-green {
+  background: linear-gradient(95deg, #22c55e, #16a34a);
+  color: white;
+}
+.btn-green:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* Bleu vue / vérification */
+.btn-blue {
+  background: #1e3a8a;
+  color: white;
+}
+.btn-blue:hover { background: #172554; transform: translateY(-1px); }
+
+/* Rouge outline suspendre */
+.btn-outline-red {
+  background: white;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+.btn-outline-red:hover { background: #fef2f2; }
+
+/* Bleu outline vérifier */
+.btn-outline-blue {
+  background: white;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+}
+.btn-outline-blue:hover { background: #eff6ff; }
+
+/* Vert outline */
+.btn-outline-green {
+  background: white;
+  color: #16a34a;
+  border: 1px solid #dcfce7;
+}
+.btn-outline-green:hover { background: #f0fdf4; }
+
+/* Ghost contact / clôturer */
+.btn-ghost {
+  background: transparent;
+  color: #94a3b8;
+}
+.btn-ghost:hover { color: #64748b; }
+
+/* Fallback */
+.btn-default { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 3rem; color: #94a3b8; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .litige-content { flex-direction: column; }
+  .litige-actions { max-width: 100%; min-width: auto; padding: 0 1.5rem 1.5rem; border-left: none; }
+  .litige-body { padding: 1.25rem 1.5rem; }
+  .litige-details { grid-template-columns: repeat(2, 1fr); }
+  .page-header { flex-direction: column; gap: 1rem; }
+  .row { position: relative; }
+  .sidebar-col { position: absolute; width: 0; height: 0; padding: 0; overflow: visible; }
+  .main-col { flex: 0 0 100%; max-width: 100%; padding: 1rem; padding-top: 4.5rem; }
+}

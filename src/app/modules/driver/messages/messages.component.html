@@ -1,0 +1,237 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+
+  <div class="main-content">
+
+    <!-- Header -->
+    <div class="msg-page-header">
+      <div class="header-left">
+        <h1 class="msg-title">
+          <i class="bi bi-chat-square-dots-fill"></i>
+          Messages
+        </h1>
+        <p class="msg-sub">{{ unreadCount }} conversation<span *ngIf="unreadCount !== 1">s</span> non lue<span *ngIf="unreadCount !== 1">s</span></p>
+      </div>
+      <div class="header-actions">
+        <span class="online-badge">
+          <span class="online-dot"></span>
+          En ligne
+        </span>
+        <button class="btn-icon" title="Notifications">
+          <i class="bi bi-bell"></i>
+        </button>
+        <button class="btn-primary-sm">
+          <i class="bi bi-plus-lg"></i>
+          Nouveau
+        </button>
+      </div>
+    </div>
+
+    <div class="msg-body">
+
+      <!-- ═══ Sessions List (mobile slide-in drawer) ═══ -->
+      <div class="sessions-col" [class.mobile-open]="showSessionsDrawer">
+        <div class="sessions-header">
+          <span class="sessions-title">Conversations</span>
+          <span class="nav-badge" *ngIf="unreadCount > 0">{{ unreadCount }} non lue<span *ngIf="unreadCount !== 1">s</span></span>
+        </div>
+
+        <div class="search-wrapper">
+          <i class="bi bi-search"></i>
+          <input class="search-conv" type="text" placeholder="Rechercher..." [(ngModel)]="searchQuery" (input)="filterSessions()">
+        </div>
+
+        <!-- Active Trip -->
+        <div class="sessions-group-label">
+          <i class="bi bi-geo-alt-fill"></i>
+          Trajet actif — {{ activeTripRoute }}
+        </div>
+
+        <div *ngFor="let s of filteredActive"
+             class="session-item"
+             [class.session-active]="active?.reservationId === s.reservationId"
+             (click)="selectSession(s)">
+          <div class="session-av {{ s.cls }}">{{ s.initials }}</div>
+          <div class="session-info">
+            <div class="session-name-row">
+              <span class="session-name">{{ s.label }}</span>
+              <span class="session-time">{{ s.lastTime }}</span>
+            </div>
+            <div class="session-preview">
+              <i class="bi bi-image" *ngIf="s.lastMsg.includes('image')"></i>
+              <i class="bi bi-mic-fill" *ngIf="s.lastMsg.includes('vocal')"></i>
+              {{ s.lastMsg || '—' }}
+            </div>
+          </div>
+          <div class="session-meta">
+            <div class="unread-badge" *ngIf="s.unread > 0">{{ s.unread }}</div>
+            <div class="online-indicator" *ngIf="s.online"></div>
+          </div>
+        </div>
+
+        <!-- Upcoming -->
+        <div class="sessions-group-label" *ngIf="filteredUpcoming.length > 0">
+          <i class="bi bi-calendar-event"></i>
+          Prochains trajets
+        </div>
+
+        <div *ngFor="let s of filteredUpcoming"
+             class="session-item"
+             [class.session-active]="active?.reservationId === s.reservationId"
+             (click)="selectSession(s)">
+          <div class="session-av {{ s.cls }}">{{ s.initials }}</div>
+          <div class="session-info">
+            <div class="session-name-row">
+              <span class="session-name">{{ s.label }}</span>
+              <span class="session-time">{{ s.lastTime }}</span>
+            </div>
+            <div class="session-preview">{{ s.lastMsg || '—' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Chat Area ═══ -->
+      <div class="chat-col">
+
+        <!-- Empty State -->
+        <div class="chat-empty" *ngIf="!active">
+          <div class="empty-illustration">
+            <i class="bi bi-chat-square-text"></i>
+          </div>
+          <h3>Sélectionnez une conversation</h3>
+          <p>Choisissez un passager pour commencer à discuter</p>
+        </div>
+
+        <ng-container *ngIf="active">
+
+          <!-- Chat Header -->
+          <div class="chat-header">
+            <!-- Mobile back button to conversation list -->
+            <button class="btn-icon mobile-back-btn" (click)="toggleSessions()" title="Retour aux conversations">
+              <i class="bi bi-arrow-left"></i>
+            </button>
+
+            <div class="chat-header-left">
+              <div class="session-av {{ active.cls }}" style="width:44px;height:44px;font-size:16px">{{ active.initials }}</div>
+              <div class="chat-header-info">
+                <div class="chat-header-name">{{ active.label }}</div>
+                <div class="chat-header-status">
+                  <span class="status-dot online"></span>
+                  En ligne · {{ active.routeLabel }}
+                </div>
+              </div>
+            </div>
+            <button class="btn-icon" title="Plus d'options">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+          </div>
+
+          <!-- Trip Context -->
+          <div class="trip-context-bar" *ngIf="active.routeLabel">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>Trajet en cours : <strong>{{ active.routeLabel }}</strong></span>
+            <span class="trip-time">Départ {{ active.departTime }} · Arrivée {{ active.arriveTime }}</span>
+          </div>
+
+          <!-- Messages -->
+          <div class="messages-area" #scrollAnchor>
+            <div *ngIf="loading" class="loading-messages">
+              <div class="spinner-border text-primary"></div>
+            </div>
+
+            <div *ngIf="!loading && active.messages.length === 0" class="empty-chat">
+              <i class="bi bi-send"></i>
+              <p>Commencez la conversation</p>
+            </div>
+
+            <div *ngFor="let m of active.messages"
+                 class="message-row"
+                 [class.own-message]="m.senderId === myId">
+
+              <!-- Avatar (theirs) -->
+              <div *ngIf="m.senderId !== myId" class="msg-avatar session-av {{ active.cls }}">{{ active.initials }}</div>
+
+              <!-- Message Content -->
+              <div class="message-wrapper">
+
+                <!-- TEXT -->
+                <div *ngIf="m.type === 'TEXT' || !m.type" class="msg-bubble" [class.mine]="m.senderId === myId">
+                  {{ m.content }}
+                </div>
+
+                <!-- IMAGE -->
+                <div *ngIf="m.type === 'IMAGE'" class="msg-bubble media-bubble" [class.mine]="m.senderId === myId">
+                  <img [src]="m.mediaUrl" alt="Image" class="chat-image" (click)="openImage(m.mediaUrl!)">
+                  <p *ngIf="m.content" class="media-caption">{{ m.content }}</p>
+                </div>
+
+                <!-- VOICE -->
+                <div *ngIf="m.type === 'VOICE'" class="msg-bubble voice-bubble" [class.mine]="m.senderId === myId">
+                  <button class="voice-play-btn" (click)="toggleAudio($event)">
+                    <i class="bi bi-play-fill"></i>
+                  </button>
+                  <div class="voice-wave">
+                    <span *ngFor="let bar of [1,2,3,4,5,6,7,8,9,10]" class="wave-bar"></span>
+                  </div>
+                  <span class="voice-duration">{{ m.duration || 0 }}s</span>
+                  <audio [src]="m.mediaUrl" class="voice-audio"></audio>
+                </div>
+
+                <!-- Time -->
+                <div class="msg-time" [class.mine]="m.senderId === myId">
+                  {{ m.sentAt | date:'HH:mm' }}
+                  <i class="bi bi-check2-all" *ngIf="m.senderId === myId" class="read-status"></i>
+                </div>
+              </div>
+
+              <!-- Avatar (mine) -->
+              <div *ngIf="m.senderId === myId" class="msg-avatar av-me">{{ myInitials }}</div>
+            </div>
+          </div>
+
+          <!-- Recording Bar -->
+          <div class="recording-bar" *ngIf="isRecording">
+            <span class="recording-pulse"></span>
+            <span class="recording-text">Enregistrement en cours</span>
+            <span class="recording-timer">{{ recordingDuration }}s</span>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="chat-input-row">
+            <input type="file" #imageInput accept="image/*" style="display:none" (change)="onImageSelected($event)">
+
+            <button class="input-btn attach" (click)="imageInput.click()" title="Image">
+              <i class="bi bi-image"></i>
+            </button>
+
+            <button class="input-btn voice"
+                    (mousedown)="startRecording()"
+                    (mouseup)="stopRecording()"
+                    (touchstart)="startRecording()"
+                    (touchend)="stopRecording()"
+                    [class.recording]="isRecording"
+                    title="Message vocal">
+              <i class="bi" [class.bi-mic-fill]="!isRecording" [class.bi-stop-fill]="isRecording"></i>
+            </button>
+
+            <div class="input-wrapper">
+              <input class="chat-input" [(ngModel)]="newMessage" placeholder="Écrire un message..." (keyup.enter)="send()">
+              <button class="input-btn emoji" title="Emoji">😊</button>
+            </div>
+
+            <button class="btn-send" (click)="send()" [disabled]="!newMessage.trim()">
+              <i class="bi bi-send-fill"></i>
+            </button>
+          </div>
+
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Image Lightbox -->
+<div class="lightbox" *ngIf="lightboxImage" (click)="closeLightbox()">
+  <img [src]="lightboxImage" alt="Aperçu">
+  <button class="lightbox-close"><i class="bi bi-x-lg"></i></button>
+</div>

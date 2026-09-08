@@ -1,0 +1,524 @@
+<div class="organizer-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-organizer-sidebar></app-organizer-sidebar>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- ===== LIST VIEW ===== -->
+        <div *ngIf="!selectedVoyageForManage">
+
+          <!-- Header -->
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Voyages organisées</h1>
+              <p class="page-subtitle">{{ currentDate }} — {{ agencyName }}</p>
+            </div>
+            <button class="btn-publish" (click)="openCreateModal()">
+              <i class="bi bi-plus-lg me-1"></i>Publier un voyage
+            </button>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="loading" class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+          </div>
+
+          <!-- Empty -->
+          <div *ngIf="!loading && voyages.length === 0" class="empty-state">
+            <i class="bi bi-calendar-x" style="font-size: 3rem; color: #cbd5e1;"></i>
+            <p>Aucun voyage organisé</p>
+            <button class="btn-publish" (click)="openCreateModal()">Créer mon premier voyage</button>
+          </div>
+
+          <!-- Filter Section -->
+          <div *ngIf="!loading && voyages.length > 0" class="filter-section">
+
+            <!-- Status Tabs -->
+            <div class="filter-tabs-voyage">
+              <button
+                *ngFor="let tab of filterTabs"
+                class="voyage-tab"
+                [class.active]="filterTab === tab.value"
+                (click)="setFilterTab(tab.value)">
+                {{ tab.label }}
+                <span class="tab-count">{{ getTabCount(tab.value) }}</span>
+              </button>
+            </div>
+
+            <!-- Date Filter -->
+            <div class="date-filter-row">
+              <div class="date-inputs">
+                <div class="date-field">
+                  <label for="dateFrom">Du</label>
+                  <input
+                    type="date"
+                    id="dateFrom"
+                    [(ngModel)]="dateFrom"
+                    (change)="setFilterTab(filterTab)"
+                    class="form-control date-input">
+                </div>
+                <div class="date-field">
+                  <label for="dateTo">Au</label>
+                  <input
+                    type="date"
+                    id="dateTo"
+                    [(ngModel)]="dateTo"
+                    (change)="setFilterTab(filterTab)"
+                    class="form-control date-input">
+                </div>
+              </div>
+              <button *ngIf="dateFrom || dateTo" class="btn-clear-date" (click)="clearDateFilter()">
+                <i class="bi bi-x-lg"></i> Effacer dates
+              </button>
+              <div class="results-meta">
+                {{ filteredVoyages.length }} résultat{{ filteredVoyages.length > 1 ? 's' : '' }}
+                • Tri: plus récent
+              </div>
+            </div>
+          </div>
+
+          <!-- Voyages Grid -->
+          <div *ngIf="!loading && filteredVoyages.length > 0" class="voyages-grid">
+            <div
+              *ngFor="let voyage of filteredVoyages; trackBy: trackByVoyageId"
+              class="voyage-card"
+              [class.cancelled]="voyage.status === 'CANCELLED'">
+
+              <!-- Status Badge on Card -->
+              <div class="card-status-badge" [class]="voyageStatusClass(voyage.status)">
+                {{ voyageStatusLabel(voyage.status) }}
+              </div>
+
+              <div class="card-image">
+                <img [src]="voyage.imageUrl || 'assets/default-voyage.jpg'" [alt]="voyage.title">
+                <div *ngIf="voyage.status === 'CANCELLED'" class="cancelled-overlay">
+                  <span class="cancelled-badge">ANNULÉ</span>
+                </div>
+                <span class="agency-badge">Tunisia Tours</span>
+                <span class="location-badge">{{ voyage.arrivalCity }}</span>
+              </div>
+              <div class="card-body">
+                <h3>{{ voyage.title }}</h3>
+                <p class="voyage-meta">
+                  <i class="bi bi-calendar3"></i>
+                  {{ voyage.departureDate | date:'MMM d, y' }} • {{ voyage.departureDate | date:'HH:mm' }}
+                </p>
+                <p class="created-meta">
+                  <i class="bi bi-clock-history"></i>
+                  Créé {{ voyage.createdAt | date:'d MMM yyyy' }}
+                </p>
+
+                <!-- Progress bar -->
+                <div class="progress-section">
+                  <span class="progress-text">
+                    {{ getReservedSeats(voyage) }}/{{ voyage.totalSeats }} Places
+                  </span>
+                  <div class="progress-track">
+                    <div class="progress-fill" [style.width.%]="getFillRate(voyage)"></div>
+                  </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="card-footer">
+                  <div class="passenger-avatars">
+                    <img
+                      *ngFor="let p of getTopPassengers(voyage, 2); trackBy: trackByPassengerName"
+                      [src]="p.avatar || 'assets/default-avatar.png'"
+                      class="avatar" [alt]="p.name">
+                    <span *ngIf="getPassengerCount(voyage) > 2" class="avatar-more">
+                      +{{ getPassengerCount(voyage) - 2 }}
+                    </span>
+                  </div>
+                  <button
+                    class="btn-manage"
+                    [class.disabled]="voyage.status === 'CANCELLED'"
+                    (click)="voyage.status !== 'CANCELLED' && manageVoyage(voyage)">
+                    {{ voyage.status === 'CANCELLED' ? 'Annulé' : 'Gérer' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add New Card -->
+            <div class="voyage-card add-card" (click)="openCreateModal()">
+              <div class="add-content">
+                <div class="add-icon">+</div>
+                <h3>Plannifier un nouveau voyage</h3>
+                <p>Créez un nouvel itinéraire et planifiez-le pour votre flotte</p>
+                <span class="quick-create">Création rapide <i class="bi bi-arrow-right"></i></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state for filtered results -->
+          <div *ngIf="!loading && filteredVoyages.length === 0 && voyages.length > 0" class="empty-state">
+            <i class="bi bi-funnel" style="font-size: 3rem; color: #cbd5e1;"></i>
+            <p>Aucun voyage ne correspond à ces critères</p>
+            <button class="btn-publish" (click)="clearDateFilter(); setFilterTab('all')">
+              Voir tous les voyages
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== MANAGE/DETAIL VIEW ===== -->
+        <div *ngIf="selectedVoyageForManage" class="manage-view">
+
+          <!-- Breadcrumb -->
+          <div class="breadcrumb">
+            <span (click)="backToList()">Dashboard</span>
+            <i class="bi bi-chevron-right"></i>
+            <span (click)="backToList()">Voyages organisés</span>
+            <i class="bi bi-chevron-right"></i>
+            <span class="active">{{ selectedVoyageForManage.title }}</span>
+          </div>
+
+          <!-- Manage Header -->
+          <div class="manage-header">
+            <div>
+              <h1>Gérer le voyage</h1>
+              <p>
+                {{ selectedVoyageForManage.title }} —
+                {{ selectedVoyageForManage.departureCity }} → {{ selectedVoyageForManage.arrivalCity }}
+                <span class="status-pill active">Actif</span>
+              </p>
+            </div>
+            <div class="header-actions">
+              <button class="btn-action btn-add-passenger" (click)="openAddPassengerModal()">
+                <i class="bi bi-person-plus"></i> + Ajouter passager
+              </button>
+              <button class="btn-action btn-edit" (click)="openEditModal(selectedVoyageForManage)">
+                <i class="bi bi-pencil"></i> Modifier
+              </button>
+              <button class="btn-action btn-notify">
+                <i class="bi bi-bell"></i> Notifier
+              </button>
+              <button class="btn-action btn-pdf">
+                <i class="bi bi-file-pdf"></i> PDF
+              </button>
+              <button class="btn-action btn-cancel-voyage" (click)="cancelVoyage(selectedVoyageForManage.id)">
+                <i class="bi bi-x-circle"></i> Annuler
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="kpi-grid-manage">
+            <div class="kpi-card-manage">
+              <div class="kpi-icon"><i class="bi bi-calendar3"></i></div>
+              <div class="kpi-info">
+                <label>Départ & Durée</label>
+                <strong>{{ selectedVoyageForManage.departureDate | date:'MMM d, y' }} • {{ selectedVoyageForManage.departureDate | date:'HH:mm' }}</strong>
+                <span>{{ getDuration(selectedVoyageForManage) }}</span>
+              </div>
+            </div>
+            <div class="kpi-card-manage">
+              <div class="kpi-icon" style="background: #dcfce7; color: #16a34a;"><i class="bi bi-people"></i></div>
+              <div class="kpi-info">
+                <label>Passagers confirmés</label>
+                <strong>{{ getConfirmedCount(selectedVoyageForManage) }} sur {{ getTotalReservations(selectedVoyageForManage) }} réservations</strong>
+                <div class="mini-progress">
+                  <div class="mini-fill" [style.width.%]="getConfirmationRate(selectedVoyageForManage)"></div>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-card-manage">
+              <div class="kpi-icon" style="background: #fef3c7; color: #d97706;"><i class="bi bi-clock"></i></div>
+              <div class="kpi-info">
+                <label>Attente paiement</label>
+                <strong>{{ getPendingPaymentCount(selectedVoyageForManage) }} passagers</strong>
+                <span style="color: #ef4444;"> </span>
+              </div>
+            </div>
+            <div class="kpi-card-manage">
+              <div class="kpi-icon" style="background: #e0e7ff; color: #4f46e5;"><i class="bi bi-wallet2"></i></div>
+              <div class="kpi-info">
+                <label>Revenus encaissés</label>
+                <strong>{{ getRevenue(selectedVoyageForManage) }} DT / {{ getTargetRevenue(selectedVoyageForManage) }} DT</strong>
+                <span>{{ getRevenuePercent(selectedVoyageForManage) }}% de l'objectif atteint</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs-bar">
+            <button class="tab" [class.active]="activeTab === 'passengers'" (click)="activeTab = 'passengers'">
+              Passagers <span class="tab-badge">{{ getPassengerCount(selectedVoyageForManage) }}</span>
+            </button>
+            <button class="tab" [class.active]="activeTab === 'itinerary'" (click)="activeTab = 'itinerary'">Itinéraire</button>
+            <button class="tab" [class.active]="activeTab === 'vehicles'" (click)="activeTab = 'vehicles'">Véhicules & chauffeurs</button>
+            <button class="tab" [class.active]="activeTab === 'finances'" (click)="activeTab = 'finances'">Finances</button>
+            <button class="tab" [class.active]="activeTab === 'notifications'" (click)="activeTab = 'notifications'">Notifications</button>
+          </div>
+
+          <!-- Passengers Tab -->
+          <div *ngIf="activeTab === 'passengers'" class="tab-content">
+            <div class="filters-bar">
+              <button class="btn-filter"><i class="bi bi-funnel"></i> Filtrer</button>
+              <input type="text" class="search-input" placeholder="Rechercher un passager..." [(ngModel)]="passengerSearch">
+            </div>
+
+            <div class="table-card">
+              <table class="data-table">
+                <thead>
+                <tr>
+                  <th>Passager</th>
+                  <th>Siège</th>
+                  <th>Téléphone</th>
+                  <th>Mode Paiement</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let p of getFilteredPassengers(selectedVoyageForManage); trackBy: trackByPassengerName">
+                  <td class="cell-passenger">
+                    <img [src]="p.avatar || 'assets/default-avatar.png'" class="table-avatar" [alt]="p.name">
+                    <div>
+                      <div class="p-name">{{ p.name }}</div>
+                      <div class="p-email">{{ p.email }}</div>
+                    </div>
+                  </td>
+                  <td class="cell-seat">{{ p.seatNumber || '—' }}</td>
+                  <td class="cell-phone">{{ p.phone }}</td>
+                  <td class="cell-payment">{{ p.paymentMethod || 'Carte Bancaire' }}</td>
+                  <td class="cell-amount">{{ p.amount || selectedVoyageForManage.pricePerSeat }} DT</td>
+                  <td class="cell-status">
+                      <span class="badge-statut" [class]="'stat-' + (p.status || 'CONFIRMED')">
+                        {{ statusLabel(p.status || 'CONFIRMED') }}
+                      </span>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div *ngIf="getPassengerCount(selectedVoyageForManage) > 10" class="pagination">
+              <button class="page-btn"><i class="bi bi-chevron-left"></i></button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <span class="page-dots">...</span>
+              <button class="page-btn">5</button>
+              <button class="page-btn"><i class="bi bi-chevron-right"></i></button>
+            </div>
+
+            <!-- Bottom Cards -->
+            <div class="bottom-grid">
+              <div class="info-card">
+                <h3>Détails du voyage</h3>
+                <div class="info-row">
+                  <span>ITINÉRAIRE</span>
+                  <strong>{{ selectedVoyageForManage.departureCity }} -> {{ selectedVoyageForManage.arrivalCity }}</strong>
+                </div>
+                <div class="info-row">
+                  <span>DATES</span>
+                  <strong>{{ selectedVoyageForManage.departureDate | date:'MMM d' }} - {{ selectedVoyageForManage.returnDate | date:'MMM d' }}</strong>
+                </div>
+                <div class="info-row">
+                  <span>DISPONIBILITÉ</span>
+                  <strong>{{ getAvailableSeats(selectedVoyageForManage) }} places totales</strong>
+                </div>
+                <div class="info-row">
+                  <span>TARIF</span>
+                  <strong>{{ selectedVoyageForManage.pricePerSeat }} DT / person</strong>
+                </div>
+                <div class="info-note">
+                  <i class="bi bi-info-circle"></i>
+                  {{ selectedVoyageForManage.description || 'L\'itinéraire comprend 3 arrêts prévus. Les passagers recevront leur ticket numérique 24h avant le départ.' }}
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="activity-header">
+                  <h3>Activité récente</h3>
+                  <a href="#" class="view-all">Tout voir</a>
+                </div>
+                <div class="activity-list">
+                  <div *ngFor="let act of getActivities(selectedVoyageForManage); trackBy: trackByActivityTitle" class="activity-item">
+                    <div class="activity-dot" [style.background]="act.color"></div>
+                    <div class="activity-content">
+                      <div class="activity-title">{{ act.title }}</div>
+                      <div class="activity-desc">{{ act.description }}</div>
+                      <div class="activity-time">{{ act.time }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other Tabs (placeholders) -->
+          <div *ngIf="activeTab !== 'passengers'" class="tab-content">
+            <div class="coming-soon">
+              <i class="bi bi-cone-striped" style="font-size: 3rem; color: #f59e0b;"></i>
+              <p>Section en cours de développement</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CREATE/EDIT MODAL ===== -->
+        <div *ngIf="showModal" class="modal-overlay" (click)="closeModalOnOverlay($event)">
+          <div class="modal-content modal-large">
+            <div class="modal-header">
+              <div>
+                <h3>{{ isEditMode ? 'Modifier le voyage' : 'Nouveau voyage organisé' }}</h3>
+                <p>Configurez les détails de votre prochaine expédition</p>
+              </div>
+              <button class="modal-close" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="modal-body">
+              <form [formGroup]="voyageForm" (ngSubmit)="onSubmit()">
+
+                <!-- TITRE -->
+                <div class="form-group">
+                  <label>TITRE DU VOYAGE</label>
+                  <input type="text" formControlName="title" class="form-control" placeholder="Ex: Découverte des Oasis de Chebika">
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="form-group">
+                  <label>PROGRAMME DÉTAILLÉ</label>
+                  <textarea formControlName="description" rows="4" class="form-control" placeholder="Décrivez le déroulement du séjour jour par jour..."></textarea>
+                </div>
+
+                <!-- VILLE DE DÉPART -->
+                <div class="form-group">
+                  <label>VILLE DE DÉPART</label>
+                  <div class="input-icon">
+                    <i class="bi bi-geo-alt"></i>
+                    <input type="text" formControlName="departureCity" class="form-control" placeholder="Ex: Tunis">
+                  </div>
+                </div>
+
+                <!-- DESTINATION -->
+                <div class="form-group">
+                  <label>DESTINATION</label>
+                  <div class="input-icon">
+                    <i class="bi bi-geo-alt"></i>
+                    <input type="text" formControlName="arrivalCity" class="form-control" placeholder="Ville, Pays">
+                  </div>
+                </div>
+
+                <!-- DATE DE DÉPART -->
+                <div class="form-group">
+                  <label>DATE DE DÉPART</label>
+                  <div class="input-icon">
+                    <i class="bi bi-calendar"></i>
+                    <input
+                      type="date"
+                      formControlName="departureDate"
+                      class="form-control"
+                      [class.is-invalid]="voyageForm.get('departureDate')?.invalid && voyageForm.get('departureDate')?.touched"
+                      [min]="minDate">
+                  </div>
+                  <small *ngIf="voyageForm.get('departureDate')?.hasError('pastDate') && voyageForm.get('departureDate')?.touched" class="text-danger">
+                    La date ne peut pas être dans le passé
+                  </small>
+                </div>
+
+                <!-- DATE DE RETOUR -->
+                <div class="form-group">
+                  <label>DATE DE RETOUR (OPTIONNEL)</label>
+                  <div class="input-icon">
+                    <i class="bi bi-calendar"></i>
+                    <input
+                      type="date"
+                      formControlName="returnDate"
+                      class="form-control"
+                      [class.is-invalid]="voyageForm.hasError('returnBeforeDeparture') && voyageForm.get('returnDate')?.touched"
+                      [min]="voyageForm.get('departureDate')?.value || minDate">
+                  </div>
+                  <small *ngIf="voyageForm.hasError('returnBeforeDeparture') && voyageForm.get('returnDate')?.touched" class="text-danger">
+                    Doit être après la date de départ
+                  </small>
+                </div>
+
+                <!-- LIGNE 3 CHAMPS : DURÉE + SIÈGES + PRIX -->
+                <div class="form-row three-col">
+                  <div class="form-group">
+                    <label>DURÉE (JOURS) — Auto</label>
+                    <input
+                      type="number"
+                      formControlName="duration"
+                      class="form-control"
+                      min="1"
+                      placeholder="0"
+                      readonly
+                      style="background-color: #f1f5f9; color: #475569; cursor: not-allowed; border: 1px dashed #cbd5e1;">
+                  </div>
+                  <div class="form-group">
+                    <label>SIÈGES MAX</label>
+                    <input type="number" formControlName="totalSeats" class="form-control" min="1" placeholder="50">
+                  </div>
+                  <div class="form-group">
+                    <label>PRIX (DT)</label>
+                    <input type="number" formControlName="pricePerSeat" class="form-control" step="0.001" placeholder="0.000">
+                  </div>
+                </div>
+
+                <!-- IMAGE + SERVICES -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>IMAGE DE COUVERTURE</label>
+                    <div class="upload-zone" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onFileDrop($event)">
+                      <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+                      <i class="bi bi-cloud-upload" style="font-size: 2rem; color: #94a3b8;"></i>
+                      <p>Cliquez pour téléverser ou glissez-déposez</p>
+                      <span>PNG, JPG jusqu'à 10MB</span>
+                      <div *ngIf="imagePreview" class="image-preview-modal">
+                        <img [src]="imagePreview" alt="Preview">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>SERVICES INCLUS</label>
+                    <div class="services-list">
+                      <label class="service-item">
+                        <input type="checkbox" [(ngModel)]="services.transport" [ngModelOptions]="{standalone: true}">
+                        <span class="checkmark"><i class="bi bi-check"></i></span>
+                        <span>Transport</span>
+                      </label>
+                      <label class="service-item">
+                        <input type="checkbox" [(ngModel)]="services.hebergement" [ngModelOptions]="{standalone: true}">
+                        <span class="checkmark"><i class="bi bi-check"></i></span>
+                        <span>Hébergement</span>
+                      </label>
+                      <label class="service-item">
+                        <input type="checkbox" [(ngModel)]="services.petitDejeuner" [ngModelOptions]="{standalone: true}">
+                        <span class="checkmark"><i class="bi bi-check"></i></span>
+                        <span>Petit-déjeuner</span>
+                      </label>
+                      <label class="service-item">
+                        <input type="checkbox" [(ngModel)]="services.guide" [ngModelOptions]="{standalone: true}">
+                        <span class="checkmark"><i class="bi bi-check"></i></span>
+                        <span>Guide local</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- BOUTONS -->
+                <div class="modal-footer">
+                  <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
+                  <button type="submit" class="btn-save" [disabled]="submitting || uploading">
+                    <span *ngIf="submitting || uploading" class="spinner-border spinner-border-sm me-1"></span>
+                    Publier le voyage
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

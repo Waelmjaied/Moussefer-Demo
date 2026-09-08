@@ -1,0 +1,108 @@
+<footer class="modern-footer">
+  <!-- Newsletter -->
+  <div class="footer-newsletter">
+    <div class="footer-container">
+      <div class="newsletter-content">
+        <div class="newsletter-text">
+          <h4>Recevez les meilleures offres et nouveaux trajets par email</h4>
+          <p>Inscrivez-vous à notre newsletter pour ne rien manquer des actualités de Moussefer.</p>
+        </div>
+        <form class="newsletter-form" (ngSubmit)="onNewsletterSubmit($event)">
+          <input type="email" placeholder="Votre email" required>
+          <button type="submit">S'abonner</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Links + Logo -->
+  <div class="footer-container footer-links-wrapper">
+    <!-- Logo / brand column (left side) -->
+    <div class="footer-col footer-brand-col">
+      <div class="footer-logo">
+        <img src="assets/logo-removebg-preview.png" alt="Moussefer" class="logo-img" height="238" width="301">
+      </div>
+      <p class="brand-description">
+        Votre plateforme de réservation de trajets et voyages organisés en Tunisie.
+        Simple, rapide et sécurisée.
+      </p>
+    </div>
+
+    <!-- Passagers -->
+    <div class="footer-col">
+      <h4>PASSAGERS</h4>
+      <ul>
+        <li><a routerLink="/passenger/search">Rechercher un trajet</a></li>
+        <li><a routerLink="/voyages">Voyages organisés</a></li>
+        <li><a routerLink="/passenger/collective-demand">Demandes collectives</a></li>
+        <li><a routerLink="/passenger/profile">Mon compte</a></li>
+        <li><a routerLink="/passenger/my-reservations">Mes réservations</a></li>
+        <li><a routerLink="/loyalty">Programme fidélité</a></li>
+        <li><a routerLink="/promo-codes">Codes promotionnels</a></li>
+      </ul>
+    </div>
+
+    <!-- Chauffeurs -->
+    <div class="footer-col">
+      <h4>CHAUFFEURS</h4>
+      <ul>
+        <li><a routerLink="/driver/publish">Publier un départ</a></li>
+        <li><a routerLink="/driver">Tableau de bord</a></li>
+        <li><a routerLink="/driver/trips">Gérer mes trajets</a></li>
+        <li><a routerLink="/auth/register/driver">S’inscrire chauffeur</a></li>
+        <li><a routerLink="/driver/terms">Conditions chauffeur</a></li>
+        <li><a routerLink="/support/driver">Support chauffeur</a></li>
+      </ul>
+    </div>
+
+    <!-- Organisateurs -->
+    <div class="footer-col">
+      <h4>ORGANISATEURS</h4>
+      <ul>
+        <li><a routerLink="/organizer">Espace organisateur</a></li>
+        <li><a routerLink="/organizer/publish">Publier un voyage</a></li>
+        <li><a routerLink="/organizer/reservations">Gérer les réservations</a></li>
+        <li><a routerLink="/organizer/promo">Codes promo</a></li>
+        <li><a routerLink="/auth/register/organizer">S’inscrire organisateur</a></li>
+      </ul>
+    </div>
+
+    <!-- Moussefer -->
+    <div class="footer-col">
+      <h4>MOUSSEFER</h4>
+      <ul>
+        <li><a routerLink="/about">À propos de nous</a></li>
+        <li><a routerLink="/how-it-works">Comment ça marche</a></li>
+        <li><a routerLink="/safety">Sécurité & confiance</a></li>
+        <li><a routerLink="/press">Presse & médias</a></li>
+        <li><a routerLink="/careers">Carrières</a></li>
+        <li><a routerLink="/blog">Blog</a></li>
+        <li><a routerLink="/contact">Contact & support</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="footer-bottom">
+    <div class="footer-container">
+      <div class="bottom-left">
+        <p>&copy; {{ currentYear }} Moussefer. Tous droits réservés. Made By MOBINNOV Group</p>
+      </div>
+      <div class="bottom-right">
+        <div class="social-links">
+          <a href="https://www.facebook.com/moussefer" target="_blank" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="https://twitter.com/moussefer" target="_blank" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+          <a href="https://www.instagram.com/moussefer" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="https://www.linkedin.com/company/moussefer" target="_blank" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+        </div>
+        <div class="legal-links">
+          <a routerLink="/privacy-policy">Politique de confidentialité</a>
+          <a routerLink="/cookies">Cookies</a>
+          <a routerLink="/sitemap">Plan du site</a>
+          <a routerLink="/legal">Mentions légales</a>
+          <a href="https://tunise.fr/" target="_blank">Tunise (FR)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

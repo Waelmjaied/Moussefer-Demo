@@ -1,0 +1,82 @@
+<div class="organizer-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-organizer-sidebar></app-organizer-sidebar>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Clients</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ agencyName }}</p>
+          </div>
+          <a routerLink="/organizer/my-voyages" class="btn-publish">+ Publier un voyage</a>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <ng-container *ngIf="!loading">
+          <!-- Search -->
+          <div class="search-bar">
+            <i class="bi bi-search"></i>
+            <input type="text" [(ngModel)]="search" placeholder="Rechercher un client..." (input)="onSearch()">
+          </div>
+
+          <!-- Empty -->
+          <div *ngIf="filtered.length === 0" class="alert alert-info">
+            Aucun client trouvé.
+          </div>
+
+          <!-- Table -->
+          <div class="table-card" *ngIf="filtered.length > 0">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Client</th>
+                <th>Téléphone</th>
+                <th>Voyages</th>
+                <th>Dépenses</th>
+                <th>Dernière réservation</th>
+                <th>Source</th>
+                <th>Statut</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let c of filtered">
+                <td class="cell-id">#R{{ c.displayId }}</td>
+                <td class="cell-client">
+                  <div class="client-name">{{ c.name }}</div>
+                </td>
+                <td class="cell-phone">{{ c.phone }}</td>
+                <td class="cell-voyages">{{ c.voyagesCount }}</td>
+                <td class="cell-depenses">{{ c.totalSpent | number:'1.0-0' }} DT</td>
+                <td class="cell-date">{{ c.lastBooking | date:'d MMM' }}</td>
+                <td class="cell-source">
+                    <span class="badge-source" [class]="'source-' + c.source">
+                      {{ c.sourceLabel }}
+                    </span>
+                </td>
+                <td class="cell-statut">
+                    <span class="badge-client" [class]="'client-' + c.clientStatus">
+                      {{ c.clientStatusLabel }}
+                    </span>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+</div>

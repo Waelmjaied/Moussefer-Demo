@@ -1,0 +1,247 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+
+      <div class="col-md-9 col-lg-10 main-col">
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <button class="btn-back" (click)="goBack()" aria-label="Retour">
+              <i class="bi bi-arrow-left"></i> Retour
+            </button>
+            <h1 class="page-title">Détail réservation</h1>
+            <p class="page-subtitle">
+              <code>#{{ reservationId }}</code>
+            </p>
+          </div>
+        </div>
+
+        <!-- LOADING -->
+        <div *ngIf="loading" class="state-card">
+          <div class="spinner-border" role="status"></div>
+          <p>Chargement…</p>
+        </div>
+
+        <!-- ERROR -->
+        <div *ngIf="!loading && error" class="state-card state-error">
+          <i class="bi bi-exclamation-triangle"></i>
+          <p>{{ error }}</p>
+          <button class="btn-primary" (click)="loadReservation()">Réessayer</button>
+        </div>
+
+        <!-- CONTENT -->
+        <div *ngIf="!loading && !error && reservation" class="detail-grid">
+
+          <!-- Status badge -->
+          <div class="status-row">
+            <span class="badge" [ngClass]="getStatusClass(reservation.status)">
+              {{ getStatusLabel(reservation.status) }}
+            </span>
+            <span class="text-muted">
+              Créée le {{ reservation.createdAt | date: 'dd MMM yyyy à HH:mm' }}
+            </span>
+          </div>
+
+          <!-- Réservation -->
+          <section class="card">
+            <h3>Réservation</h3>
+            <dl>
+              <dt>ID</dt>
+              <dd><code>{{ reservation.id }}</code></dd>
+
+              <dt>Trajet</dt>
+              <dd>
+                <a [routerLink]="['/admin/trajets', reservation.trajetId]">
+                  <code>{{ reservation.trajetId }}</code>
+                </a>
+                <button class="btn-link" (click)="goToTrajet()">Voir le trajet →</button>
+              </dd>
+
+              <dt>Sièges réservés</dt>
+              <dd>{{ reservation.seatsReserved }}</dd>
+
+              <dt>Montant total</dt>
+              <dd class="amount">{{ reservation.totalPrice | number: '1.2-2' }} TND</dd>
+
+              <dt>Itinéraire</dt>
+              <dd>
+                {{ reservation.departureCity || '—' }}
+                <i class="bi bi-arrow-right"></i>
+                {{ reservation.arrivalCity || '—' }}
+              </dd>
+
+              <dt *ngIf="reservation.refusalReason">Motif refus</dt>
+              <dd *ngIf="reservation.refusalReason" class="text-danger">
+                {{ reservation.refusalReason }}
+              </dd>
+            </dl>
+          </section>
+
+          <!-- Passager -->
+          <section class="card">
+            <h3>Passager</h3>
+            <dl>
+              <dt>Nom</dt>
+              <dd>{{ reservation.passengerName || '—' }}</dd>
+
+              <dt>ID</dt>
+              <dd><code>{{ reservation.passengerId }}</code></dd>
+
+              <dt *ngIf="reservation.passengerPhone">Téléphone</dt>
+              <dd *ngIf="reservation.passengerPhone">{{ reservation.passengerPhone }}</dd>
+            </dl>
+            <button class="btn-link" (click)="goToPassenger()">Voir l'utilisateur →</button>
+          </section>
+
+          <!-- Chauffeur -->
+          <section class="card">
+            <h3>Chauffeur</h3>
+            <dl>
+              <dt>Nom</dt>
+              <dd>{{ reservation.driverName || '—' }}</dd>
+
+              <dt>ID</dt>
+              <dd><code>{{ reservation.driverId }}</code></dd>
+            </dl>
+          </section>
+
+          <!-- Timeline -->
+          <section class="card">
+            <h3>Chronologie</h3>
+            <ul class="timeline">
+              <li *ngIf="reservation.createdAt">
+                <strong>Création</strong>
+                <span>{{ reservation.createdAt | date: 'dd MMM yyyy HH:mm' }}</span>
+              </li>
+              <li *ngIf="reservation.driverResponseDeadline">
+                <strong>Deadline réponse chauffeur</strong>
+                <span>{{ reservation.driverResponseDeadline | date: 'dd MMM yyyy HH:mm' }}</span>
+              </li>
+              <li *ngIf="reservation.confirmedAt">
+                <strong>Confirmée</strong>
+                <span>{{ reservation.confirmedAt | date: 'dd MMM yyyy HH:mm' }}</span>
+              </li>
+              <li *ngIf="reservation.paidAt">
+                <strong>Payée</strong>
+                <span>{{ reservation.paidAt | date: 'dd MMM yyyy HH:mm' }}</span>
+              </li>
+            </ul>
+          </section>
+
+          <!-- Actions -->
+          <section class="card card-actions">
+            <h3>Actions administrateur</h3>
+
+            <button
+              *ngIf="canRefund && reservation.status === 'CONFIRMED'"
+              class="btn-warning"
+              (click)="openRefundModal()"
+            >
+              <i class="bi bi-arrow-counterclockwise"></i> Rembourser
+            </button>
+
+            <button
+              *ngIf="canChangeStatus && reservation.status !== 'CONFIRMED'"
+              class="btn-success"
+              (click)="openStatusModal('CONFIRMED')"
+            >
+              <i class="bi bi-check-circle"></i> Confirmer
+            </button>
+
+            <button
+              *ngIf="canChangeStatus && reservation.status !== 'CANCELLED' && reservation.status !== 'REFUSED'"
+              class="btn-danger"
+              (click)="openStatusModal('CANCELLED')"
+            >
+              <i class="bi bi-x-circle"></i> Annuler
+            </button>
+
+            <button
+              *ngIf="canChangeStatus && reservation.status !== 'ESCALATED'"
+              class="btn-outline"
+              (click)="openStatusModal('ESCALATED')"
+            >
+              <i class="bi bi-exclamation-circle"></i> Escalader
+            </button>
+          </section>
+
+        </div>
+
+        <!-- ─── REFUND MODAL ─── -->
+        <div *ngIf="showRefundModal" class="modal-overlay" (click)="closeRefundModal($event)">
+          <div class="modal-dialog">
+            <h3>Confirmer le remboursement</h3>
+            <p class="text-muted">Réservation <code>#{{ reservationId }}</code></p>
+
+            <label>
+              Montant (TND)
+              <input type="number" [(ngModel)]="refundAmount" min="0" step="0.01" name="refundAmount" />
+            </label>
+
+            <label>
+              Motif (obligatoire)
+              <textarea
+                [(ngModel)]="refundReason"
+                name="refundReason"
+                rows="3"
+                placeholder="Ex: Annulation client, problème de service…"
+              ></textarea>
+            </label>
+
+            <div class="modal-actions">
+              <button type="button" (click)="closeRefundModal()" [disabled]="processingRefund">
+                Annuler
+              </button>
+              <button
+                type="button"
+                class="btn-warning"
+                (click)="confirmRefund()"
+                [disabled]="processingRefund || !refundReason.trim()"
+              >
+                {{ processingRefund ? 'Traitement…' : 'Confirmer le remboursement' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── STATUS CHANGE MODAL ─── -->
+        <div *ngIf="showStatusModal" class="modal-overlay" (click)="closeStatusModal($event)">
+          <div class="modal-dialog">
+            <h3>Changer le statut</h3>
+            <p>
+              Réservation <code>#{{ reservationId }}</code> → <strong>{{ getStatusLabel(newStatus) }}</strong>
+            </p>
+
+            <label>
+              Note (optionnelle)
+              <textarea
+                [(ngModel)]="statusReason"
+                name="statusReason"
+                rows="3"
+                placeholder="Ajouter une note pour l'audit-log…"
+              ></textarea>
+            </label>
+
+            <div class="modal-actions">
+              <button type="button" (click)="closeStatusModal()" [disabled]="processingStatus">
+                Annuler
+              </button>
+              <button
+                type="button"
+                class="btn-primary"
+                (click)="confirmStatusChange()"
+                [disabled]="processingStatus"
+              >
+                {{ processingStatus ? 'Traitement…' : 'Confirmer' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

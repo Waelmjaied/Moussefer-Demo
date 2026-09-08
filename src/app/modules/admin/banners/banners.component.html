@@ -1,0 +1,223 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Bannières publicitaires</h1>
+            <p class="page-subtitle">{{ currentDate }} - Gestion des campagnes</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher utilisateur" [(ngModel)]="searchQuery" (input)="applyFilters()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-bar">
+          <button
+            *ngFor="let tab of tabs"
+            class="tab"
+            [class.active]="activeTab === tab.value"
+            (click)="setTab(tab.value)">
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <!-- Banners Grid -->
+        <div class="banners-grid" *ngIf="!loading">
+          <div class="banner-card" *ngFor="let b of filteredBanners">
+
+            <!-- Preview avec bouton supprimer -->
+            <div class="banner-preview">
+              <img *ngIf="b.imageUrl" [src]="b.imageUrl" [alt]="b.title" class="banner-preview-img" />
+              <div *ngIf="!b.imageUrl" class="banner-preview-fallback" [style.background]="'#1e3a8a'">
+                <span class="banner-preview-text">{{ b.previewText }}</span>
+              </div>
+              <button
+                class="btn-delete-card"
+                (click)="deleteBanner(b.id); $event.stopPropagation()"
+                title="Supprimer">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+
+            <!-- Content -->
+            <div class="banner-content">
+              <div class="banner-title">{{ b.title }}</div>
+              <div class="banner-subtitle">{{ b.subtitle }}</div>
+
+              <div class="banner-badges">
+                <span class="badge-banner" [class]="'badge-status-' + b.statusClass">{{ b.statusLabel }}</span>
+                <span class="badge-banner" [class]="'badge-page-' + b.pageClass">{{ b.pageLabel }}</span>
+              </div>
+
+              <div class="banner-stats">
+                <span><i class="bi bi-eye"></i> {{ b.impressions | number }} affich.</span>
+                <span class="dot">·</span>
+                <span><i class="bi bi-hand-index-thumb"></i> {{ b.clicks | number }} clics</span>
+                <span class="dot">·</span>
+                <span><i class="bi bi-graph-up-arrow"></i> {{ b.ctr }}% CTR</span>
+              </div>
+
+              <div class="banner-actions">
+                <button class="btn-action-outline" (click)="openEditForm(b)">Modifier</button>
+                <button
+                  *ngIf="b.status === 'active'"
+                  class="btn-action-pause"
+                  (click)="pauseBanner(b)">
+                  Pause
+                </button>
+                <button
+                  *ngIf="b.status === 'expired'"
+                  class="btn-action-report"
+                  (click)="viewReport(b)">
+                  Rapport
+                </button>
+                <button
+                  *ngIf="b.status === 'expired'"
+                  class="btn-action-renew"
+                  (click)="renewBanner(b)">
+                  Renouveler
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Create Card -->
+          <div class="banner-card banner-create" (click)="openCreateForm()">
+            <div class="create-icon">📢</div>
+            <div class="create-label">Nouvelle bannière</div>
+            <button class="btn-create-small">
+              <i class="bi bi-plus-lg"></i> Créer
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="!loading && filteredBanners.length === 0" class="empty-state">
+          <p>Aucune bannière trouvée.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Créer / Modifier -->
+<div class="modal-overlay" *ngIf="showForm" (click)="closeModal($event)">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">{{ editMode ? 'Modifier la bannière' : 'Nouvelle bannière' }}</h3>
+        <button class="btn-close-modal" (click)="cancelForm()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="bannerForm">
+          <div class="form-row">
+            <div class="form-group half">
+              <label>Titre de la campagne <span class="required">*</span></label>
+              <input type="text" formControlName="title" placeholder="Ex: Campagne été 2025">
+            </div>
+            <div class="form-group half">
+              <label>Texte affiché <span class="required">*</span></label>
+              <input type="text" formControlName="previewText" placeholder="Ex: Moussefer Pro - 30% Off">
+            </div>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="form-group">
+            <label>Image de la bannière <span class="required">*</span></label>
+            <div class="image-upload-zone" *ngIf="!imagePreview">
+              <input
+                type="file"
+                accept="image/*"
+                id="bannerImage"
+                (change)="onFileSelected($event)"
+                hidden
+              />
+              <label for="bannerImage" class="upload-label">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span>Cliquez pour télécharger une image</span>
+                <small>PNG, JPG, GIF jusqu'à 5 Mo</small>
+              </label>
+            </div>
+            <div class="image-preview-wrap" *ngIf="imagePreview">
+              <img [src]="imagePreview" alt="Preview" class="image-preview" />
+              <button type="button" class="btn-remove-image" (click)="removeImage()" title="Supprimer l'image">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group half">
+              <label>Page d'affichage</label>
+              <select formControlName="pageLabel">
+                <option value="Page d'accueil">Page d'accueil</option>
+                <option value="Confirmation résa">Confirmation résa</option>
+                <option value="Paiement">Paiement</option>
+                <option value="Profil">Profil</option>
+              </select>
+            </div>
+            <div class="form-group half">
+              <label>Audience cible</label>
+              <select formControlName="targetAudience">
+                <option value="ALL">Tous</option>
+                <option value="PASSENGER">Passagers</option>
+                <option value="DRIVER">Conducteurs</option>
+                <option value="ORGANIZER">Organisateurs</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>URL de redirection <span class="required">*</span></label>
+            <input type="url" formControlName="redirectUrl" placeholder="https://...">
+          </div>
+          <div class="form-row">
+            <div class="form-group half">
+              <label>Date de début</label>
+              <input type="date" formControlName="startsAt">
+            </div>
+            <div class="form-group half">
+              <label>Date de fin</label>
+              <input type="date" formControlName="endsAt">
+            </div>
+          </div>
+          <label class="form-check">
+            <input type="checkbox" formControlName="active">
+            <span>Bannière active</span>
+          </label>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="cancelForm()">Annuler</button>
+        <button class="btn-submit" (click)="onSubmit()" [disabled]="bannerForm.invalid || submitting || uploadingImage">
+          <span *ngIf="!submitting && !uploadingImage">{{ editMode ? 'Enregistrer' : 'Créer' }}</span>
+          <span *ngIf="uploadingImage"><i class="bi bi-arrow-repeat spin"></i> Upload image...</span>
+          <span *ngIf="submitting && !uploadingImage"><i class="bi bi-arrow-repeat spin"></i> ...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

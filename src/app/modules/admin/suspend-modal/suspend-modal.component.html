@@ -1,0 +1,29 @@
+<!-- Sidebar -->
+<app-admin-sidebar></app-admin-sidebar>
+<div class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Suspendre l'utilisateur</h3>
+      <button class="btn-close" (click)="close.emit()">×</button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="suspendForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label>Raison</label>
+          <textarea formControlName="reason" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+          <label>Durée (jours)</label>
+          <input type="number" formControlName="durationDays" class="form-control" (input)="updateEndDate()" min="1">
+          <small *ngIf="suspensionEndDate" class="text-muted">
+            Suspendu jusqu'au {{ suspensionEndDate | date:'dd/MM/yyyy' }}
+          </small>
+        </div>
+        <button type="submit" class="btn btn-danger" [disabled]="submitting">
+          <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+          Suspendre
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

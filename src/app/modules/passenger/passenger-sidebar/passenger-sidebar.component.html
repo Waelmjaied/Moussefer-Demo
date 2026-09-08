@@ -1,0 +1,103 @@
+<!-- OVERLAY (ferme le menu au clic) -->
+<div class="sidebar-overlay" [class.open]="sidebarOpen" (click)="sidebarOpen = false"></div>
+
+<!-- HEADER MOBILE -->
+<header class="mobile-header">
+  <button class="btn-hamburger" (click)="sidebarOpen = !sidebarOpen">
+    <i class="bi" [class.bi-list]="!sidebarOpen" [class.bi-x-lg]="sidebarOpen"></i>
+  </button>
+  <img src="assets/LOGO.png" alt="Moussefer" class="logo-img">
+  <div class="header-actions">
+    <div class="avatar-circle mobile-avatar">{{ initials }}</div>
+  </div>
+</header>
+
+<!-- LAYOUT PRINCIPAL -->
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="profile-panel" [class.open]="sidebarOpen">
+
+    <!-- Avatar + name -->
+    <div class="avatar-section">
+      <div class="avatar-wrap">
+        <div class="avatar-circle">{{ initials }}</div>
+        <span class="avatar-online"></span>
+      </div>
+      <div class="profile-name">{{ fullName }}</div>
+      <div class="profile-email">{{ email }}</div>
+      <button class="btn-edit-profile" routerLink="/passenger/profile" (click)="sidebarOpen = false">
+        <i class="bi bi-pencil-square"></i> Modifier le profil
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-cell">
+        <div class="stat-num">{{ totalTrips }}</div>
+        <div class="stat-lbl">Trajets</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">{{ avgRating }}</div>
+        <div class="stat-lbl">Note</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">{{ totalSpent | number:'1.2-2' }}</div>
+        <div class="stat-lbl">Total dépensés</div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-section">
+      <div class="nav-section-label">Navigation</div>
+
+      <a class="nav-item" routerLink="/passenger/profile" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-person"></i> Mon profil</div>
+      </a>
+      <a class="nav-item" routerLink="/passenger/search" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-search"></i> trajet/voyage</div>
+      </a>
+      <a class="nav-item" routerLink="/passenger/my-reservations" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-calendar-check"></i> Mes réservations</div>
+        <span class="nav-badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
+      </a>
+      <a class="nav-item" routerLink="/passenger/messages" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-chat-dots"></i> Messagerie</div>
+        <span class="nav-badge" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
+      </a>
+      <a class="nav-item" routerLink="/passenger/collective-demand" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-people"></i> Demandes collectives</div>
+        <span class="nav-badge nav-badge-amber" *ngIf="activeDemandes > 0">{{ activeDemandes }}</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Compte</div>
+      <a class="nav-item" routerLink="/passenger/loyalty" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-stars"></i> Points fidélité</div>
+        <span class="nav-badge nav-badge-emerald" *ngIf="loyaltyPoints > 0">{{ loyaltyPoints | number }}</span>
+      </a>
+      <a class="nav-item" routerLink="/passenger/payments" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-credit-card"></i> Paiements</div>
+      </a>
+      <a class="nav-item" routerLink="/passenger/disputes" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-shield-exclamation"></i> Reclamation</div>
+      </a>
+      <a class="nav-item" routerLink="/passenger/settings" routerLinkActive="active" (click)="sidebarOpen = false">
+        <div class="nav-item-left"><i class="bi bi-gear"></i> Paramètres</div>
+      </a>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <!-- Logout -->
+    <button class="logout-item" (click)="logout(); sidebarOpen = false">
+      <i class="bi bi-box-arrow-right"></i> Se déconnecter
+    </button>
+  </aside>
+
+  <!-- CONTENT PANEL (sera rempli par le composant parent) -->
+  <main class="content-panel">
+    <ng-content></ng-content>
+  </main>
+</div>

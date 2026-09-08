@@ -1,0 +1,40 @@
+<div class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Paiement sécurisé</h3>
+      <button class="btn-close" (click)="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Montant à payer : <strong>{{ amount }} TND</strong></p>
+      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label class="form-label">Devise</label>
+          <select formControlName="currency" class="form-select">
+            <option value="TND">TND</option>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Numéro de carte (simulation)</label>
+          <input type="text" formControlName="cardNumber" class="form-control">
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <label class="form-label">Expiration</label>
+            <input type="text" formControlName="expiry" class="form-control">
+          </div>
+          <div class="col-6">
+            <label class="form-label">CVV</label>
+            <input type="text" formControlName="cvv" class="form-control">
+          </div>
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger mt-2">{{ errorMessage }}</div>
+        <button type="submit" class="btn btn-primary w-100 mt-3" [disabled]="processing">
+          <span *ngIf="processing" class="spinner-border spinner-border-sm me-2"></span>
+          Payer {{ amount }} TND
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

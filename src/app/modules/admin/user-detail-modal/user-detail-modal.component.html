@@ -1,0 +1,61 @@
+<!-- Sidebar -->
+<app-admin-sidebar></app-admin-sidebar>
+<div class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Détails de l'utilisateur</h3>
+      <button class="btn-close" (click)="close.emit()">×</button>
+    </div>
+    <div class="modal-body" *ngIf="user">
+      <p><strong>ID:</strong> {{ user.userId }}</p>
+      <p><strong>Nom:</strong> {{ user.name }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Téléphone:</strong> {{ user.phoneNumber }}</p>
+      <p><strong>Rôle:</strong> {{ user.role }}</p>
+      <p><strong>Actif:</strong> {{ user.active ? 'Oui' : 'Non' }}</p>
+      <p *ngIf="user.role === 'DRIVER' || user.role === 'ORGANIZER'"><strong>Vérifié:</strong> {{ user.verified ? 'Oui' : 'Non' }}</p>
+      <p><strong>Rôle admin:</strong> {{ user.adminRole || 'Aucun' }}</p>
+      <div *ngIf="user.suspensionEndDate">
+        <p><strong>Suspendu jusqu'au:</strong> {{ user.suspensionEndDate | date }}</p>
+      </div>
+
+      <!-- Only SUPER_ADMIN can assign admin roles -->
+      <div class="mt-3" *ngIf="permissionService.isSuperAdmin() && user.role === 'ADMIN'">
+        <label>Attribuer un rôle admin</label>
+        <select class="form-select" [(ngModel)]="assignAdminRoleValue">
+          <option value="">Aucun</option>
+          <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+          <option value="MODERATOR">MODERATOR</option>
+          <option value="REPORTER">REPORTER</option>
+          <option value="OPERATIONAL_ADMIN">OPERATIONAL_ADMIN</option>
+          <option value="AUDITEUR">AUDITEUR</option>
+        </select>
+        <button class="btn btn-primary mt-2" (click)="assignAdminRole()">Attribuer</button>
+      </div>
+
+      <!-- Loyalty points -->
+      <div class="mt-3 p-3 bg-light rounded" *ngIf="loyaltyPoints">
+        <h6 class="mb-2"><i class="bi bi-gift me-2"></i>Points de fidélité</h6>
+        <div class="d-flex gap-4">
+          <div class="text-center">
+            <div class="h4 fw-bold text-warning mb-0">{{ loyaltyPoints.balance ?? loyaltyPoints.points ?? 0 }}</div>
+            <small class="text-muted">Disponibles</small>
+          </div>
+          <div class="text-center">
+            <div class="h4 fw-bold text-success mb-0">{{ loyaltyPoints.totalEarned ?? 0 }}</div>
+            <small class="text-muted">Gagnés</small>
+          </div>
+          <div class="text-center">
+            <div class="h4 fw-bold text-danger mb-0">{{ loyaltyPoints.totalRedeemed ?? 0 }}</div>
+            <small class="text-muted">Utilisés</small>
+          </div>
+        </div>
+      </div>
+      <div class="mt-2" *ngIf="!loyaltyPoints && permissionService.isSuperAdmin()">
+        <button class="btn btn-sm btn-outline-secondary" (click)="loadLoyaltyPoints()">
+          <i class="bi bi-gift me-1"></i>Voir les points fidélité
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

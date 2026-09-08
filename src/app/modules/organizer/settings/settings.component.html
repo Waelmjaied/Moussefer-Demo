@@ -1,0 +1,114 @@
+<div class="organizer-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-organizer-sidebar></app-organizer-sidebar>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Paramètres</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ agencyName }}</p>
+          </div>
+          <a routerLink="/organizer/my-voyages" class="btn-publish">+Publier un voyage</a>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <div class="settings-grid" *ngIf="!loading">
+          <!-- Profile Card -->
+          <div class="settings-card profile-card">
+            <div class="card-header-custom">
+              <span class="card-title">Profil organisateur</span>
+              <span class="identity-badge">IDENTITÉ</span>
+            </div>
+
+            <div class="card-body-custom">
+              <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>NOM DE L'ORGANISME</label>
+                    <input type="text" formControlName="organizationName" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label>EMAIL DE CONTACT</label>
+                    <input type="email" formControlName="email" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>TÉLÉPHONE</label>
+                    <input type="tel" formControlName="phone" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label>SITE WEB</label>
+                    <input type="url" formControlName="website" class="form-control">
+                  </div>
+                </div>
+
+                <div class="form-group full">
+                  <label>DESCRIPTION</label>
+                  <textarea formControlName="description" rows="3" class="form-control"></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-reset" (click)="resetProfile()">Réinitialiser</button>
+                  <button type="submit" class="btn-save" [disabled]="profileForm.invalid || savingProfile">
+                    <i class="bi bi-save" *ngIf="!savingProfile"></i>
+                    <span *ngIf="savingProfile" class="spinner-border spinner-border-sm me-1"></span>
+                    Sauvegarder
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Notifications Card -->
+          <div class="settings-card notifications-card">
+            <div class="card-header-custom">
+              <span class="card-title">Notifications & Préférences</span>
+            </div>
+
+            <div class="card-body-custom">
+              <div class="toggle-list">
+                <div class="toggle-item" *ngFor="let pref of preferences">
+                  <div class="toggle-icon" [style.background]="pref.iconBg" [style.color]="pref.iconColor">
+                    <i class="bi" [class]="pref.icon"></i>
+                  </div>
+                  <div class="toggle-info">
+                    <div class="toggle-title">{{ pref.label }}</div>
+                    <div class="toggle-desc">{{ pref.description }}</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" [(ngModel)]="pref.enabled" (change)="onPreferenceChange(pref)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="notification-actions">
+                <button class="btn-save-full" (click)="savePreferences()" [disabled]="savingPrefs">
+                  <span *ngIf="savingPrefs" class="spinner-border spinner-border-sm me-1"></span>
+                  Sauvegarder les préférences
+                </button>
+                <button class="btn-password" (click)="changePassword()">
+                  <i class="bi bi-lock me-1"></i>Changer mot de passe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

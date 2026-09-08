@@ -1,0 +1,158 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Analyse des annulations</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ alertMessage }}</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher">
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="alert-banner" *ngIf="showAlert">
+          <div class="alert-content">
+            <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
+            <span class="alert-text">
+              <strong>Alerte</strong> — {{ alertMessage }}. Taux d'annulation <strong>+{{ alertPercentage }}%</strong> aujourd'hui.
+            </span>
+          </div>
+          <div class="alert-actions">
+            <button class="btn-alert btn-alert-ghost" (click)="dismissAlert()">Ignorer</button>
+            <button class="btn-alert btn-alert-primary" (click)="viewAlertDetails()">Voir les détails</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Annulations aujourd'hui</div>
+            <div class="kpi-value" [class.red]="todayCancellations > 0">{{ todayCancellations }}</div>
+            <div class="kpi-trend up">+{{ cancellationIncrease }}% vs moy. hebdo</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Annulations conducteur</div>
+            <div class="kpi-value blue">{{ driverCancellations }}</div>
+            <div class="kpi-trend info">{{ driverPercent }}% du total</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Heure critique</div>
+            <div class="kpi-value dark">{{ peakHour }}</div>
+            <div class="kpi-trend info">Pic entre {{ peakWindow }}</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Montant impacté</div>
+            <div class="kpi-value dark">{{ impactedAmount | number:'1.0-0' }} DT</div>
+            <div class="kpi-trend info">Revenus perdus aujourd'hui</div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row charts-row">
+          <!-- Causes IA -->
+          <div class="col-lg-5">
+            <div class="chart-card">
+              <div class="chart-header">
+                <i class="bi bi-cpu chart-icon"></i>
+                <span class="chart-title">Causes détectées par l'IA</span>
+              </div>
+              <div class="chart-body">
+                <div class="cause-list" *ngIf="causes.length > 0">
+                  <div class="cause-item" *ngFor="let cause of causes">
+                    <div class="cause-info">
+                      <span class="cause-name">{{ cause.name }}</span>
+                      <span class="cause-percent">{{ cause.percent }}%</span>
+                    </div>
+                    <div class="cause-bar-track">
+                      <div class="cause-bar" [style.width.%]="cause.percent" [style.background]="cause.color"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="ia-recommendation" *ngIf="recommendation">
+                  <div class="rec-title">Recommandation IA</div>
+                  <p class="rec-text">{{ recommendation }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Distribution horaire -->
+          <div class="col-lg-7">
+            <div class="chart-card">
+              <div class="chart-header">
+                <span class="chart-title">Distribution horaire des annulations</span>
+                <div class="chart-legend">
+                  <span class="legend-item"><span class="legend-dot today"></span> Aujourd'hui</span>
+                  <span class="legend-item"><span class="legend-dot average"></span> Moyenne</span>
+                </div>
+              </div>
+              <div class="chart-body">
+                <div class="hourly-chart" *ngIf="hourlyDistribution.length > 0">
+                  <div class="hour-bar-group" *ngFor="let h of hourlyDistribution">
+                    <div class="hour-bars">
+                      <div class="hour-bar today-bar" [style.height.%]="h.todayPercent"></div>
+                      <div class="hour-bar avg-bar" [style.height.%]="h.avgPercent"></div>
+                    </div>
+                    <span class="hour-label">{{ h.hour }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tableau des annulations -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Passager</th>
+                <th>Conducteur</th>
+                <th>Heure prévue</th>
+                <th>Annulé par</th>
+                <th>Cause déclarée</th>
+                <th>Remb.</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let row of cancellationRows">
+                <td><span class="row-id">{{ row.id }}</span></td>
+                <td>{{ row.passenger }}</td>
+                <td>{{ row.driver }}</td>
+                <td>{{ row.scheduledTime }}</td>
+                <td>
+                  <span class="badge" [class]="'badge-' + row.cancelledBy.toLowerCase()">{{ row.cancelledBy }}</span>
+                </td>
+                <td>
+                  <span class="cause-text" [class.red]="row.cause === 'Non remb.'">{{ row.cause }}</span>
+                </td>
+                <td>
+                    <span class="badge-refund" [class]="row.refunded ? 'badge-refund-yes' : 'badge-refund-no'">
+                      {{ row.refunded ? 'Remb.' : 'Non remb.' }}
+                    </span>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

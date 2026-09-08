@@ -1,0 +1,156 @@
+<!-- ═══ Mobile Header Bar (visible only on mobile) ═══ -->
+<div class="mobile-header">
+  <img src="assets/logo-removebg-preview.png" alt="Logo" class="mobile-logo">
+  <button class="hamburger-btn" (click)="toggleSidebar()" aria-label="Menu">
+    <i class="bi" [class.bi-list]="!isOpen" [class.bi-x-lg]="isOpen"></i>
+  </button>
+</div>
+
+<!-- ═══ Overlay Backdrop ═══ -->
+<div class="sidebar-overlay"
+     [class.open]="isOpen"
+     (click)="closeSidebar()"></div>
+
+<!-- ═══ Sidebar ═══ -->
+<div class="sidebar" [class.open]="isOpen">
+  <div class="position-sticky pt-3">
+
+    <!-- Close button (mobile only) -->
+    <button class="sidebar-close" (click)="closeSidebar()" aria-label="Fermer">
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <img src="assets/logo-removebg-preview.png" alt="Logo" class="logo-img">
+    </div>
+
+    <div class="sidebar-group">PRINCIPAL</div>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-speedometer2"></i> Dashboard Analytics
+        </a>
+      </li>
+      <li class="nav-item" *ngIf="permissionService.isSuperAdmin()">
+        <a class="nav-link" routerLink="/admin/api-monitoring" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-broadcast"></i> Monitoring API
+        </a>
+      </li>
+      <li class="nav-item" *ngIf="permissionService.isSuperAdmin()">
+      <a class="nav-link" routerLink="/admin/litiges" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="bi bi-broadcast"></i> Litiges
+      </a>
+    </li>
+      <li class="nav-item" *ngIf="permissionService.canViewStatistics()">
+        <a class="nav-link" routerLink="/admin/statistics" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-graph-up"></i> Statistiques
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/annulations" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-gear"></i> Annulations
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-group">MODULES</div>
+    <ul class="nav flex-column">
+      <li class="nav-item" *ngIf="permissionService.isSuperAdmin()">
+        <a class="nav-link" routerLink="/admin/roles" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-shield-lock"></i> Rôles/Permissions
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/users" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-people"></i> Utilisateurs
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/trajets" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-map"></i> Trajets/Louages
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/kyc" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-shield-check"></i> Vérification KYC
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/reservations" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-calendar-check"></i> Réservations
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-group">GESTION</div>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/payments" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-credit-card"></i> Paiements/Commission
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/banners" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-images"></i> Bannières Publicitaires
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/promo-codes" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-ticket"></i> Codes Promotionnels
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/stations" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-geo-alt"></i> Stations GPS
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-group">SYSTEME</div>
+    <ul class="nav flex-column">
+      <li class="nav-item" *ngIf="permissionService.canViewActivityLog()">
+        <a class="nav-link" routerLink="/admin/activity-log" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-journal-text"></i> Journal d'activité
+        </a>
+      </li>
+      <li class="nav-item" *ngIf="permissionService.canManageFares()">
+        <a class="nav-link" routerLink="/admin/fares" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-currency-dollar"></i> Tarifs officiels
+        </a>
+      </li>
+      <li class="nav-item" *ngIf="permissionService.isSuperAdmin()">
+        <a class="nav-link" routerLink="/admin/feature-toggles" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-toggles"></i> Feature Toggles
+        </a>
+      </li>
+      <li class="nav-item" *ngIf="permissionService.isSuperAdmin() || permissionService.isModerator()">
+        <a class="nav-link" routerLink="/admin/send-notifications" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-send"></i> Envoyer notifications
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/admin/settings" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-gear"></i> Paramètres
+        </a>
+      </li>
+      <li>
+        <a class="nav-link logout-link" href="#" (click)="logout(); $event.preventDefault()">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Déconnexion</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Bottom admin info -->
+    <div class="sidebar-avatar">
+      <div class="avatar-circle">
+        <span class="avatar-initials">{{ adminRoleLabel | slice:0:2 | uppercase }}</span>
+      </div>
+      <div class="user-info">
+        <div class="admin-role">{{ adminRoleLabel }}</div>
+        <div class="admin-email">{{ adminEmail }}</div>
+      </div>
+    </div>
+  </div>
+</div>

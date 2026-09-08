@@ -1,0 +1,79 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <app-admin-sidebar></app-admin-sidebar>
+      <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
+
+        <div class="d-flex align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2"><i class="bi bi-send me-2"></i>Envoyer des notifications</h1>
+        </div>
+
+        <div class="row g-4">
+          <!-- Templates -->
+          <div class="col-md-7">
+            <div class="card">
+              <div class="card-header fw-semibold">Templates disponibles</div>
+              <div class="card-body">
+                <div *ngIf="loading" class="text-center py-3">
+                  <div class="spinner-border spinner-border-sm text-primary"></div>
+                </div>
+                <div *ngIf="!loading && templates.length === 0" class="text-muted small">
+                  Aucun template configuré.
+                </div>
+                <div *ngIf="!loading && templates.length > 0">
+                  <div class="list-group list-group-flush">
+                    <button class="list-group-item list-group-item-action"
+                            *ngFor="let t of templates"
+                            [class.active]="selectedTemplate?.id === t.id"
+                            (click)="selectedTemplate = t; customMessage = ''">
+                      <div class="fw-semibold">{{ t.name ?? t.title }}</div>
+                      <small class="text-muted">{{ t.preview ?? t.body }}</small>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Send form -->
+          <div class="col-md-5">
+            <div class="card">
+              <div class="card-header fw-semibold">Envoyer</div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Audience cible</label>
+                  <select class="form-select" [(ngModel)]="targetAudience">
+                    <option value="ALL">Tous les utilisateurs</option>
+                    <option value="PASSENGER">Passagers uniquement</option>
+                    <option value="DRIVER">Conducteurs uniquement</option>
+                    <option value="ORGANIZER">Organisateurs uniquement</option>
+                  </select>
+                </div>
+
+                <div *ngIf="selectedTemplate" class="alert alert-info small py-2">
+                  <i class="bi bi-check-circle me-1"></i>
+                  Template : <strong>{{ selectedTemplate.name ?? selectedTemplate.title }}</strong>
+                  <button class="btn-close btn-close-sm ms-2 float-end" style="font-size:10px"
+                          (click)="selectedTemplate = null"></button>
+                </div>
+
+                <div class="mb-3" *ngIf="!selectedTemplate">
+                  <label class="form-label">Message personnalisé</label>
+                  <textarea class="form-control" rows="4" [(ngModel)]="customMessage"
+                            placeholder="Rédigez votre message..."></textarea>
+                </div>
+
+                <button class="btn btn-primary w-100" (click)="send()"
+                        [disabled]="sending || (!selectedTemplate && !customMessage)">
+                  <span *ngIf="sending" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!sending" class="bi bi-send me-2"></i>
+                  {{ sending ? 'Envoi...' : 'Envoyer la notification' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,186 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Trajets et louages</h1>
+            <p class="page-subtitle">{{ currentDate }} - Supervision en temps réel</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher" [(ngModel)]="searchQuery" (input)="applyFilters()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-bar">
+          <div class="filter-group">
+            <select [(ngModel)]="filterStatus" (change)="applyFilters()">
+              <option value="">Tous les status</option>
+              <option value="ACTIVE">En cours</option>
+              <option value="PUBLISHED">Publié</option>
+              <option value="CONFIRMED">Confirmé</option>
+              <option value="COMPLETED">Complet</option>
+              <option value="FINISHED">Terminé</option>
+              <option value="CANCELLED">Annulé</option>
+            </select>
+            <i class="bi bi-chevron-down filter-chevron"></i>
+          </div>
+          <div class="filter-group">
+            <select [(ngModel)]="filterRoute" (change)="applyFilters()">
+              <option value="">Tous les trajets</option>
+              <option *ngFor="let route of uniqueRoutes" [value]="route">{{ route }}</option>
+            </select>
+            <i class="bi bi-chevron-down filter-chevron"></i>
+          </div>
+          <div class="filter-group date-filter">
+            <input type="date" [(ngModel)]="filterDate" (change)="applyFilters()">
+            <i class="bi bi-calendar"></i>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card" *ngIf="!loading">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Conducteur</th>
+                <th>Trajet</th>
+                <th>Date</th>
+                <th>Place</th>
+                <th>Remplissage</th>
+                <th>Statut</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let t of filteredTrajets">
+                <td><span class="trajet-id">{{ t.displayId }}</span></td>
+                <td class="cell-driver">{{ t.driverName }}</td>
+                <td class="cell-route">{{ t.route }}</td>
+                <td class="cell-date">{{ t.displayDate }}</td>
+                <td class="cell-seats">{{ t.occupiedSeats }}/{{ t.totalSeats }}</td>
+                <td>
+                  <div class="fill-bar-wrapper">
+                    <div class="fill-bar-track">
+                      <div class="fill-bar" [style.width.%]="t.fillPercent"></div>
+                    </div>
+                    <span class="fill-percent">{{ t.fillPercent }}%</span>
+                  </div>
+                </td>
+                <td>
+                    <span class="status-badge-trajet" [class]="'status-' + getStatusClass(t.status)">
+                      {{ t.displayStatus }}
+                    </span>
+                </td>
+                <td>
+                  <div class="action-icons">
+                    <button class="icon-btn view" (click)="viewTrajet(t)" title="Voir">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button
+                      *ngIf="canEdit(t.status)"
+                      class="icon-btn edit"
+                      (click)="openReassignModal(t.id)"
+                      title="Réassigner">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      *ngIf="canCancel(t.status)"
+                      class="icon-btn delete"
+                      (click)="openCancelModal(t.id)"
+                      title="Annuler">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div *ngIf="!loading && filteredTrajets.length === 0" class="empty-state">
+          <p>Aucun trajet trouvé.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Annuler -->
+<div class="modal-overlay" *ngIf="showCancelModal" (click)="closeCancelModal($event)">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Annuler le trajet</h3>
+        <button class="btn-close-modal" (click)="closeCancelModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Raison de l'annulation <span class="required">*</span></label>
+          <textarea rows="3" [(ngModel)]="cancelReason" placeholder="Décrivez la raison..."></textarea>
+        </div>
+        <label class="form-check">
+          <input type="checkbox" [(ngModel)]="notifyPassenger">
+          <span>Notifier le(s) passager(s)</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeCancelModal()">Annuler</button>
+        <button class="btn-confirm btn-danger" (click)="confirmCancel()" [disabled]="!cancelReason.trim() || submitting">
+          <span *ngIf="!submitting">Confirmer</span>
+          <span *ngIf="submitting"><i class="bi bi-arrow-repeat spin"></i> ...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Réassigner -->
+<div class="modal-overlay" *ngIf="showReassignModal" (click)="closeReassignModal($event)">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Réassigner le trajet</h3>
+        <button class="btn-close-modal" (click)="closeReassignModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nouveau chauffeur</label>
+          <select [(ngModel)]="selectedDriverId">
+            <option value="">Sélectionnez un chauffeur</option>
+            <option *ngFor="let driver of drivers" [value]="driver.userId">
+              {{ driver.name }} ({{ driver.email }})
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeReassignModal()">Annuler</button>
+        <button class="btn-submit" (click)="confirmReassign()" [disabled]="!selectedDriverId || submitting">
+          <span *ngIf="!submitting">Réassigner</span>
+          <span *ngIf="submitting"><i class="bi bi-arrow-repeat spin"></i> ...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

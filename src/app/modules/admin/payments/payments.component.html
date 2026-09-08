@@ -1,0 +1,101 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Paiements & Commissions</h1>
+            <p class="page-subtitle">{{ currentDate }} - Transactions et versements</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher" [(ngModel)]="searchQuery" (input)="applyFilters()">
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Revenu brut</div>
+            <div class="kpi-value">{{ totalRevenue | number:'1.0-0' }} DT</div>
+            <div class="kpi-trend up">▲ +{{ revenueGrowth }}%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Comission générés</div>
+            <div class="kpi-value">{{ totalCommission | number:'1.0-0' }}DT</div>
+            <div class="kpi-trend info">{{ commissionRate }}% par transaction</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Remboursement</div>
+            <div class="kpi-value">{{ pendingRefundsAmount | number:'1.0-0' }}DT</div>
+            <div class="kpi-trend info">{{ pendingRefundsCount }} en attente</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Versements</div>
+            <div class="kpi-value">{{ totalPayouts | number:'1.0-0' }}DT</div>
+            <div class="kpi-trend info">{{ pendingPayoutsCount }} en attente</div>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card" *ngIf="!loading">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Utilisateur</th>
+                <th>Trajet</th>
+                <th>Méthode</th>
+                <th>Montant brut</th>
+                <th>Comission</th>
+                <th>Net conducteur</th>
+                <th>Statut</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let p of filteredPayments">
+                <td><span class="pay-id">{{ p.displayId }}</span></td>
+                <td class="cell-user">{{ p.userName }}</td>
+                <td class="cell-route">{{ p.route }}</td>
+                <td>
+                    <span class="method-badge" [class]="'method-' + p.methodClass">
+                      {{ p.method }}
+                    </span>
+                </td>
+                <td class="cell-amount">{{ p.amount | number:'1.0-0' }} DT</td>
+                <td class="cell-commission">-{{ p.commission | number:'1.2-2' }}DT</td>
+                <td class="cell-net">{{ p.netDriver | number:'1.2-2' }} DT</td>
+                <td>
+                    <span class="status-badge-pay" [class]="'status-' + p.statusClass">
+                      {{ p.status }}
+                    </span>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div *ngIf="!loading && filteredPayments.length === 0" class="empty-state">
+          <p>Aucune transaction trouvée.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

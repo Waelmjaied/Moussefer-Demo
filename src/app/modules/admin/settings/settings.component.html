@@ -1,0 +1,131 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Paramètres</h1>
+            <p class="page-subtitle">{{ currentDate }} — Configuration système et administrateurs</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher">
+            </div>
+          </div>
+        </div>
+
+        <!-- ═════════════════════════════════════════════════════
+             GESTION DES ADMINISTRATEURS
+             ═════════════════════════════════════════════════════ -->
+        <div class="section-header">
+          <h2 class="section-title">Gestion des administrateurs</h2>
+        </div>
+
+        <div class="admins-card">
+          <div class="admin-row" *ngFor="let admin of admins" [class.me]="admin.isMe">
+            <div class="admin-info">
+              <div class="admin-avatar" [style.background]="admin.avatarColor">
+                {{ admin.initials }}
+              </div>
+              <div class="admin-meta">
+                <div class="admin-name">{{ admin.name }}</div>
+                <div class="admin-email">{{ admin.email }}</div>
+              </div>
+            </div>
+            <div class="admin-badges">
+              <span class="role-badge" [class]="'role-' + admin.roleClass">{{ admin.roleLabel }}</span>
+              <span class="you-badge" *ngIf="admin.isMe">Vous</span>
+              <button
+                *ngIf="!admin.isMe && permissionService.isSuperAdmin()"
+                class="btn-revoke"
+                (click)="revokeAdmin(admin)">
+                Révoquer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═════════════════════════════════════════════════════
+             PARAMÈTRES SYSTÈME
+             ═════════════════════════════════════════════════════ -->
+        <div class="section-header">
+          <h2 class="section-title"><i class="bi bi-gear"></i> Paramètres système</h2>
+        </div>
+
+        <div class="settings-card">
+          <div class="setting-row">
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="settings.autoNotifications" (change)="toggleSetting('autoNotifications')">
+              <span class="toggle-slider"></span>
+            </label>
+            <div class="setting-info">
+              <div class="setting-label">Notifications automatiques</div>
+              <div class="setting-desc">Alertes email aux admins en cas d'incident</div>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="settings.weeklyReport" (change)="toggleSetting('weeklyReport')">
+              <span class="toggle-slider"></span>
+            </label>
+            <div class="setting-info">
+              <div class="setting-label">Rapport hebdomadaire automatique</div>
+              <div class="setting-desc">Envoi chaque lundi à 08:00</div>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="settings.maintenanceMode" (change)="toggleSetting('maintenanceMode')">
+              <span class="toggle-slider"></span>
+            </label>
+            <div class="setting-info">
+              <div class="setting-label">Mode maintenance</div>
+              <div class="setting-desc">Désactive l'accès public à la plateforme</div>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="settings.extendedLogs" (change)="toggleSetting('extendedLogs')">
+              <span class="toggle-slider"></span>
+            </label>
+            <div class="setting-info">
+              <div class="setting-label">Journal d'activité étendu</div>
+              <div class="setting-desc">Enregistrer toutes les actions administratives</div>
+            </div>
+          </div>
+
+          <div class="setting-input-row">
+            <label class="setting-input-label">Commission plateforme (%)</label>
+            <input
+              type="number"
+              class="setting-input"
+              [(ngModel)]="settings.commissionRate"
+              min="0"
+              max="100"
+              step="0.1"
+              placeholder="7.0">
+          </div>
+
+          <div class="settings-footer">
+            <button class="btn-save" (click)="saveSettings()" [disabled]="saving">
+              <span *ngIf="!saving">Enregistrer</span>
+              <span *ngIf="saving"><i class="bi bi-arrow-repeat spin"></i> Enregistrement...</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

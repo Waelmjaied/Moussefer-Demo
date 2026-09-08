@@ -1,0 +1,347 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap');
+
+/* ═══════════════════════════════════════
+   SIDEBAR – Desktop (default)
+   ═══════════════════════════════════════ */
+.sidebar {
+  width: 280px !important;
+  background: #2A388C !important;
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  padding: 1.5rem 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+/* Masquer icônes desktop */
+.nav-link i {
+  display: none !important;
+}
+
+/* Supprimer soulignements */
+.nav-link,
+.nav-link:hover,
+.nav-link:focus,
+.nav-link:active {
+  text-decoration: none !important;
+}
+
+/* Liens navigation */
+.nav-link {
+  font-weight: 400;
+  font-size: 14px;
+  color: #FFFFFF;
+  padding: 10px 16px;
+  margin: 0 10px 20px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: block;
+  text-align: center;
+}
+
+.nav-link.active {
+  background: rgba(100, 150, 255, 0.25);
+  color: #FFFFFF;
+  font-weight: 500;
+  padding: 8px 16px;
+}
+
+.nav-link:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Titres sections */
+.sidebar-group {
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 30px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.sidebar-group:first-of-type {
+  margin-top: 0;
+}
+
+/* Logo */
+.sidebar-logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.logo-img {
+  max-height: 45px;
+  width: auto;
+  display: inline-block;
+}
+
+/* ─── Bloc utilisateur ─── */
+.sidebar-avatar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding: 20px;
+  position: relative;
+}
+.sidebar-avatar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+.avatar-circle {
+  width: 35px;
+  height: 35px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.avatar-initials {
+  font-weight: 700;
+  font-size: 14px;
+  color: #2A388C;
+  text-transform: uppercase;
+}
+.user-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.admin-role {
+  font-weight: 500;
+  font-size: 14px;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.3;
+}
+.admin-email {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* ═══════════════════════════════════════
+   UTILITAIRES – Caché par défaut
+   ═══════════════════════════════════════ */
+.mobile-header,
+.sidebar-close,
+.sidebar-overlay {
+  display: none;
+}
+
+/* ═══════════════════════════════════════
+   MOBILE – Hamburger Overlay
+   ═══════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ─── Lock body scroll when sidebar open ─── */
+  :host-context(body.sidebar-open) {
+    overflow: hidden;
+  }
+
+  /* ─── Mobile Header Bar ─── */
+  .mobile-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #2A388C;
+    padding: 0 16px;
+    z-index: 1040;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  .mobile-header .mobile-logo {
+    height: 32px;
+    width: auto;
+  }
+
+  .mobile-header .hamburger-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .mobile-header .hamburger-btn:hover {
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* ─── Sidebar: full height, scrollable ─── */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px !important;
+    height: 100vh;
+    height: 100dvh;
+    min-height: auto;
+    transform: translateX(-100%);
+    z-index: 1060;
+    padding: 1.5rem 0;
+    box-shadow: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 30px rgba(0,0,0,0.4);
+  }
+
+  /* ─── Overlay backdrop ─── */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 1050;
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  /* ─── Close button dans sidebar ─── */
+  .sidebar-close {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 1.2rem;
+    margin: 0 20px 20px auto;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .sidebar-close:hover {
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* ─── Contenu sidebar normal ─── */
+  .sidebar-logo {
+    margin-bottom: 20px;
+  }
+
+  .nav.flex-column {
+    flex-direction: column !important;
+  }
+
+  .nav-link {
+    margin: 0 15px 12px 15px;
+    font-size: 14px;
+    display: block;
+    text-align: center;
+  }
+
+  .nav-link i {
+    display: none !important;
+  }
+
+  .sidebar-group {
+    margin-top: 20px;
+  }
+
+  .sidebar-avatar {
+    display: flex;
+    padding: 15px;
+  }
+
+  /* ─── Contenu principal décalé ─── */
+  .main-content,
+  :host ::ng-deep .main-content,
+  .admin-layout .main-content {
+    margin-left: 0 !important;
+    margin-top: 0px !important;
+    padding-top: 1rem !important;
+    width: 100% !important;
+    overflow-y: auto;
+
+  }
+}
+
+/* ═══════════════════════════════════════
+   TABLETTE – Sidebar réduite
+   ═══════════════════════════════════════ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 80px !important;
+    padding: 1rem 0;
+  }
+
+  .sidebar-logo {
+    margin-bottom: 20px;
+  }
+
+  .logo-img {
+    max-height: 35px;
+  }
+
+  .sidebar-group {
+    font-size: 9px;
+    margin-top: 20px;
+  }
+
+  .nav-link {
+    font-size: 0;
+    padding: 12px;
+    margin: 0 8px 15px 8px;
+  }
+
+  .nav-link i {
+    display: block !important;
+    font-size: 1.3rem;
+  }
+
+  .sidebar-avatar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px 10px;
+  }
+
+  .user-info {
+    display: none;
+  }
+}

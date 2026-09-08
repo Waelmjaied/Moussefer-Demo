@@ -1,0 +1,39 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+  <div class="main-col">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Mes demandes</h1>
+        <p>Suivi de demandes</p>
+      </div>
+      <a routerLink="/driver/publish" class="btn-publish"><i class="bi bi-plus-lg"></i>Publier un trajet</a>
+    </div>
+
+    <div class="alert-banner" *ngIf="pending.length > 0">
+      <i class="bi bi-clock-history" style="font-size:18px;flex-shrink:0"></i>
+      <div class="alert-banner-text">
+        <strong>{{ pending.length }} demandes en attentes</strong>
+        - Vous avez moins de 15 minutes pour répondre. Passé ce délai le systéme passera automatiquement au louage suivant
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner-border text-primary"></div></div>
+    <div class="empty-state" *ngIf="!loading && pending.length === 0"><i class="bi bi-inbox" style="font-size:36px;display:block;margin-bottom:10px"></i>Aucune demande en attente</div>
+
+    <div *ngFor="let r of pending">
+      <div class="req-card">
+        <div class="req-avatar">{{ r.passengerId.charAt(0).toUpperCase() || 'P' }}</div>
+        <div class="req-info">
+          <div class="req-name">{{ r.passengerName || 'Passager' }}</div>
+          <div class="req-detail">{{ r.seatsReserved }} place · {{ r.departureCity || '—' }} &nbsp;{{ r.arrivalCity || '—' }} · {{ r.createdAt | date:'d MMMM' }}</div>
+        </div>
+        <div class="req-meta">
+          <span class="timer-pill">12:18 restant</span>
+          <span class="place-pill">{{ r.seatsReserved }} place</span>
+          <button class="btn-accept" (click)="accept(r.id)">Accepter</button>
+          <button class="btn-refuse" (click)="refuse(r.id)">Refuser</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

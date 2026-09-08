@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+/* app.component.css */
+.main-content {
+  min-height: calc(100vh - 130px); /* adjust based on header+footer height */
+}
+/* ---- Remove bullet points from sidebar lists ---- */
+app-admin-sidebar ul,
+app-admin-sidebar li {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 0 !important;
+}
+
+/* ---- Refined hover effect (stays on dark sidebar) ---- */
+.nav-link:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.12);  /* subtle light overlay */
+  color: #8a8686;                                /* keep text white */
+  transform: translateX(6px);                    /* slightly more slide */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}

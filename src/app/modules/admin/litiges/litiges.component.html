@@ -1,0 +1,111 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Traitement des litiges</h1>
+            <p class="page-subtitle">
+              {{ currentDate }} — {{ pendingLitiges }} litige{{ pendingLitiges > 1 ? 's' : '' }} en attente d'intervention
+            </p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher">
+            </div>
+          </div>
+        </div>
+
+        <div class="litige-list" *ngIf="litiges.length > 0">
+          <div class="litige-card" *ngFor="let litige of litiges" [class.urgent]="litige.priority === 'URGENT'">
+
+            <!-- Header -->
+            <div class="litige-header">
+              <div class="litige-tags">
+                <span class="tag" [class]="getPriorityClass(litige.priority)">{{ litige.priority }}</span>
+                <span class="litige-id">{{ litige.id }}</span>
+                <span class="litige-title">{{ litige.title }}</span>
+              </div>
+              <span class="litige-time">{{ litige.timeAgo }}</span>
+            </div>
+
+            <!-- Body : 2 colonnes -->
+            <div class="litige-content">
+
+              <!-- Gauche -->
+              <div class="litige-body">
+                <div class="litige-desc">"{{ litige.description }}"</div>
+
+                <div class="litige-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Itinéraire</span>
+                    <span class="detail-value route">{{ litige.route }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">{{ litige.amountLabel || 'Montant payé' }}</span>
+                    <span class="detail-value" [class.red]="litige.amountColor === 'red'" [class.blue]="litige.amountColor === 'blue'">{{ litige.amount }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">{{ litige.extraLabel || 'Historique conducteur' }}</span>
+                    <span class="detail-value" [class.red]="litige.extraColor === 'red'" [class.blue]="litige.extraColor === 'blue'">{{ litige.extraValue }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">{{ litige.statusLabel || 'Statut transaction' }}</span>
+                    <span class="detail-value" [class.red]="litige.statusColor === 'red'" [class.blue]="litige.statusColor === 'blue'">{{ litige.status }}</span>
+                  </div>
+                </div>
+
+                <div class="litige-history" *ngIf="litige.history && litige.history.length > 0">
+                  <div class="history-title">
+                    <i class="bi bi-clock-history"></i> HISTORIQUE DES ACTIONS
+                  </div>
+                  <div class="history-list">
+                    <div class="history-item" *ngFor="let h of litige.history">
+                      <span class="history-dot" [class]="h.type"></span>
+                      <span class="history-text">{{ h.text }}</span>
+                      <span class="history-user" *ngIf="h.user">par <strong>{{ h.user }}</strong></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Droite : actions empilées -->
+              <div class="litige-actions">
+                <button *ngFor="let action of litige.actions.primary"
+                        [class]="'btn-action btn-' + (action.variant || inferVariant(action.type))"
+                        (click)="handleAction(litige, action)">
+                  <i class="bi" [class]="action.icon" *ngIf="action.icon"></i>
+                  {{ action.label }}
+                </button>
+                <button *ngFor="let action of litige.actions.secondary"
+                        [class]="'btn-action btn-' + (action.variant || inferVariant(action.type))"
+                        (click)="handleAction(litige, action)">
+                  {{ action.label }}
+                </button>
+                <button *ngFor="let action of litige.actions.ghost"
+                        class="btn-action btn-ghost"
+                        (click)="handleAction(litige, action)">
+                  {{ action.label }}
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <div *ngIf="litiges.length === 0" class="empty-state">
+          <p>Aucun litige à traiter.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

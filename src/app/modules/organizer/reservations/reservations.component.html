@@ -1,0 +1,251 @@
+<div class="organizer-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar column -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-organizer-sidebar></app-organizer-sidebar>
+      </div>
+
+      <!-- Main content column -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Réservation</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ agencyName }}</p>
+          </div>
+          <a routerLink="/organizer/my-voyages" class="btn-publish">
+            <i class="bi bi-plus-lg me-1"></i>Publier un voyage
+          </a>
+        </div>
+
+        <!-- KPI Cards -->
+        @if (!loading && reservations.length > 0) {
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Total réservations</div>
+              <div class="kpi-value">{{ totalReservations }}</div>
+              @if (reservationsTrend) {
+                <div class="kpi-trend up">
+                  <i class="bi bi-caret-up-fill me-1"></i>+{{ reservationsTrend }} sem.
+                </div>
+              }
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Moussefer</div>
+              <div class="kpi-value">{{ mousseferCount }}</div>
+              <div class="kpi-trend" style="color: #22c55e;">{{ mousseferPercent }}%</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Hors Moussefer</div>
+              <div class="kpi-value">{{ horsMousseferCount }}</div>
+              <div class="kpi-trend" style="color: #64748b;">Tél, agence, direct</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">En attente</div>
+              <div class="kpi-value">{{ pendingCount }}</div>
+              <div class="kpi-trend" style="color: #f59e0b;">A valider</div>
+            </div>
+          </div>
+        }
+
+        <!-- Filter Tabs & Add Button -->
+        @if (voyageId) {
+          <div class="filter-bar">
+            <div class="filter-tabs">
+              <button class="filter-tab" [class.active]="activeFilter === 'all'" (click)="setFilter('all')">Tous</button>
+              <button class="filter-tab" [class.active]="activeFilter === 'moussefer'" (click)="setFilter('moussefer')">Moussefer</button>
+              <button class="filter-tab" [class.active]="activeFilter === 'hors-site'" (click)="setFilter('hors-site')">Hors site</button>
+              <button class="filter-tab" [class.active]="activeFilter === 'en-attente'" (click)="setFilter('en-attente')">En attente</button>
+              <button class="filter-tab" [class.active]="activeFilter === 'confirmes'" (click)="setFilter('confirmes')">Confirmés</button>
+            </div>
+            <button class="btn-add-reservation" (click)="openModal()">
+              <i class="bi bi-plus-lg me-1"></i>+ Ajouter une réservation
+            </button>
+          </div>
+        }
+
+        <!-- ✅ FIXED: Only show this alert when NO voyageId AND no reservations -->
+        @if (!voyageId && reservations.length === 0 && !loading) {
+          <div class="alert alert-info">
+            Sélectionnez un voyage depuis <a routerLink="/organizer/my-voyages">Mes voyages</a>.
+          </div>
+        }
+
+        <!-- Loading -->
+        @if (loading) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+          </div>
+        }
+
+        <!-- No reservations -->
+        @if (!loading && reservations.length === 0 && voyageId) {
+          <div class="alert alert-info">
+            Aucune réservation pour ce voyage.
+          </div>
+        }
+
+        <!-- ✅ FIXED: Show table when we have data, regardless of voyageId -->
+        @if (!loading && filteredReservations.length > 0) {
+          <div class="table-card">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Passager</th>
+                <th>Voyage</th>
+                <th>Date</th>
+                <th>Place</th>
+                <th>Montant</th>
+                <th>Source</th>
+                <th>Paiement</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (res of filteredReservations; track res.id) {
+                  <tr>
+                    <td class="cell-id">#R{{ res.id | slice:0:5 }}</td>
+                    <td class="cell-passenger">
+                      <div class="passenger-name">{{ getPassengerName(res) }}</div>
+                    </td>
+                    <td class="cell-voyage">{{ getVoyageDisplay(res) }}</td>
+                    <td class="cell-date">{{ res.createdAt | date:'d MMM' }}</td>
+                    <td class="cell-place">{{ res.seatsReserved }} places</td>
+                    <td class="cell-montant">{{ res.totalPrice }} DT</td>
+                    <td class="cell-source">
+                      <span class="badge-source" [class]="'source-' + getSourceType(res)">
+                        {{ getSourceLabel(res) }}
+                      </span>
+                    </td>
+                    <td class="cell-paiement">
+                      <span class="badge-paiement" [class]="'pay-' + getPaymentStatus(res)">
+                        {{ getPaymentStatusLabel(res) }}
+                      </span>
+                    </td>
+                    <td class="cell-statut">
+                      <span class="badge-statut" [class]="'stat-' + res.status">
+                        {{ statusLabel(res.status) }}
+                      </span>
+                    </td>
+                    <td class="cell-actions">
+                      @if (res.status === 'PENDING_ORGANIZER') {
+                        <div class="action-buttons">
+                          <button class="btn-action btn-accept" (click)="accept(res.id)" [disabled]="actionLoading === res.id" title="Accepter">
+                            @if (actionLoading === res.id) {
+                              <span class="spinner-border spinner-border-sm"></span>
+                            } @else {
+                              <i class="bi bi-check-lg"></i>
+                            }
+                          </button>
+                          <button class="btn-action btn-refuse" (click)="refuse(res.id)" [disabled]="actionLoading === res.id" title="Refuser">
+                            <i class="bi bi-x-lg"></i>
+                          </button>
+                        </div>
+                      }
+
+                      @if (res.status === 'CONFIRMED' || res.status === 'PENDING_PAYMENT') {
+                        <button class="btn-action btn-cancel" (click)="cancel(res.id)" [disabled]="actionLoading === res.id" title="Annuler la réservation">
+                          @if (actionLoading === res.id) {
+                            <span class="spinner-border spinner-border-sm"></span>
+                          } @else {
+                            <i class="bi bi-trash"></i>
+                          }
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <!-- Modal: Nouvelle réservation manuelle -->
+        @if (showModal) {
+          <div class="modal-overlay" (click)="closeModalOnOverlay($event)">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3 class="modal-title">Nouvelle réservation manuelle</h3>
+                <button class="modal-close" (click)="closeModal()">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+
+              <div class="modal-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">NOM COMPLET *</label>
+                    <input type="text" class="form-control" [(ngModel)]="newReservation.fullName" placeholder="Nom et prénom">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">TÉLÉPHONE *</label>
+                    <input type="tel" class="form-control" [(ngModel)]="newReservation.phone" placeholder="+216 XX XXX XXX">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">VOYAGE *</label>
+                    <select class="form-control form-select" [(ngModel)]="newReservation.voyageId">
+                      <option value="">Sélectionner un voyage</option>
+                      @for (v of voyages; track v.id) {
+                        <option [value]="v.id">{{ v.title }} — {{ v.departureCity }} → {{ v.arrivalCity }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">NOMBRE DE PLACES</label>
+                    <input type="number" class="form-control" [(ngModel)]="newReservation.seats" min="1">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">SOURCE *</label>
+                    <div class="custom-select">
+                      <i class="bi bi-telephone me-2"></i>
+                      <select class="form-control form-select" [(ngModel)]="newReservation.source">
+                        <option value="telephone">Téléphone</option>
+                        <option value="agence">Agence</option>
+                        <option value="direct">Direct</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">STATUT PAIEMENT</label>
+                    <select class="form-control form-select" [(ngModel)]="newReservation.paymentStatus">
+                      <option value="non-paye">Non payé</option>
+                      <option value="paye">Payé</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">MONTANT TOTAL (DT)</label>
+                    <div class="amount-input">
+                      <input type="number" class="form-control" [(ngModel)]="newReservation.amount" min="0">
+                      <span class="amount-unit">DT</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button class="btn-cancel" (click)="closeModal()">Annuler</button>
+                <button class="btn-save" (click)="saveReservation()" [disabled]="saving">
+                  @if (saving) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</div>

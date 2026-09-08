@@ -1,0 +1,144 @@
+<div class="driver-layout">
+  <div class="main-col">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1><i class="bi bi-credit-card me-2"></i>Paiements</h1>
+        <p>Gérez vos paiements et consultez votre historique de transactions</p>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="loading-center">
+        <div class="spinner-border text-primary"></div>
+      </div>
+    } @else {
+      <!-- KPI Cards -->
+      <div class="kpi-row">
+        <div class="kpi-card green-accent">
+          <div class="kpi-label">Total payé</div>
+          <div class="kpi-value">{{ totalPaid | number:'1.2-2' }} <span style="font-size:18px;">DT</span></div>
+          <div class="kpi-sub up"><i class="bi bi-arrow-up-short"></i> Montant cumulé</div>
+        </div>
+        <div class="kpi-card blue-accent">
+          <div class="kpi-label">Transactions</div>
+          <div class="kpi-value">{{ totalElements }}</div>
+          <div class="kpi-sub"><i class="bi bi-receipt"></i> Paiements effectués</div>
+        </div>
+        <div class="kpi-card purple-accent">
+          <div class="kpi-label">Moyenne</div>
+          <div class="kpi-value">{{ totalElements > 0 ? (totalPaid / totalElements | number:'1.2-2') : '0' }} <span style="font-size:18px;">DT</span></div>
+          <div class="kpi-sub"><i class="bi bi-calculator"></i> Par transaction</div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      @if (rows.length === 0) {
+        <div class="empty-state-card">
+          <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+          <h3>Aucun paiement trouvé</h3>
+          <p>Vos paiements apparaîtront ici une fois que vous aurez effectué une réservation.</p>
+        </div>
+      }
+
+      <!-- Payments Table -->
+      @if (rows.length > 0) {
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title"><i class="bi bi-receipt"></i> Historique des paiements</div>
+            <div class="table-actions">
+              <button class="btn-filter"><i class="bi bi-funnel"></i> Filtrer</button>
+              <button class="btn-export"><i class="bi bi-download"></i> Exporter</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="modern-table">
+              <thead>
+              <tr>
+                <th>Réservation</th>
+                <th>Trajet</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Reçu</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (row of rows; track row.payment.paymentId; let i = $index) {
+                  <tr class="table-row" [class.even]="i % 2 === 0">
+                    <td>
+                      <div class="cell-id">
+                        <div class="id-icon"><i class="bi bi-ticket-perforated"></i></div>
+                        <div class="id-text">
+                          <span class="id-code">#{{ row.payment.reservationId | slice:0:10 }}</span>
+                          <span class="id-label">Réservation</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-route">
+                        @if (row.reservation; as res) {
+                          <span class="route-code">#{{ res.trajetId | slice:0:8 }}</span>
+                        } @else {
+                          <span class="route-code text-muted">#{{ row.payment.reservationId | slice:0:8 }}</span>
+                        }
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell-amount">
+                        <span class="amount-value">{{ row.payment.amount | number:'1.2-2' }} {{ row.payment.currency }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="status-pill" [class]="statusClass(row.payment.status)">
+                        <i class="bi" [class]="statusIcon(row.payment.status)"></i>
+                        {{ statusLabel(row.payment.status) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="cell-date">
+                        <i class="bi bi-calendar3"></i>
+                        <span>{{ (row.payment.createdAt || row.payment.updatedAt) | date:'dd/MM/yyyy' }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      @if (['SUCCEEDED','CONFIRMED'].includes(row.payment.status)) {
+                        <button class="btn-receipt" (click)="downloadInvoice(row.payment.reservationId)">
+                          <i class="bi bi-file-earmark-pdf"></i> PDF
+                        </button>
+                      } @else {
+                        <span class="text-muted small">—</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          @if (totalPages > 1) {
+            <div class="table-footer">
+              <div class="showing-text">
+                Affichage de <strong>{{ page * size + 1 }}</strong> à <strong>{{ (page + 1) * size > totalElements ? totalElements : (page + 1) * size }}</strong> sur <strong>{{ totalElements }}</strong> entrées
+              </div>
+              <div class="pagination">
+                <button class="page-btn" [disabled]="page === 0" (click)="changePage(page - 1)">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+                @for (pageNum of pages; track pageNum) {
+                  <button class="page-btn" [class.active]="pageNum === page" (click)="changePage(pageNum)">
+                    {{ pageNum + 1 }}
+                  </button>
+                }
+                <button class="page-btn" [disabled]="page >= totalPages - 1" (click)="changePage(page + 1)">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

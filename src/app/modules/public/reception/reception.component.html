@@ -1,0 +1,535 @@
+<div class="reception-page">
+  <!-- Trajet Detail Modal -->
+  <div class="modal-overlay" *ngIf="showTrajetDetail" (click)="closeDetail()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ selectedTrajet?.departureCity }} → {{ selectedTrajet?.arrivalCity }}</h3>
+        <button class="modal-close" (click)="closeDetail()">×</button>
+      </div>
+      <div class="modal-body" *ngIf="!loadingDetail && selectedTrajet">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:1rem; margin-bottom:1rem;">
+          <div style="background:#f7f8fa; padding:0.75rem; border-radius:8px;">
+            <small style="display:block; color:#666; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.25rem;">Date</small>
+            <strong style="font-size:0.95rem;">{{ selectedTrajet.departureDate | date:'fullDate':'fr' }}</strong>
+          </div>
+          <div style="background:#f7f8fa; padding:0.75rem; border-radius:8px;">
+            <small style="display:block; color:#666; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.25rem;">Heure</small>
+            <strong style="font-size:0.95rem;">{{ selectedTrajet.departureDate | date:'HH:mm' }}</strong>
+          </div>
+          <div style="background:#f7f8fa; padding:0.75rem; border-radius:8px;">
+            <small style="display:block; color:#666; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.25rem;">Prix</small>
+            <strong style="font-size:0.95rem; color:#198754;">{{ selectedTrajet.pricePerSeat }} DT</strong>
+          </div>
+          <div style="background:#f7f8fa; padding:0.75rem; border-radius:8px;">
+            <small style="display:block; color:#666; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.25rem;">Places</small>
+            <strong style="font-size:0.95rem;">{{ selectedTrajet.availableSeats }} / {{ selectedTrajet.totalSeats || 8 }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body" *ngIf="loadingDetail">
+        <div style="text-align:center; padding:2rem;">Chargement…</div>
+      </div>
+      <div class="modal-footer" *ngIf="!loadingDetail && selectedTrajet">
+        <button class="btn-modal-secondary" (click)="closeDetail()">Fermer</button>
+        <button class="btn-modal-primary" (click)="reserveTrajet(selectedTrajet.id)">Réserver</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voyage Detail Modal -->
+  <div class="modal-overlay" *ngIf="showVoyageDetail" (click)="closeDetail()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ selectedVoyage?.title }}</h3>
+        <button class="modal-close" (click)="closeDetail()">×</button>
+      </div>
+      <div class="modal-body" *ngIf="!loadingDetail && selectedVoyage">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:1rem; margin-bottom:1rem;">
+          <div style="background:#f7f8fa; padding:0.75rem; border-radius:8px;">
+            <small style="display:block; color:#666; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.25rem;">Départ</small>
+            <strong style="font-size:0.95rem;">{{ selectedVoyage.departureCity }}</strong>
+          </div>
+          <div style="background:#f7f8fa; padding:0.75rem; border-radius:8px;">
+            <small style="display:block; color:#666; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.25rem;">Date</small>
+            <strong style="font-size:0.95rem;">{{ selectedVoyage.departureDate | date:'fullDate':'fr' }}</strong>
+          </div>
+          <div style="background:#f7f8fa; padding:0.75rem; border-radius:8px;">
+            <small style="display:block; color:#666; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.25rem;">Prix</small>
+            <strong style="font-size:0.95rem; color:#198754;">{{ selectedVoyage.pricePerSeat }} DT</strong>
+          </div>
+          <div style="background:#f7f8fa; padding:0.75rem; border-radius:8px;">
+            <small style="display:block; color:#666; font-size:0.7rem; text-transform:uppercase; margin-bottom:0.25rem;">Places dispo</small>
+            <strong style="font-size:0.95rem;">{{ selectedVoyage.availableSeats }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body" *ngIf="loadingDetail">
+        <div style="text-align:center; padding:2rem;">Chargement…</div>
+      </div>
+      <div class="modal-footer" *ngIf="!loadingDetail && selectedVoyage">
+        <button class="btn-modal-secondary" (click)="closeDetail()">Fermer</button>
+        <button class="btn-modal-primary" (click)="reserveVoyage(selectedVoyage.id)">Réserver</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="navbar">
+    <div class="container nav-container">
+      <div class="logo-brand">
+        <img src="assets/LOGO.png" alt="Moussefer" class="logo-img">
+      </div>
+      <ul class="nav-links">
+        <li><a routerLink="/" class="active">Accueil</a></li>
+        <li><a (click)="onNavClick('/passenger/search')">Trajets</a></li>
+        <li><a (click)="onNavClick('/passenger/collective-demand')">Demandes collectives</a></li>
+        <li><a (click)="onNavClick('/passenger/voyages')">Voyages organisés</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button *ngIf="!isAuthenticated()" class="btn-primary" (click)="goToLogin()">Se Connecter</button>
+        <button *ngIf="isAuthenticated()" class="btn-primary" routerLink="/passenger/profile">Profile Passager</button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-content">
+      <h1>Voyagez en louage avec toute simplicité</h1>
+      <p>Trouvez ou proposez un trajet en quelques secondes.</p>
+
+      <div class="search-container">
+        <div class="search-input">
+          <label>Départ</label>
+          <div class="station-dropdown" [class.open]="openDropdown === 'departure'">
+            <button type="button" class="station-toggle" (click)="toggleDropdown('departure', $event)">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5ec090" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span [class.placeholder]="!departureStation">{{ departureStation || 'Station de départ' }}</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#979797" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="station-menu" *ngIf="openDropdown === 'departure'" (click)="$event.stopPropagation()">
+              <div class="station-filter-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#979797" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="Rechercher une station…" [(ngModel)]="departureFilter">
+              </div>
+              <div class="station-list">
+                <div class="station-option" *ngFor="let s of filteredStations(departureFilter)"
+                     [class.selected]="s === departureStation"
+                     (click)="selectStation('departure', s)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span>{{ s }}</span>
+                  <svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div class="station-empty" *ngIf="filteredStations(departureFilter).length === 0">Aucune station trouvée</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="search-input">
+          <label>Destination</label>
+          <div class="station-dropdown" [class.open]="openDropdown === 'arrival'">
+            <button type="button" class="station-toggle" (click)="toggleDropdown('arrival', $event)">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5ec090" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+              </svg>
+              <span [class.placeholder]="!arrivalStation">{{ arrivalStation || "Station d'arrivée" }}</span>
+              <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#979797" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="station-menu" *ngIf="openDropdown === 'arrival'" (click)="$event.stopPropagation()">
+              <div class="station-filter-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#979797" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="Rechercher une station…" [(ngModel)]="arrivalFilter">
+              </div>
+              <div class="station-list">
+                <div class="station-option" *ngFor="let s of filteredStations(arrivalFilter)"
+                     [class.selected]="s === arrivalStation"
+                     (click)="selectStation('arrival', s)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span>{{ s }}</span>
+                  <svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div class="station-empty" *ngIf="filteredStations(arrivalFilter).length === 0">Aucune station trouvée</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="search-input">
+          <label>Date</label>
+          <div class="input-with-icon">
+            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5ec090" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <input type="date" [(ngModel)]="travelDate" [min]="minDate" placeholder="jj/mm/aaaa">
+          </div>
+        </div>
+        <button class="btn-search" (click)="onSearch()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Rechercher
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section-spacing">
+      <div class="section-header">
+        <h2 class="title-main">Trajets disponibles maintenant</h2>
+        <a (click)="onNavClick('/passenger/search')" class="view-all">Voir tous</a>
+      </div>
+
+      <div class="carousel-wrapper">
+        <button class="carousel-btn prev" (click)="scroll(trajetScroll, -1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A388C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <div class="trips-grid" #trajetScroll>
+          <div class="trip-card" *ngFor="let trajet of trajets">
+            <div class="card-tag">
+              <span [className]="trajet.availableSeats > 2 ? 'badge-priority' : 'badge-waiting'">
+                {{ trajet.availableSeats > 2 ? 'Prioritaire' : 'File d\'attente' }}
+              </span>
+            </div>
+
+            <div class="trip-route">
+              <span class="city">{{ trajet.departureCity }}</span>
+              <svg class="icon-sep" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#979797" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+              <span class="city">{{ trajet.arrivalCity }}</span>
+            </div>
+
+            <div class="trip-time">Aujourd'hui</div>
+            <div class="trip-hour">{{ trajet.departureDate | date:'HH:mm' }}</div>
+            <div class="trip-meta">Direct • Climatisé</div>
+
+            <div class="price-box">
+              <div class="price-val">{{ trajet.pricePerSeat }} DT <span>/pers.</span></div>
+              <div class="seats-count">{{ trajet.availableSeats }} places restants sur 8</div>
+            </div>
+
+            <div class="progress-container">
+              <div class="progress-bar" [style.width.%]="(trajet.availableSeats / 8) * 100"></div>
+            </div>
+
+            <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+              <button class="btn-action" style="flex:1; background:transparent; color:#2A388C; border:2px solid #2A388C;" (click)="openTrajetDetail(trajet.id)">Voir détails</button>
+              <button class="btn-action" style="flex:1;" (click)="reserveTrajet(trajet.id)">Réserver maintenant</button>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-btn next" (click)="scroll(trajetScroll, 1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A388C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="section-spacing" *ngIf="banners.length > 0">
+      <div class="section-header">
+        <h2 class="title-main">Offres & Promotions</h2>
+      </div>
+      <div class="carousel-wrapper">
+        <button class="carousel-btn prev" (click)="scroll(bannerScroll, -1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A388C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <div class="trips-grid" #bannerScroll>
+          <div class="banner-card" *ngFor="let banner of banners" (click)="onBannerClick(banner)" style="cursor:pointer;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1);transition:transform .2s;flex:0 0 auto;width:300px;">
+            <img [src]="banner.imageUrl" [alt]="banner.title"
+                 style="width:100%;height:160px;object-fit:cover;"
+                 onerror="this.style.display='none'">
+            <div style="background:white;padding:12px 14px;">
+              <div style="font-weight:600;font-size:14px;">{{ banner.title }}</div>
+              <div *ngIf="banner.redirectUrl" style="font-size:11px;color:#185FA5;margin-top:2px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+                  <polyline points="7 17 17 7"/>
+                  <polyline points="7 7 17 7 17 17"/>
+                </svg>
+                Voir l'offre
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-btn next" (click)="scroll(bannerScroll, 1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A388C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="how-it-works section-spacing">
+      <h2 class="title-center">Comment ça marche ?</h2>
+      <div class="steps-container">
+        <div class="step-card">
+          <div class="step-circle">1</div>
+          <h3>Recherchez votre trajet</h3>
+          <p>Entrez votre ville de départ et de destination avec la date souhaitée.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-circle">2</div>
+          <h3>Choisissez votre Louage</h3>
+          <p>Comparez les horaires, prix et chauffeurs pour trouver le meilleur trajet.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-circle">3</div>
+          <h3>Réservez et voyagez</h3>
+          <p>Confirmez votre réservation et recevez votre billet instantanément.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-spacing">
+      <div class="tag-label">NOUVEAU SUR MOUSSEFER</div>
+      <h2 class="title-main">Voyages organisés</h2>
+      <div class="carousel-wrapper">
+        <button class="carousel-btn prev" (click)="scroll(voyageScroll, -1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A388C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <div class="org-grid" #voyageScroll>
+          <div class="org-card" *ngFor="let voyage of voyages">
+            <div class="org-thumb">
+              <img [src]="voyage.imageUrl || 'assets/default-trip.jpg'" alt="Voyage"
+                   onerror="this.onerror=null;this.src='assets/default-trip.jpg'">
+              <span class="duration-tag">3 jours</span>
+              <span class="places-tag">{{ voyage.availableSeats }} places dispo</span>
+            </div>
+            <div class="org-body">
+              <h3>{{ voyage.title }}</h3>
+              <p>Départ {{ voyage.departureCity }} . {{ voyage.departureDate | date:'dd MMMM yyyy' }} . Tout inclus</p>
+              <div class="org-footer">
+                <span class="price-tag">{{ voyage.pricePerSeat }} DT <span>/pers.</span></span>
+              </div>
+              <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+                <button style="flex:1; padding:0.5rem; border-radius:6px; border:1.5px solid #2A388C; background:transparent; color:#2A388C; cursor:pointer; font-weight:600; font-size:0.85rem;" (click)="openVoyageDetail(voyage.id)">Voir détails</button>
+                <button class="btn-action" style="flex:1; padding:0.5rem; font-size:0.85rem;" (click)="reserveVoyage(voyage.id)">Réserver</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-btn next" (click)="scroll(voyageScroll, 1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A388C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="features-new">
+      <div class="features-container">
+        <h2 class="features-title">Pourquoi choisir Moussefer ?</h2>
+        <p class="features-subtitle">
+          <b>Découvrez une nouvelle dimension du voyage avec nos solutions innovantes conçues pour votre confort et votre sécurité.</b>
+        </p>
+
+        <div class="features-grid-3cols">
+          <div class="feature-card">
+            <div class="icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 2L4 14H12L11 22L20 10H12L13 2Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>Système de priorité intelligent</h3>
+            <p>Chatbots intelligents</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L3 7L3 12.5C3 17.2 7 21.5 12 22C17 21.5 21 17.2 21 12.5V7L12 2Z" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 7.5V12.5" stroke="#1e2a6e" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="12" cy="15.5" r="0.5" fill="#1e2a6e" stroke="#1e2a6e"/>
+              </svg>
+            </div>
+            <h3>Chauffeurs 100% vérifiés</h3>
+            <p>Chauffeurs vérifiés</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M3 21V19C3 16.8 4.8 15 7 15H11C13.2 15 15 16.8 15 19V21" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 3.5C17.5 4 18.5 5.5 18.5 7C18.5 8.5 17.5 10 16 10.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M19 21V19C19 17.1 17.9 15.5 16 15" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Demandes collectives</h3>
+            <p>Facture PDF instantanée</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="5" width="20" height="14" rx="2" fill="white" stroke="white" stroke-width="1.5"/>
+                <path d="M2 10H22" stroke="#1e2a6e" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M7 15H10" stroke="#1e2a6e" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Paiement & codes promo</h3>
+            <p>Code promo</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 11.5C21 16.2 17.2 20 12.5 20C11.3 20 10.1 19.8 9 19.3L3 21L4.7 15.5C4.2 14.4 4 13.2 4 12C4 7.3 7.8 3.5 12.5 3.5C17.2 3.5 21 7.3 21 11.5Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M8 10H17" stroke="#1e2a6e" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M8 14H14" stroke="#1e2a6e" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Chat intégré sécurisé</h3>
+            <p>Messagerie cryptée</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 4H16L20 8V20H4V4Z" fill="white" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M16 4V8H20" stroke="#1e2a6e" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M8 12H16" stroke="#1e2a6e" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M8 16H12" stroke="#1e2a6e" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Facture PDF instantanée</h3>
+            <p>Reçus automatiques</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about section-spacing">
+      <div class="about-container">
+        <img src="assets/about-left.png" alt="" class="about-img-left">
+        <div class="about-text">
+          <h2>À propos de Moussefer</h2>
+          <p><b>Moussefer est une plateforme de transport innovante <br> dédiée à faciliter les déplacements entre les villes en Tunisie,<br> en particulier via le système de louage.</b></p>
+        </div>
+        <img src="assets/about-right.png" alt="" class="about-img-right">
+      </div>
+    </section>
+
+    <section class="testimonials section-spacing">
+      <div class="tag-label">AVIS CLIENTS</div>
+      <h2 class="title-center">Ce que disent nos voyageurs</h2>
+      <div class="reviews-grid">
+        <div class="review-card" *ngFor="let review of [1,2,3]">
+          <div class="stars">★★★★★</div>
+          <p>« Fini le stress de la station ! Je réserve depuis chez moi et je sais exactement à quelle heure mon louage part. »</p>
+          <div class="reviewer">
+            <div class="avatar">L</div>
+            <div class="info">
+              <strong>Leila Bouaziz</strong>
+              <span>Tunis → Sfax</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-newsletter">
+        <div class="newsletter-text">
+          <h3>Recevez les meilleures offres et nouveaux trajets par email.</h3>
+          <p>Restez informé de toutes les nouveautés Moussefer.</p>
+        </div>
+        <div class="newsletter-form">
+          <input
+            type="email"
+            placeholder="Votre adresse email"
+            [(ngModel)]="newsletterEmail"
+            [disabled]="newsletterLoading"
+            (keyup.enter)="subscribeNewsletter()">
+          <button
+            class="btn-newsletter"
+            type="button"
+            (click)="subscribeNewsletter()"
+            [disabled]="newsletterLoading">
+            @if (newsletterLoading) {
+              <span class="spinner-border spinner-border-sm"></span>
+            } @else {
+              S'abonner
+            }
+          </button>
+        </div>
+      </div>
+
+      <div class="footer-grid">
+        <div class="footer-col footer-brand">
+          <img src="assets/logo-removebg-preview.png" alt="Moussefer" class="footer-logo">
+          <p>La plateforme de louage intelligente en Tunisie.</p>
+          <div class="social-links">
+            <img src="assets/facebook.png" alt="Facebook">
+            <img src="assets/Instagram.png" alt="Instagram">
+            <img src="assets/tiktok.png" alt="TikTok">
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>PASSAGERS</h4>
+          <ul>
+            <li><a (click)="onNavClick('/passenger/trajets')">Rechercher un trajet</a></li>
+            <li><a (click)="onNavClick('/passenger/my-reservations')">Mes réservations</a></li>
+            <li><a (click)="onNavClick('/passenger/collective-demand')">Demandes collectives</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>CHAUFFEURS</h4>
+          <ul>
+            <li><a (click)="onNavClick('/driver/publish')">Proposer un trajet</a></li>
+            <li><a (click)="onNavClick('/driver/my-trajets')">Mes trajets</a></li>
+            <li><a (click)="onNavClick('/driver/earnings')">Revenus</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>ORGANISATEURS</h4>
+          <ul>
+            <li><a (click)="onNavClick('/organizer/publish')">Créer un voyage</a></li>
+            <li><a (click)="onNavClick('/organizer/reservations')">Gestion des groupes</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>MOUSSEFER</h4>
+          <ul>
+            <li><a routerLink="/about">À propos</a></li>
+            <li><a routerLink="/contact">Contact</a></li>
+            <li><a routerLink="/conditions">Conditions</a></li>
+            <li><a routerLink="/privacy">Confidentialité</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Moussefer. Tous droits réservés.</p>
+        <div class="footer-links">
+          <span>Mentions légales</span> | <span>Confidentialité</span> | <span>Cookies</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

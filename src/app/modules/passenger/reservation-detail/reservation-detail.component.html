@@ -1,0 +1,439 @@
+<div class="booking-page">
+
+  <!-- STEP 1: SÉLECTION -->
+  @if (step === 'select') {
+    <div class="back-bar">
+      <div class="back-inner">
+        <div>
+          <button class="btn-back" (click)="goBack()">
+            <i class="bi bi-arrow-left"></i> Retour
+          </button>
+          @if (tripDetails) {
+            <div class="trip-title">{{ tripDetails.departureCity }} → {{ tripDetails.arrivalCity }}</div>
+          }
+          @if (voyageDetails) {
+            <div class="trip-title">{{ voyageDetails.title }}</div>
+          }
+          @if (tripDetails) {
+            <div class="trip-sub">
+              <span><i class="bi bi-calendar3 me-1"></i>{{ tripDetails.departureDate | date:'EEEE d MMMM' }}</span>
+              <span><i class="bi bi-clock me-1"></i>{{ tripDetails.departureDate | date:'HH:mm' }}</span>
+            </div>
+          }
+        </div>
+        @if (tripDetails) {
+          <div class="trip-price-right">
+            <div class="trip-price-label">Prix par siège</div>
+            <span class="trip-price-amount">{{ tripDetails.pricePerSeat }}</span>
+            <span class="trip-price-unit"> TND</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="text-center py-5">
+        <div class="spinner-border" style="color:#12b76a"></div>
+      </div>
+    }
+
+    @if (!loading) {
+      @if (!reservation) {
+        <div class="booking-body">
+          <div>
+            <div class="bcard">
+              <div class="bcard-title">{{ partyTitle }}</div>
+              <div class="driver-row">
+                <div class="driver-avatar">
+                  {{ partyInitial }}
+                  <span class="online-dot"></span>
+                </div>
+                <div>
+                  <div class="driver-name">{{ partyName }}</div>
+                  <div class="driver-rating">
+                    <span class="star">★</span> 4.8
+                    <span class="avis">{{ avisList.length || 0 }} avis</span>
+                  </div>
+                </div>
+              </div>
+              <div class="driver-actions">
+                <button class="btn-msg" (click)="openChat()">
+                  <i class="bi bi-chat-dots-fill"></i> Envoyer un message
+                </button>
+              </div>
+
+              @if (type === 'trajet') {
+                <div class="bcard-title" style="margin-top:20px;margin-bottom:12px">Véhicule</div>
+                <div class="vehicle-row">
+                  <i class="bi bi-car-front-fill vehicle-icon"></i>
+                  <div>
+                    <div class="vehicle-info">{{ driverInfo?.vehicleBrand || '—' }} {{ driverInfo?.vehicleModel || '' }}</div>
+                    <div class="vehicle-plate">{{ driverInfo?.vehiclePlate || '—' }}</div>
+                  </div>
+                </div>
+              }
+
+              @if (type === 'voyage' && voyageDetails) {
+                <div class="bcard-title" style="margin-top:20px;margin-bottom:12px">Agence / programme</div>
+                <div class="vehicle-row">
+                  <i class="bi bi-building vehicle-icon"></i>
+                  <div>
+                    <div class="vehicle-info">{{ voyageDetails.title || 'Voyage organisé' }}</div>
+                    <div class="vehicle-plate">{{ voyageDetails.departureCity }} → {{ voyageDetails.arrivalCity }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (tripDetails || voyageDetails) {
+              <div class="bcard">
+                <div class="bcard-title">
+                  {{ type === 'voyage' ? 'Détails du voyage' : 'Détails du trajet' }}
+                </div>
+                <div class="detail-item">
+                  <i class="bi bi-people-fill detail-icon"></i>
+                  <div style="flex:1">
+                    <div class="detail-text-title">Places disponibles</div>
+                    <div class="detail-text-sub">
+                      @if (type === 'voyage' && voyageDetails) {
+                        {{ voyageDetails.availableSeats }} places restantes
+                        @if (voyageDetails.totalSeats) { / {{ voyageDetails.totalSeats }} }
+                      } @else if (tripDetails) {
+                        {{ tripDetails.availableSeats }} places restantes
+                      }
+                    </div>
+                    @if (type === 'trajet' && tripDetails) {
+                      <div class="detail-bar">
+                        <div class="detail-bar-fill" [style.width.%]="(tripDetails.totalSeats - tripDetails.availableSeats) / tripDetails.totalSeats * 100"></div>
+                      </div>
+                    } @else if (type === 'voyage' && voyageDetails && voyageDetails.totalSeats) {
+                      <div class="detail-bar">
+                        <div class="detail-bar-fill" [style.width.%]="(voyageDetails.totalSeats - voyageDetails.availableSeats) / voyageDetails.totalSeats * 100"></div>
+                      </div>
+                    }
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <i class="bi bi-shield-check detail-icon"></i>
+                  <div>
+                    @if (type === 'voyage') {
+                      <div class="detail-text-title">Organisateur vérifié</div>
+                      <div class="detail-text-sub">Agence enregistrée sur Moussefer</div>
+                    } @else {
+                      <div class="detail-text-title">Chauffeur vérifié</div>
+                      <div class="detail-text-sub">Permis de conduire et assurance validés</div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (avisList.length > 0) {
+              <div class="bcard">
+                <div class="bcard-title">Avis des passagers ({{ avisList.length }})</div>
+                @for (avis of avisList.slice(0, 3); track avis.id) {
+                  <div class="review-item">
+                    <div class="review-avatar av-teal">{{ (avis.passengerId?.charAt(0) || 'P') | uppercase }}</div>
+                    <div style="flex:1">
+                      <div class="review-name">Passager vérifié</div>
+                      <div class="review-text">{{ avis.comment || 'Très bon service.' }}</div>
+                      <div class="review-date">{{ avis.createdAt | date:'d MMMM yyyy' }}</div>
+                    </div>
+                    <div class="review-stars">
+                      @for (s of [1,2,3,4,5]; track s) {
+                        <span>{{ s <= avis.rating ? '★' : '☆' }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <div>
+            <div class="booking-widget">
+              <div class="widget-title">
+                {{ type === 'voyage' ? 'Réserver ce voyage' : 'Réserver ce trajet' }}
+              </div>
+              <div class="widget-row">
+                <span class="widget-label">Prix par siège</span>
+                <span class="widget-val green">{{ tripDetails?.pricePerSeat || voyageDetails?.pricePerSeat }} DT</span>
+              </div>
+              <div class="widget-row">
+                <span class="widget-label">Places disponibles</span>
+                <span class="widget-val">{{ tripDetails?.availableSeats || voyageDetails?.availableSeats }}</span>
+              </div>
+              <hr class="widget-divider">
+              <p style="font-size:13px;color:#667085;margin-bottom:8px">Nombre de places</p>
+
+              @if (type === 'trajet') {
+                <div class="seats-grid" style="margin-bottom:14px">
+                  @for (n of seatRange; track n) {
+                    <button class="seat-btn"
+                            [class.selected]="seatsNeeded === n"
+                            (click)="seatsNeeded = n; updateTotal()"
+                            [disabled]="n > (tripDetails?.availableSeats || 0)">
+                      {{ n }}
+                    </button>
+                  }
+                </div>
+              } @else {
+                <div class="seat-stepper" style="margin-bottom:14px">
+                  <button class="stepper-btn" type="button" (click)="decrementSeats()" [disabled]="seatsNeeded <= 1" aria-label="Diminuer">−</button>
+                  <input class="stepper-input" type="number" inputmode="numeric" min="1" [max]="voyageDetails?.availableSeats || 1" [ngModel]="seatsNeeded" (ngModelChange)="onSeatsInputChange($event)" aria-label="Nombre de places" />
+                  <button class="stepper-btn" type="button" (click)="incrementSeats()" [disabled]="seatsNeeded >= (voyageDetails?.availableSeats || 1)" aria-label="Augmenter">+</button>
+                </div>
+                <p class="stepper-help">Entre 1 et {{ voyageDetails?.availableSeats || 0 }} places — défini par l'organisateur.</p>
+              }
+              <button class="btn-reserve" (click)="confirmReservation()" [disabled]="isProcessing || (type === 'voyage' && !voyageDetails) || (type === 'trajet' && !tripDetails)">
+                @if (isProcessing) { <span class="spinner-border spinner-border-sm me-2"></span> }
+                {{ isProcessing ? 'Envoi...' : 'Réserver maintenant' }}
+              </button>
+              <div class="widget-note">
+                <i class="bi bi-check-circle-fill note-icon"></i>
+                <span>Annulation gratuite sous condition</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  }
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 2a: WAITING FOR DRIVER ACCEPTANCE (TRAJET LOUAGE UNIQUEMENT)
+       ═══════════════════════════════════════════════════════ -->
+  @if (step === 'waiting_driver') {
+    <div class="stepper-page" style="display:flex;align-items:center;justify-content:center">
+      <div class="bcard" style="max-width:460px;text-align:center;padding:40px">
+        @if (type === 'trajet') {
+          <!-- ⏱ Timer UNIQUEMENT pour le louage -->
+          <div class="spinner-border mb-3" style="color:#12b76a;width:48px;height:48px;border-width:4px"></div>
+          <h2 style="font-size:20px;font-weight:700;color:#101828;margin:0 0 8px">En attente de validation</h2>
+          <p style="font-size:14px;color:#667085;margin:0 0 16px">Votre demande a été envoyée au chauffeur.</p>
+          <div style="font-size:24px;font-weight:700;color:#1e3a6b">{{ countdownDisplay }}</div>
+          <p style="font-size:12px;color:#98a2b3;margin-top:4px">Temps restant</p>
+          <button class="btn btn-outline-secondary mt-3" (click)="cancelAndGoBack()">Annuler</button>
+        } @else {
+          <!-- Voyage organisé : pas de timer (sécurité, ne devrait pas atterrir ici) -->
+          <div class="spinner-border mb-3" style="color:#12b76a;width:48px;height:48px;border-width:4px"></div>
+          <h2 style="font-size:20px;font-weight:700;color:#101828;margin:0 0 8px">Demande envoyée</h2>
+          <p style="font-size:14px;color:#667085;margin:0 0 16px">Votre réservation a été enregistrée. L'organisateur la confirmera sous peu.</p>
+          <button class="btn btn-outline-secondary mt-3" (click)="cancelAndGoBack()">Annuler</button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- STEP 2b: PAYMENT -->
+  @if (step === 'payment') {
+    <div class="stepper-page">
+      <div style="max-width:1060px;margin:0 auto;padding:0 20px;margin-bottom:28px">
+        <div class="stepper">
+          <div class="step-wrap"><div class="step-item"><div class="step-circle done"><i class="bi bi-check-lg"></i></div><div class="step-label">Sélection</div></div></div>
+          <div class="step-line done"></div>
+          <div class="step-wrap"><div class="step-item"><div class="step-circle active">2</div><div class="step-label active">Paiement</div></div></div>
+          <div class="step-line"></div>
+          <div class="step-wrap"><div class="step-item"><div class="step-circle">3</div><div class="step-label">Confirmation</div></div></div>
+        </div>
+      </div>
+
+      <div class="stepper-body">
+        @if (!paymentProvider) {
+          <div class="bcard" style="max-width:600px">
+            <div class="bcard-title">Choisir le mode de paiement</div>
+            <p style="font-size:13px;color:#667085;margin-bottom:20px">Sélectionnez votre méthode de paiement préférée.</p>
+
+            <button type="button" (click)="chooseKonnect()" style="display:flex;width:100%;align-items:center;gap:16px;padding:16px 18px;border:2px solid #12b76a;border-radius:12px;background:#f6fef9;margin-bottom:12px;cursor:pointer;text-align:left">
+              <div style="font-size:32px;line-height:1">🇹🇳</div>
+              <div style="flex:1">
+                <div style="font-size:15px;font-weight:600;color:#101828">Konnect — Paiement 100% tunisien</div>
+                <div style="font-size:12px;color:#667085;margin-top:4px">Carte bancaire tunisienne, e-Dinar, wallet Konnect, Flouci</div>
+              </div>
+              <div style="font-size:11px;font-weight:600;color:#027a48;background:#dcfae6;padding:4px 8px;border-radius:6px;white-space:nowrap">Recommandé</div>
+            </button>
+
+            <button type="button" (click)="chooseStripe()" style="display:flex;width:100%;align-items:center;gap:16px;padding:16px 18px;border:1px solid #d0d5dd;border-radius:12px;background:#ffffff;cursor:pointer;text-align:left">
+              <div style="font-size:32px;line-height:1">💳</div>
+              <div style="flex:1">
+                <div style="font-size:15px;font-weight:600;color:#101828">Stripe — Carte internationale</div>
+                <div style="font-size:12px;color:#667085;margin-top:4px">Visa, Mastercard, Amex (hors Tunisie)</div>
+              </div>
+            </button>
+
+            <div class="btn-step-row" style="margin-top:20px">
+              <button class="btn-back-step" (click)="goBack()">Retour</button>
+            </div>
+          </div>
+        }
+
+        @if (paymentProvider === 'KONNECT') {
+          <div class="bcard" style="max-width:520px;text-align:center;padding:32px">
+            @if (konnectLoading) {
+              <div class="spinner-border mb-3" style="color:#12b76a;width:42px;height:42px;border-width:4px"></div>
+              <h3 style="font-size:18px;font-weight:600;color:#101828;margin:0 0 6px">Redirection vers Konnect…</h3>
+              <p style="font-size:13px;color:#667085;margin:0">Ne fermez pas cette fenêtre.</p>
+            } @else if (paymentError) {
+              <i class="bi bi-exclamation-circle" style="font-size:42px;color:#dc2626"></i>
+              <h3 style="font-size:18px;font-weight:600;color:#101828;margin:12px 0 6px">Erreur de paiement</h3>
+              <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;color:#dc2626;margin:12px 0">{{ paymentError }}</div>
+              <button class="btn-back-step" (click)="resetPaymentProvider()">Choisir un autre mode</button>
+            }
+          </div>
+        }
+
+        @if (paymentProvider === 'STRIPE' && !stripeCurrency && !paymentLoading) {
+          <div class="bcard" style="max-width:600px">
+            <div class="bcard-title">Choisir la devise de paiement</div>
+            <p style="font-size:13px;color:#667085;margin-bottom:20px">Stripe ne supporte pas le TND. Choisissez la devise de débit.</p>
+
+            <button type="button" (click)="chooseStripeCurrency('EUR')" style="display:flex;width:100%;align-items:center;justify-content:space-between;padding:14px 18px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;margin-bottom:10px;cursor:pointer;text-align:left">
+              <div><div style="font-size:15px;font-weight:600;color:#101828">🇪🇺 Euro (EUR)</div><div style="font-size:12px;color:#667085;margin-top:2px">Taux : 1 EUR = {{ stripeRates.EUR }} TND</div></div>
+              <div style="font-size:15px;font-weight:600;color:#101828">≈ {{ (finalPrice / stripeRates.EUR) | number:'1.2-2' }} €</div>
+            </button>
+            <button type="button" (click)="chooseStripeCurrency('USD')" style="display:flex;width:100%;align-items:center;justify-content:space-between;padding:14px 18px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;margin-bottom:10px;cursor:pointer;text-align:left">
+              <div><div style="font-size:15px;font-weight:600;color:#101828">🇺🇸 US Dollar (USD)</div><div style="font-size:12px;color:#667085;margin-top:2px">Taux : 1 USD = {{ stripeRates.USD }} TND</div></div>
+              <div style="font-size:15px;font-weight:600;color:#101828">≈ {{ (finalPrice / stripeRates.USD) | number:'1.2-2' }} $</div>
+            </button>
+            <button type="button" (click)="chooseStripeCurrency('GBP')" style="display:flex;width:100%;align-items:center;justify-content:space-between;padding:14px 18px;border:1px solid #d0d5dd;border-radius:10px;background:#fff;margin-bottom:10px;cursor:pointer;text-align:left">
+              <div><div style="font-size:15px;font-weight:600;color:#101828">🇬🇧 British Pound (GBP)</div><div style="font-size:12px;color:#667085;margin-top:2px">Taux : 1 GBP = {{ stripeRates.GBP }} TND</div></div>
+              <div style="font-size:15px;font-weight:600;color:#101828">≈ {{ (finalPrice / stripeRates.GBP) | number:'1.2-2' }} £</div>
+            </button>
+
+            <div class="btn-step-row" style="margin-top:16px">
+              <button class="btn-back-step" (click)="resetPaymentProvider()">Changer de mode</button>
+            </div>
+          </div>
+        }
+
+        @if (paymentProvider === 'STRIPE' && stripeCurrency) {
+          <div class="bcard">
+            <div class="bcard-title">Paiement sécurisé ({{ stripeCurrency }})</div>
+            <p style="font-size:13px;color:#667085;margin-bottom:14px">Veuillez saisir les informations de votre carte</p>
+
+            @if (paymentLoading) {
+              <div class="text-center py-4">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-2" style="color:#667085">Initialisation du paiement...</p>
+              </div>
+            } @else {
+              <div class="mb-3">
+                <label class="form-label">Numéro de carte *</label>
+                <input type="text" class="form-control" [(ngModel)]="cardNumber" placeholder="4242 4242 4242 4242" maxlength="19" (input)="formatCardNumber($event)">
+              </div>
+              <div class="row" style="display:flex;gap:12px;margin-bottom:16px">
+                <div style="flex:1">
+                  <label class="form-label">Date d'expiration *</label>
+                  <input type="text" class="form-control" [(ngModel)]="cardExpiry" placeholder="MM/YY" maxlength="5" (input)="formatExpiry($event)">
+                </div>
+                <div style="flex:1">
+                  <label class="form-label">CVV *</label>
+                  <input type="text" class="form-control" [(ngModel)]="cardCvv" placeholder="123" maxlength="4">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Nom sur la carte</label>
+                <input type="text" class="form-control" [(ngModel)]="cardHolderName" placeholder="Wael Mjaied">
+              </div>
+
+              <div class="mb-3" style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;background:#fafafa">
+                <label class="form-label" style="font-size:13px;font-weight:600;color:#344054;margin-bottom:6px"><i class="bi bi-tag me-1"></i>Code promo (optionnel)</label>
+                <div style="display:flex;gap:8px">
+                  <input type="text" class="form-control" [(ngModel)]="promoCode" placeholder="Ex: MOUSSEFER10" [disabled]="promoLoading || discountedPrice !== null" style="text-transform:uppercase">
+                  @if (discountedPrice === null) {
+                    <button type="button" class="btn" (click)="applyPromo()" [disabled]="!promoCode.trim() || promoLoading" style="background:#12b76a;color:white;font-weight:600;min-width:100px">
+                      @if (promoLoading) { <span class="spinner-border spinner-border-sm"></span> } @else { Appliquer }
+                    </button>
+                  } @else {
+                    <button type="button" class="btn btn-outline-secondary" (click)="promoCode=''; discountedPrice=null; promoMessage=''; updateFinalPrice()" style="min-width:100px"><i class="bi bi-x"></i> Retirer</button>
+                  }
+                </div>
+                @if (promoMessage) {
+                  <small [style.color]="discountedPrice !== null ? '#027a48' : '#dc2626'" style="font-size:12px;display:block;margin-top:6px">
+                    @if (discountedPrice !== null) { <i class="bi bi-check-circle me-1"></i> } @else { <i class="bi bi-exclamation-circle me-1"></i> }
+                    {{ promoMessage }}
+                  </small>
+                }
+              </div>
+
+              @if (pointsBalance > 0) {
+                <div class="mb-3" style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;background:#fafafa">
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0">
+                    <input type="checkbox" [(ngModel)]="usePoints" (change)="togglePoints()" style="width:18px;height:18px;cursor:pointer">
+                    <div style="flex:1">
+                      <div style="font-size:13px;font-weight:600;color:#344054"><i class="bi bi-star-fill me-1" style="color:#f79009"></i>Utiliser mes points fidélité</div>
+                      <div style="font-size:12px;color:#667085;margin-top:2px">Solde : <strong>{{ pointsBalance }} points</strong> (≈ {{ pointsBalance / pointsConversionRate | number:'1.2-2' }} DT)</div>
+                    </div>
+                    @if (usePoints && pointsDiscount > 0) {
+                      <span style="color:#027a48;font-weight:600;font-size:13px">-{{ pointsDiscount | number:'1.2-2' }} DT</span>
+                    }
+                  </label>
+                </div>
+              }
+
+              @if (paymentError) {
+                <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;color:#dc2626;margin-bottom:12px"><i class="bi bi-exclamation-circle me-1"></i>{{ paymentError }}</div>
+              }
+
+              <div class="btn-step-row">
+                <button class="btn-back-step" (click)="resetPaymentProvider()">Changer de mode</button>
+                <button class="btn-next-step" (click)="submitCardPayment()" [disabled]="stripeProcessing || !isCardFormValid()">
+                  @if (stripeProcessing) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                  {{ stripeProcessing ? 'Traitement...' : 'Payer ' + (finalPrice | number:'1.2-2') + ' DT' }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        @if (paymentProvider === 'STRIPE' && stripeCurrency) {
+          <div class="booking-widget">
+            <div class="widget-title">Récapitulatif</div>
+            <div class="summary-date">{{ tripDetails?.departureDate | date:'EEEE, dd MMMM yyyy' }}</div>
+            @if (tripDetails) {
+              <div class="summary-stop"><span class="time">{{ tripDetails.departureDate | date:'HH:mm' }}</span><span class="dot dot-from"></span><span>{{ tripDetails.departureCity }}</span></div>
+              <div class="summary-line"></div>
+              <div class="summary-stop"><span class="time"></span><span class="dot dot-to"></span><span>{{ tripDetails.arrivalCity }}</span></div>
+            }
+            <hr class="widget-divider">
+            <div class="summary-billing-title">Facturation:</div>
+            <div class="summary-line-item"><span class="lbl">Montant :</span><span class="val">{{ totalPrice | number:'1.2-2' }} DT</span></div>
+            @if (discountedPrice !== null) {
+              <div class="summary-line-item"><span class="lbl" style="color:#027a48">Promo :</span><span class="val" style="color:#027a48">-{{ totalPrice - discountedPrice | number:'1.2-2' }} DT</span></div>
+            }
+            @if (usePoints && pointsDiscount > 0) {
+              <div class="summary-line-item"><span class="lbl" style="color:#027a48">Points :</span><span class="val" style="color:#027a48">-{{ pointsDiscount | number:'1.2-2' }} DT</span></div>
+            }
+            <div class="summary-total"><span>Total :</span><span class="total-green">{{ finalPrice | number:'1.2-2' }} DT</span></div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- STEP 3: CONFIRMATION -->
+  @if (step === 'confirmed') {
+    <div class="stepper-page" style="display:flex;align-items:center;justify-content:center">
+      <div class="bcard" style="max-width:500px;text-align:center;padding:40px">
+        <div class="confirm-icon"><i class="bi bi-check-lg"></i></div>
+        <h2 style="font-size:22px;font-weight:700;color:#101828;margin:0 0 8px">Réservation confirmée !</h2>
+        <p style="font-size:14px;color:#667085;margin:0 0 24px">Votre paiement a été reçu. Bon voyage !</p>
+        @if (reservation) {
+          <div style="background:#f8f9fc;border-radius:12px;padding:16px;text-align:left;margin-bottom:24px">
+            <div class="summary-line-item"><span class="lbl">Référence</span><span class="val" style="font-family:monospace">{{ reservation.id | slice:0:12 }}…</span></div>
+            <div class="summary-line-item"><span class="lbl">Places</span><span class="val">{{ seatsNeeded }}</span></div>
+            <div class="summary-line-item"><span class="lbl">Montant payé</span><span class="val" style="color:#12b76a">{{ finalPrice | number:'1.2-2' }} DT</span></div>
+          </div>
+          @if (qrCodeData) {
+            <div style="margin-bottom:20px">
+              <img [src]="qrCodeData" alt="QR Code" style="width:150px;height:150px">
+              <p style="font-size:12px;color:#667085;margin-top:8px">Présentez ce QR code à l'organisateur</p>
+            </div>
+          }
+        }
+        <a routerLink="/passenger/my-reservations" style="display:inline-block;background:linear-gradient(135deg,#1e3a6b,#2d5a9e);color:#fff;border-radius:10px;padding:12px 28px;font-weight:700;text-decoration:none;font-size:14px">Voir mes réservations</a>
+      </div>
+    </div>
+  }
+
+</div>

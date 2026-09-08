@@ -1,0 +1,9 @@
+<app-header *ngIf="!hideHeaderAndFooter && !isPassengerSearchRoute"></app-header>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
+
+<app-footer *ngIf="!hideHeaderAndFooter"></app-footer>
+
+<app-toast></app-toast>

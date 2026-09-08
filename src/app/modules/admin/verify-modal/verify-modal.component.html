@@ -1,0 +1,15 @@
+<!-- Sidebar -->
+<app-admin-sidebar></app-admin-sidebar>
+<div class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Vérifier l'utilisateur</h3>
+      <button class="btn-close" (click)="close.emit()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Marquer {{ user?.name }} comme vérifié ?</p>
+      <button class="btn btn-success" (click)="setVerified(true)" [disabled]="submitting">Oui</button>
+      <button class="btn btn-danger ms-2" (click)="setVerified(false)" [disabled]="submitting">Non</button>
+    </div>
+  </div>
+</div>

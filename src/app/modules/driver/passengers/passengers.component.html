@@ -1,0 +1,98 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+  <div class="main-col">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Passagers</h1>
+        <p>{{ today | date:'EEEE d MMMM yyyy' }} - {{ rows.length }} passagers actifs sur le trajet en cours</p>
+      </div>
+      <div class="header-right">
+        <span class="online-badge">En ligne</span>
+        <a routerLink="/driver/publish" class="btn-publish"><i class="bi bi-plus-lg"></i>Publier un trajet</a>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner-border text-primary"></div></div>
+    <div class="empty-state" *ngIf="!loading && rows.length === 0"><i class="bi bi-people" style="font-size:36px;display:block;margin-bottom:10px"></i>Aucun passager actuel</div>
+
+    <!-- Active passengers cards -->
+    <div *ngFor="let r of rows">
+      <div class="pass-card dcard">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="d-flex align-items-center gap-12px">
+            <div class="pass-avatar">{{ r.passengerId.charAt(0).toUpperCase() || 'P' }}</div>
+            <div>
+              <div class="pass-name">{{ r.passengerName || 'Passager' }}</div>
+              <div class="pass-phone">{{ r.passengerPhone || '+216 —' }}</div>
+              <div class="d-flex gap-2 mt-1">
+                <span class="status-pill s-active" style="font-size:10px">En cours</span>
+                <span style="background:#1e3a6b;color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:999px">Place {{ r.seatsReserved }}</span>
+              </div>
+            </div>
+          </div>
+          <span class="status-pill s-active">Payé</span>
+        </div>
+
+        <!-- Stats -->
+        <div class="d-flex gap-3 mb-3">
+          <div class="pass-stat">
+            <div class="pass-stat-val">{{ r.totalTrips || 8 }}</div>
+            <div class="pass-stat-label">Trajets</div>
+          </div>
+          <div class="pass-stat" style="border-color:#1e3a6b;color:#1e3a6b">
+            <div class="pass-stat-val" style="color:#1e3a6b">{{ r.totalPrice }} DT</div>
+            <div class="pass-stat-label">Ce trajet</div>
+          </div>
+          <div class="pass-stat">
+            <div class="pass-stat-val">{{ r.rating || '4.8' }} <i class="bi bi-star-fill" style="color:#f59e0b;font-size:13px"></i></div>
+            <div class="pass-stat-label">Note</div>
+          </div>
+        </div>
+
+        <div style="background:#f8f9fc;border-radius:8px;padding:10px 14px;font-size:12px;color:#667085;margin-bottom:14px">
+          Dernier trajet : {{ r.departureCity || 'Tunis' }} &nbsp;{{ r.arrivalCity || 'Sfax' }} : {{ r.createdAt | date:'d MMMM' }}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <div style="font-size:13px;font-weight:700;color:#1e3a6b">
+            {{ r.rating || '4.8' }} <i class="bi bi-star-fill" style="color:#f59e0b;font-size:11px"></i>
+            <span style="color:#98a2b3;font-weight:400">({{ r.totalReviews || 41 }} avis)</span>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn-accept" routerLink="/driver/messages">Message</button>
+            <button class="btn-banner">Voir le profil</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmed table -->
+    <div class="section-title" *ngIf="confirmed.length > 0">Confirmés - Prochain trajets</div>
+    <div class="confirmed-table" *ngIf="confirmed.length > 0">
+      <table class="dtable">
+        <thead>
+          <tr><th>Passagers</th><th>Trajets</th><th>Date</th><th>Place</th><th>Paiement</th><th>Note</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of confirmed">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar-xs av-b">{{ r.passengerId.charAt(0).toUpperCase() || 'P' }}</div>
+                <span style="font-size:13px;font-weight:600">{{ r.passengerName || 'Passager' }}</span>
+              </div>
+            </td>
+            <td>
+              <span style="color:#1e3a6b;font-weight:600">{{ r.departureCity || '—' }}</span>
+              <span style="color:#98a2b3;margin:0 4px">→</span>
+              <span style="color:#12b76a;font-weight:600">{{ r.arrivalCity || '—' }}</span>
+            </td>
+            <td style="color:#667085;font-size:13px">{{ r.createdAt | date:'d MMMM' }}</td>
+            <td><button class="btn-accept" routerLink="/driver/messages" style="font-size:11px;padding:4px 10px">Message</button></td>
+            <td><span class="status-pill s-active" style="font-size:10px">Payé</span></td>
+            <td style="color:#f59e0b">★★★★★</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

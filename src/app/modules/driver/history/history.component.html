@@ -1,0 +1,103 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+  <div class="main-col">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Historiques des trajets</h1>
+        <p>{{ today | date:'EEEE d MMMM yyyy' }} - {{ history.length }} trajets effectués ce mois</p>
+      </div>
+      <div class="header-right">
+        <span class="online-badge">En ligne</span>
+        <a routerLink="/driver/publish" class="btn-publish"><i class="bi bi-plus-lg"></i>Publier un trajet</a>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner-border text-primary"></div></div>
+
+    <ng-container *ngIf="!loading">
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-label">Total trajet</div><div class="kpi-value">{{ history.length }}</div><div class="kpi-sub up">+24 ce dernier</div></div>
+        <div class="kpi-card"><div class="kpi-label">Revenus totaux</div><div class="kpi-value">{{ totalRevenue | number:'1.0-0' }}DT</div><div class="kpi-sub up">+336DT ce mois</div></div>
+        <div class="kpi-card"><div class="kpi-label">Passagers totaux</div><div class="kpi-value">{{ totalPassengers }}</div><div class="kpi-sub up">+58 ce mois</div></div>
+        <div class="kpi-card"><div class="kpi-label">Taux remplissage</div><div class="kpi-value">{{ fillRate }}%</div><div class="kpi-sub" style="color:#dc2626">-3% mois dernier</div></div>
+      </div>
+
+      <!-- Destinations chart -->
+      <div class="dcard dest-chart-card">
+        <div class="rev-title">Trajets par destination</div>
+        <div class="dest-chart-body">
+          <div class="donut-wrap">
+            <div class="donut-circle">
+              <div class="donut-center">
+                <div style="font-size:22px;font-weight:800;color:#1e3a6b">{{ history.length }}</div>
+                <div style="font-size:11px;color:#98a2b3">Trajets</div>
+              </div>
+            </div>
+          </div>
+          <div class="dest-legend">
+            <div *ngFor="let d of destinationStats" class="dest-legend-row">
+              <span class="dest-dot" [style.background]="d.color"></span>
+              <span class="dest-label">{{ d.label }}</span>
+              <span class="dest-count">{{ d.count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter tabs + trajets -->
+      <div class="d-flex align-items-center justify-content-between mb-3 mt-3">
+        <div class="filter-tabs">
+          <button class="ftab" [class.ftab-active]="filterTab==='all'" (click)="filterTab='all';applyFilter()">Tous</button>
+          <button class="ftab" [class.ftab-active]="filterTab==='done'" (click)="filterTab='done';applyFilter()">Terminés</button>
+          <button class="ftab" [class.ftab-active]="filterTab==='cancelled'" (click)="filterTab='cancelled';applyFilter()">Annulés</button>
+        </div>
+        <input type="text" class="filter-search" placeholder="Destinations , date" [(ngModel)]="filterSearch" (input)="applyFilter()">
+      </div>
+
+      <div class="dtable-wrap">
+        <table class="dtable">
+          <thead>
+            <tr>
+              <th>Date</th><th>Trajets</th><th>Départ</th><th>Durée</th>
+              <th>Passagers</th><th>Remplissage</th><th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of filtered">
+              <td style="color:#667085;font-size:13px">{{ t.departureDate | date:'d MMMM' }}</td>
+              <td>
+                <span style="color:#1e3a6b;font-weight:700">{{ t.departureCity }}</span>
+                <span style="color:#12b76a;font-weight:700;margin:0 6px">→</span>
+                <span style="color:#12b76a;font-weight:700">{{ t.arrivalCity }}</span>
+              </td>
+              <td>{{ t.departureDate | date:'HH:mm' }}</td>
+              <td>{{ t.duration || '3h30' }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-1">
+                  <div class="avatar-pile">
+                    <div class="avatar-xs av-b">L</div>
+                    <div class="avatar-xs av-a">M</div>
+                    <div class="avatar-xs av-c">A</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="fill-track"><div class="fill-bar-inner" [style.width.%]="getFillPct(t)"></div></div>
+                  <span style="font-size:11px;font-weight:700;color:#12b76a">{{ getFillPct(t) }}%</span>
+                  <span style="font-size:12px;font-weight:700;color:#12b76a">{{ getRevenue(t) }}DT</span>
+                </div>
+              </td>
+              <td style="color:#f59e0b;font-size:14px">
+                <span *ngFor="let s of [1,2,3,4,5]">{{ s <= (t.avgRating || 4) ? '★' : '☆' }}</span>
+              </td>
+            </tr>
+            <tr *ngIf="filtered.length === 0">
+              <td colspan="7" style="text-align:center;padding:40px;color:#98a2b3">Aucun trajet dans l'historique</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+  </div>
+</div>

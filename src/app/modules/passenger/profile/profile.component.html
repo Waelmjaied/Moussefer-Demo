@@ -1,0 +1,116 @@
+<div class="profile-page">
+  <!-- Header mobile -->
+  <header class="mobile-page-header">
+    <h1 class="mobile-title">Mon profil</h1>
+    <div class="spacer"></div>
+  </header>
+
+  <div class="profile-content">
+    <!-- Desktop header -->
+    <div class="section-header desktop-only">
+      <div>
+        <h1 class="section-title">Mon profil</h1>
+        <p class="section-sub">{{ isEditing ? 'Modifiez vos informations' : 'Gérez vos informations personnelles' }}</p>
+      </div>
+      <div class="online-badge">En ligne</div>
+    </div>
+
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border" style="color:#12b76a"></div>
+    </div>
+
+    <ng-container *ngIf="!loading && user">
+      <!-- Hero card -->
+      <div class="hero-card">
+        <div class="hero-avatar" [class.has-photo]="user.profilePictureUrl" (click)="isEditing && fileInput.click()">
+          <img *ngIf="user.profilePictureUrl" [src]="user.profilePictureUrl" alt="Photo" class="avatar-photo">
+          <span *ngIf="!user.profilePictureUrl">{{ initials }}</span>
+          <div class="avatar-overlay" *ngIf="isEditing">
+            <i class="bi bi-camera"></i>
+          </div>
+        </div>
+        <input #fileInput type="file" accept="image/*" style="display:none" (change)="onPhotoSelected($event)">
+        <div class="hero-info">
+          <div class="hero-name">{{ user.name }}</div>
+          <div class="hero-role">Passager · Membre depuis {{ joinedDate }}</div>
+          <div class="hero-badges">
+            <span class="hero-badge"><i class="bi bi-pencil-square"></i>Note {{ user.averageRating || '4.8' }}/5</span>
+            <span class="hero-badge"><i class="bi bi-star"></i>{{ totalTrips }} voyages</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal info -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="info-card-title"><i class="bi bi-person"></i>Informations personnelles</div>
+          <button class="btn-modify" (click)="toggleEdit()" [class.save-mode]="isEditing">
+            <i class="bi" [class.bi-pencil-square]="!isEditing" [class.bi-check-lg]="isEditing"></i>
+            {{ isEditing ? 'Enregistrer' : 'Modifier' }}
+          </button>
+        </div>
+
+        <!-- VIEW MODE -->
+        <ng-container *ngIf="!isEditing">
+          <div class="info-grid">
+            <div class="info-field">
+              <div class="info-label">Nom complet</div>
+              <div class="info-value">{{ user.name }}</div>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="info-grid">
+            <div class="info-field">
+              <div class="info-label">Email</div>
+              <div class="info-value email-locked">
+                <i class="bi bi-lock-fill"></i>{{ user.email }}
+              </div>
+            </div>
+            <div class="info-field">
+              <div class="info-label">Téléphone</div>
+              <div class="info-value">{{ user.phoneNumber || '+216 — — —' }}</div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- EDIT MODE -->
+        <ng-container *ngIf="isEditing">
+          <form [formGroup]="editForm" (ngSubmit)="saveProfile()">
+            <div class="info-grid">
+              <div class="info-field">
+                <div class="info-label">Nom complet</div>
+                <input type="text" formControlName="name" class="edit-input">
+              </div>
+            </div>
+            <hr class="divider">
+            <div class="info-grid">
+              <div class="info-field">
+                <div class="info-label">Email <span class="lock-hint">(non modifiable)</span></div>
+                <div class="info-value email-locked">
+                  <i class="bi bi-lock-fill"></i>{{ user.email }}
+                </div>
+              </div>
+              <div class="info-field">
+                <div class="info-label">Téléphone</div>
+                <input type="tel" formControlName="phoneNumber" class="edit-input">
+              </div>
+            </div>
+            <div class="edit-actions">
+              <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+              <button type="submit" class="btn-save" [disabled]="editForm.invalid || saving">
+                <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
+            </div>
+          </form>
+        </ng-container>
+      </div>
+
+      <!-- Photo upload status -->
+      <div class="upload-status" *ngIf="uploadStatus" [class.error]="uploadStatus.type === 'error'">
+        <i class="bi" [class.bi-check-circle]="uploadStatus.type === 'success'" [class.bi-exclamation-triangle]="uploadStatus.type === 'error'"></i>
+        {{ uploadStatus.message }}
+      </div>
+    </ng-container>
+  </div>
+</div>

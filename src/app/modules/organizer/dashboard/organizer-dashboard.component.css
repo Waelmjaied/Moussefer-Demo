@@ -1,0 +1,520 @@
+/* ========================================
+   ORGANIZER DASHBOARD LAYOUT – PLAIN CSS
+   ======================================== */
+
+/* Root layout: sidebar + content side by side */
+:host {
+  display: flex;
+  min-height: 100vh;
+  background: #f1f5f9;
+}
+
+/* The sidebar is rendered by <app-organizer-sidebar> */
+app-organizer-sidebar {
+  flex-shrink: 0;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 2rem;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   PAGE HEADER
+   ======================================== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.btn-publish {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(95deg, #22c55e, #16a34a);
+  color: white;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-publish:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
+  color: white;
+}
+
+/* ========================================
+   ALERT BANNER
+   ======================================== */
+.alert-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 14px;
+  margin-bottom: 1.5rem;
+  color: #92400e;
+}
+
+.alert-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.alert-separator {
+  opacity: 0.5;
+  margin: 0 0.25rem;
+}
+
+.alert-action {
+  padding: 0.4rem 1rem;
+  background: white;
+  color: #92400e;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.alert-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ========================================
+   KPI CARDS
+   ======================================== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpi-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.kpi-label {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-trend {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.kpi-trend.up {
+  color: #22c55e;
+}
+
+.kpi-meta {
+  font-size: 0.8rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ========================================
+   CHART CARDS
+   ======================================== */
+.chart-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+
+.card-header-custom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #64748b;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.chart-body {
+  padding: 1.5rem;
+  min-height: 200px;
+}
+
+/* ========================================
+   REVENUE CHART
+   ======================================== */
+.revenue-chart-placeholder {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 180px;
+  gap: 0.5rem;
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  gap: 0.5rem;
+}
+
+.bar-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  width: 100%;
+  max-width: 40px;
+  gap: 2px;
+}
+
+.bar-current {
+  width: 100%;
+  background: #22c55e;
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  opacity: 0.9;
+}
+
+.bar-previous {
+  width: 100%;
+  background: #e2e8f0;
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+}
+
+.bar-label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ========================================
+   ACTIVITY FEED
+   ======================================== */
+.activity-list {
+  padding: 0.5rem 0;
+}
+
+.activity-item {
+  display: flex;
+  gap: 0.875rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #f8fafc;
+  transition: background 0.2s;
+}
+
+.activity-item:hover {
+  background: #f8fafc;
+}
+
+.activity-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.icon-default { background: #dbeafe; color: #3b82f6; }
+.icon-success { background: #dcfce7; color: #22c55e; }
+.icon-phone { background: #fef3c7; color: #f59e0b; }
+.icon-message { background: #f3e8ff; color: #8b5cf6; }
+
+.activity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.15rem;
+}
+
+.activity-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin-bottom: 0.15rem;
+}
+
+.activity-time {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* ========================================
+   FILL RATE
+   ======================================== */
+.fill-rate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fill-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.fill-name {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.fill-ratio {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.progress-track {
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+
+/* ========================================
+   RESERVATION SOURCES
+   ======================================== */
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.source-item:last-child {
+  border-bottom: none;
+}
+
+.source-name {
+  width: 120px;
+  font-size: 0.85rem;
+  color: #475569;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.source-bar-track {
+  flex: 1;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.source-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.source-value {
+  width: 30px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   BOOTSTRAP ROW/COL UTILITIES (if needed)
+   ======================================== */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -0.75rem;
+  margin-left: -0.75rem;
+}
+
+.row.g-3 {
+  gap: 1rem;
+}
+
+.row.g-4 {
+  gap: 1.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+.col-lg-7 {
+  flex: 0 0 58.333333%;
+  max-width: 58.333333%;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+.col-lg-5 {
+  flex: 0 0 41.666667%;
+  max-width: 41.666667%;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+.col-md-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+/* ========================================
+   LOADING SPINNER
+   ======================================== */
+.text-center {
+  text-align: center;
+}
+
+.py-5 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.spinner-border {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border: 0.25em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.75s linear infinite;
+}
+
+.text-primary {
+  color: #0d6efd;
+}
+
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 1200px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    flex-direction: column;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .alert-banner {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .col-lg-7,
+  .col-lg-5,
+  .col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}

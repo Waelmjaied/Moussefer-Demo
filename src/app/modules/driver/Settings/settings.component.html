@@ -1,0 +1,318 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+
+  <div class="main-col">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Paramétres</h1>
+        <p>{{ today | date:'EEEE d MMMM y' }} - Gérez votre compte et vos préférences</p>
+      </div>
+      <div class="header-actions">
+        <span class="online-badge" *ngIf="user?.isOnline">
+          <span class="status-dot"></span>En ligne
+        </span>
+        <span class="online-badge offline" *ngIf="!user?.isOnline">
+          <span class="status-dot"></span>Hors ligne
+        </span>
+        <button class="btn-publish" (click)="publishTrip()">
+          <i class="bi bi-plus-lg"></i>Publier un trajet
+        </button>
+      </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <span>Dashboard</span>
+      <i class="bi bi-chevron-right"></i>
+      <span class="active">Profil Chauffeur</span>
+    </div>
+
+    <!-- Profile Title Row -->
+    <div class="profile-title-row">
+      <h2 class="profile-name">{{ user?.fullName || 'Chauffeur' }}</h2>
+      <div class="profile-actions">
+        <button class="btn-share" (click)="shareProfile()">
+          <i class="bi bi-share"></i>Partager
+        </button>
+        <button class="btn-edit" (click)="editProfile()">
+          <i class="bi bi-pencil"></i>Modifier le profil
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-center">
+      <div class="spinner-border"></div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="settings-grid" *ngIf="!loading">
+
+      <!-- Left Column -->
+      <div class="settings-col">
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+          <div class="profile-avatar-section">
+            <div class="avatar-wrapper">
+              <img *ngIf="user?.avatarUrl" [src]="user!.avatarUrl" class="avatar-img" [alt]="user?.fullName">
+              <div *ngIf="!user?.avatarUrl" class="avatar">{{ getInitials(user?.fullName) }}</div>
+              <span class="avatar-badge" *ngIf="user?.isOnline"><i class="bi bi-check"></i></span>
+            </div>
+            <h3>{{ user?.fullName || 'Chauffeur' }}</h3>
+            <p class="profile-role">{{ user?.role || 'Chauffeur Partenaire' }}</p>
+          </div>
+          <div class="profile-info">
+            <div class="info-item" *ngIf="user?.phone">
+              <i class="bi bi-telephone"></i>
+              <div>
+                <label>Téléphone</label>
+                <span>{{ user!.phone }}</span>
+              </div>
+            </div>
+            <div class="info-item" *ngIf="user?.email">
+              <i class="bi bi-envelope"></i>
+              <div>
+                <label>Email</label>
+                <span>{{ user!.email }}</span>
+              </div>
+            </div>
+            <div class="info-item" *ngIf="user?.city">
+              <i class="bi bi-geo-alt"></i>
+              <div>
+                <label>Ville</label>
+                <span>{{ user!.city }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vehicle Card -->
+        <div class="vehicle-card" *ngIf="user?.vehicleBrand">
+          <div class="vehicle-header">
+            <h4>Véhicule</h4>
+            <span class="vehicle-status">ACTIF</span>
+          </div>
+          <div class="vehicle-image">
+            <img [src]="user?.vehicleImageUrl || 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=250&fit=crop'"
+                 [alt]="user?.vehicleBrand">
+            <div class="vehicle-overlay">
+              <span class="vehicle-name">{{ user?.vehicleBrand }} {{ user?.vehicleModel }}</span>
+              <span class="vehicle-plate" *ngIf="user?.vehiclePlate">Matricule: {{ user!.vehiclePlate }}</span>
+            </div>
+          </div>
+          <div class="vehicle-specs">
+            <div class="spec-item" *ngIf="user?.vehicleCapacity">
+              <i class="bi bi-people"></i>
+              <span><strong>{{ user!.vehicleCapacity }} Places</strong></span>
+            </div>
+            <div class="spec-item" *ngIf="user?.vehicleType">
+              <i class="bi bi-bus-front"></i>
+              <span><strong>{{ user!.vehicleType }}</strong></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column -->
+      <div class="settings-col">
+
+        <!-- Documents & Conformité — backed by /api/v1/drivers/documents/me.
+             Only documents the driver actually uploaded are shown (no empty
+             placeholder rows). Statuses come straight from the backend:
+             APPROVED, PENDING_REVIEW, REJECTED, EXPIRED. -->
+        <div class="section-card" *ngIf="user?.documents?.length">
+          <h3 class="section-title">Documents & Conformité</h3>
+          <div class="doc-list">
+            <div class="doc-item"
+                 *ngFor="let doc of user!.documents"
+                 [class]="getDocStatusClass(doc.status)">
+              <div class="doc-icon" [class]="getDocStatusClass(doc.status)">
+                <i class="bi bi-{{ doc.icon }}"></i>
+              </div>
+              <div class="doc-info">
+                <span class="doc-name">{{ doc.name }}</span>
+                <span class="doc-meta"
+                      *ngIf="doc.meta"
+                      [class.warn]="doc.status === 'EXPIRED' || doc.status === 'PENDING_REVIEW'"
+                      [class.danger]="doc.status === 'REJECTED'">
+                  {{ doc.meta }}
+                </span>
+              </div>
+
+              <!-- Approved / Pending: just show the badge, nothing to modify. -->
+              <span class="doc-status"
+                    [class]="getDocStatusClass(doc.status)"
+                    *ngIf="doc.status === 'APPROVED' || doc.status === 'PENDING_REVIEW'">
+                <i class="bi"
+                   [class.bi-check-circle]="doc.status === 'APPROVED'"
+                   [class.bi-hourglass-split]="doc.status === 'PENDING_REVIEW'"></i>
+                {{ getDocStatusLabel(doc.status) }}
+              </span>
+
+              <!-- Rejected / Expired: prompt the driver to re-upload. -->
+              <button class="btn-update"
+                      *ngIf="canModifyDocument(doc.status)"
+                      (click)="modifyDocument(doc)">
+                {{ getDocActionLabel(doc.status) }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="section-card">
+          <h3 class="section-title">Notifications</h3>
+          <div class="toggle-list">
+            <div class="toggle-item">
+              <span>Nouvelles demandes de réservation</span>
+              <label class="switch">
+                <input type="checkbox" [checked]="toggles.newReservations"
+                       (change)="updateToggle('newReservations', $any($event.target).checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-item">
+              <span>Demandes collectives</span>
+              <label class="switch">
+                <input type="checkbox" [checked]="toggles.collectiveRequests"
+                       (change)="updateToggle('collectiveRequests', $any($event.target).checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-item">
+              <span>Rappel de départ</span>
+              <label class="switch">
+                <input type="checkbox" [checked]="toggles.departureReminder"
+                       (change)="updateToggle('departureReminder', $any($event.target).checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-item">
+              <span>Nouveaux avis</span>
+              <label class="switch">
+                <input type="checkbox" [checked]="toggles.newReviews"
+                       (change)="updateToggle('newReviews', $any($event.target).checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-item">
+              <span>Promotions & offres</span>
+              <label class="switch">
+                <input type="checkbox" [checked]="toggles.promotions"
+                       (change)="updateToggle('promotions', $any($event.target).checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Préférences -->
+        <div class="section-card">
+          <h3 class="section-title">Préférences</h3>
+          <div class="pref-list">
+            <div class="pref-item">
+              <label>LIGNE PRINCIPALE</label>
+              <div class="pref-value" (click)="editRoute()">
+                <span>{{ user?.mainRoute || 'Non définie' }}</span>
+                <i class="bi bi-chevron-right"></i>
+              </div>
+            </div>
+            <div class="pref-row">
+              <div class="pref-item half">
+                <label>PRIX PAR PLACE (TND)</label>
+                <span class="pref-value">{{ user?.pricePerSeat || 0 }}</span>
+              </div>
+              <div class="pref-item half">
+                <label>OBJECTIF MENSUEL</label>
+                <span class="pref-value">{{ user?.monthlyGoal || 0 }}</span>
+              </div>
+            </div>
+            <div class="toggle-item">
+              <span>Accepter demandes collectives</span>
+              <label class="switch">
+                <input type="checkbox" [checked]="user?.acceptCollective"
+                       (change)="updateToggle('collectiveRequests', $any($event.target).checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-item">
+              <span>Mode automatique disponibilité</span>
+              <label class="switch">
+                <input type="checkbox" [checked]="user?.autoAvailability"
+                       (change)="updateToggle('autoAvailability', $any($event.target).checked)">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vehicle Form -->
+        <div class="section-card">
+          <h3 class="section-title">
+            <i class="bi bi-car-front"></i>Mon véhicule
+          </h3>
+          <form [formGroup]="vehiculeForm" (ngSubmit)="onSubmit()">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Marque *</label>
+                <input type="text" formControlName="vehicleBrand" class="modern-input" placeholder="Ex: Mercedes">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Modèle *</label>
+                <input type="text" formControlName="vehicleModel" class="modern-input" placeholder="Ex: Sprinter">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Plaque d'immatriculation *</label>
+                <input type="text" formControlName="vehiclePlate" class="modern-input" placeholder="Ex: 123 TU 4567">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Couleur</label>
+                <input type="text" formControlName="vehicleColor" class="modern-input" placeholder="Ex: Blanc">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Année</label>
+                <input type="number" formControlName="vehicleYear" class="modern-input"
+                       [min]="1900" [max]="currentYear" placeholder="2022">
+              </div>
+            </div>
+
+            <div *ngIf="errorMessage" class="alert-error">
+              <i class="bi bi-exclamation-triangle"></i>{{ errorMessage }}
+            </div>
+            <div *ngIf="successMessage" class="alert-success">
+              <i class="bi bi-check-circle"></i>{{ successMessage }}
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-submit" [disabled]="saving">
+                <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!saving" class="bi bi-check-lg"></i>
+                {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+          <h4><i class="bi bi-exclamation-triangle"></i>Zone de danger</h4>
+          <div class="danger-actions">
+            <button class="btn-danger-outline" (click)="changePassword()">
+              <i class="bi bi-shield-lock"></i>Changer le mot de passe
+            </button>
+            <button class="btn-danger-outline" (click)="deactivateAccount()">
+              <i class="bi bi-pause-circle"></i>Désactiver temporairement le compte
+            </button>
+            <button class="btn-danger-solid" (click)="deleteAccount()">
+              <i class="bi bi-trash"></i>Supprimer le compte
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

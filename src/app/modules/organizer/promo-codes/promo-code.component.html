@@ -1,0 +1,194 @@
+<div class="organizer-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-organizer-sidebar></app-organizer-sidebar>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Codes promotionnels</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ agencyName }}</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online">
+              <span class="status-dot"></span> En ligne
+            </span>
+            <a routerLink="/organizer/my-voyages" class="btn-publish">+Publier un trajet</a>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <div class="content-grid" *ngIf="!loading">
+          <!-- Left Column: Promo List -->
+          <div class="promo-list-section">
+            <div class="section-header">
+              <span class="section-title">Codes actifs</span>
+              <button class="btn-filter" (click)="toggleFilter()">
+                <i class="bi bi-funnel"></i>
+              </button>
+            </div>
+
+            <div *ngIf="promoCodes.length === 0" class="empty-state">
+              <p>Aucun code promo.</p>
+            </div>
+
+            <div class="promo-list" *ngIf="promoCodes.length > 0">
+              <div class="promo-item" *ngFor="let p of promoCodes" [class.expired]="isExpired(p)">
+                <div class="promo-icon" [class.expired]="isExpired(p)">
+                  <i class="bi bi-ticket-perforated" *ngIf="!isExpired(p)"></i>
+                  <i class="bi bi-clock-history" *ngIf="isExpired(p)"></i>
+                </div>
+                <div class="promo-info">
+                  <div class="promo-name-row">
+                    <span class="promo-code">{{ p.code }}</span>
+                    <span class="promo-status" [class.active]="p.active && !isExpired(p)" [class.expired]="isExpired(p)">
+                      {{ isExpired(p) ? 'Expiré' : (p.active ? 'Actif' : 'Inactif') }}
+                    </span>
+                  </div>
+                  <div class="promo-desc">
+                    {{ getDiscountLabel(p) }} — {{ getVoyageLabel(p) }} — {{ getExpiryLabel(p) }}
+                  </div>
+                </div>
+                <div class="promo-usage">
+                  <div class="usage-count">Utilisé {{ p.currentUses }}x</div>
+                  <div class="usage-label">Utilisations totales</div>
+                </div>
+                <div class="promo-action">
+                  <button class="btn-action" [class.btn-deactivate]="p.active && !isExpired(p)" [class.btn-delete]="isExpired(p) || !p.active" (click)="handleAction(p)">
+                    {{ isExpired(p) ? 'Supprimer' : (p.active ? 'Désactiver' : 'Activer') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-create-fab" (click)="openModal()">
+              <i class="bi bi-plus-lg"></i> Créer un code promo
+            </button>
+          </div>
+
+          <!-- Right Column: Stats -->
+          <div class="stats-section">
+            <!-- Monthly Overview -->
+            <div class="overview-card">
+              <div class="overview-label">Aperçu du mois</div>
+              <div class="overview-amount">{{ monthlySavings | number:'1.0-0' }} DT</div>
+              <div class="overview-desc">Économisés par vos clients</div>
+              <div class="overview-trend" *ngIf="savingsTrend !== null">
+                <i class="bi bi-arrow-up-right"></i> +{{ savingsTrend }}% vs mois dernier
+              </div>
+            </div>
+
+            <!-- Popularity Chart -->
+            <div class="popularity-card">
+              <div class="popularity-header">
+                <span class="popularity-title">Popularité des codes</span>
+                <button class="btn-info" title="Info"><i class="bi bi-info-circle"></i></button>
+              </div>
+              <div class="popularity-list" *ngIf="popularityData.length > 0">
+                <div class="popularity-item" *ngFor="let item of popularityData">
+                  <span class="pop-name">{{ item.code }}</span>
+                  <div class="pop-bar-track">
+                    <div class="pop-bar" [style.width.%]="item.percent"></div>
+                  </div>
+                  <span class="pop-percent">{{ item.percent }}%</span>
+                </div>
+              </div>
+              <div *ngIf="popularityData.length === 0" class="popularity-empty">
+                <p>Aucune donnée</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create Modal -->
+        <div class="modal-overlay" *ngIf="showModal" (click)="closeModalOnOverlay($event)">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div>
+                <h3 class="modal-title">Créer un code promo</h3>
+                <p class="modal-subtitle">Configurez les détails de votre offre promotionnelle</p>
+              </div>
+              <button class="modal-close" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="modal-body">
+              <form [formGroup]="promoForm" (ngSubmit)="addPromo()">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>CODE PROMO</label>
+                    <input type="text" formControlName="code" class="form-control" placeholder="ex: DJERBA20">
+                  </div>
+                  <div class="form-group">
+                    <label>DATE D'EXPIRATION</label>
+                    <div class="input-icon">
+                      <input type="date" formControlName="expiresAt" class="form-control" placeholder="jj/mm/aaaa">
+                      <i class="bi bi-calendar"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row three-col">
+                  <div class="form-group">
+                    <label>TYPE DE RÉDUCTION</label>
+                    <select formControlName="discountType" class="form-control form-select">
+                      <option value="PERCENTAGE">% Pourcentage</option>
+                      <option value="FIXED_AMOUNT">DT Montant fixe</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>VALEUR</label>
+                    <input type="number" formControlName="discountValue" class="form-control" min="1">
+                  </div>
+                  <div class="form-group">
+                    <label>LIMITE D'USAGE</label>
+                    <input type="number" formControlName="maxUses" class="form-control" min="1" placeholder="Illimité">
+                  </div>
+                </div>
+
+                <div class="form-group full">
+                  <label>VOYAGE CONCERNÉ</label>
+                  <select formControlName="voyageId" class="form-control form-select">
+                    <option value="">Tous les types de trajets</option>
+                    <option *ngFor="let v of voyages" [value]="v.id">{{ v.title }}</option>
+                  </select>
+                </div>
+
+                <!-- Preview -->
+                <div class="preview-box">
+                  <div class="preview-icon"><i class="bi bi-gear"></i></div>
+                  <div class="preview-content">
+                    <div class="preview-title">Aperçu du coupon</div>
+                    <div class="preview-desc">{{ getPreviewText() }}</div>
+                  </div>
+                </div>
+
+                <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+                <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn-cancel" (click)="closeModal()">Annuler</button>
+                  <button type="submit" class="btn-create" [disabled]="promoForm.invalid || submitting">
+                    <i class="bi bi-plus-circle" *ngIf="!submitting"></i>
+                    <span *ngIf="submitting" class="spinner-border spinner-border-sm me-1"></span>
+                    Créer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

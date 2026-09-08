@@ -1,0 +1,64 @@
+<div class="chat-modern-container">
+  <!-- Header -->
+  <div class="chat-modern-header">
+    <a routerLink="/passenger/my-reservations" class="back-btn">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div class="chat-info">
+      <i class="bi bi-chat-dots-fill"></i>
+      <div>
+        <strong>Chat — Réservation</strong>
+        <small>{{ reservationId | slice:0:12 }}...</small>
+      </div>
+    </div>
+    <span class="connection-badge" [class.online]="connected" [class.offline]="!connected">
+      {{ connected ? 'Connecté' : 'Connexion...' }}
+    </span>
+  </div>
+
+  <!-- No reservation -->
+  <div *ngIf="!reservationId" class="empty-state-chat">
+    <i class="bi bi-chat-square-text"></i>
+    <p>Sélectionnez une réservation confirmée pour accéder au chat.</p>
+    <a routerLink="/passenger/my-reservations" class="btn-primary-modern">Mes réservations</a>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="reservationId && loading" class="loading-state">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="reservationId && !loading" class="messages-area" #messageContainer>
+    <div *ngIf="messages.length === 0" class="no-messages">
+      <i class="bi bi-chat-text"></i>
+      <span>Aucun message. Envoyez le premier message !</span>
+    </div>
+    <div *ngFor="let msg of messages"
+         class="message-row"
+         [class.sent]="isMine(msg)"
+         [class.received]="!isMine(msg)">
+      <div class="message-bubble" [class.system]="msg.type === 'SYSTEM'">
+        <div *ngIf="msg.type === 'SYSTEM'" class="system-text">{{ msg.content }}</div>
+        <div *ngIf="msg.type !== 'SYSTEM'">
+          <p>{{ msg.content }}</p>
+          <span class="timestamp">{{ msg.sentAt | date:'HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div *ngIf="reservationId && !loading" class="input-area">
+    <div class="input-wrapper">
+      <input type="text" class="modern-input" [(ngModel)]="newMessage"
+             placeholder="Écrivez votre message..."
+             (keyup.enter)="sendMessage()"
+             [disabled]="!connected">
+      <button class="send-btn" (click)="sendMessage()" [disabled]="!connected || !newMessage.trim()">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+    <small *ngIf="!connected" class="connecting-hint">Connexion au serveur de chat en cours...</small>
+  </div>
+</div>

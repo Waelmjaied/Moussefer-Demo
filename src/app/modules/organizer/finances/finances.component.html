@@ -1,0 +1,136 @@
+<div class="organizer-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-organizer-sidebar></app-organizer-sidebar>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Finances et factures</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ agencyName }}</p>
+          </div>
+          <a routerLink="/organizer/my-voyages" class="btn-publish">+Publier un voyage</a>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <ng-container *ngIf="!loading">
+          <!-- KPI Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Revenus total DT</div>
+              <div class="kpi-value">{{ totalRevenueAll | number:'1.0-0' }} DT</div>
+              <div class="kpi-trend up" *ngIf="revenueTrend !== null">
+                <i class="bi bi-caret-up-fill me-1"></i>+{{ revenueTrend }}%
+              </div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Payés</div>
+              <div class="kpi-value">{{ totalRevenue | number:'1.0-0' }} DT</div>
+              <div class="kpi-percent">{{ paidPercent }}%</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Acomptes reçus</div>
+              <div class="kpi-value">{{ acompteRevenue | number:'1.0-0' }}</div>
+              <div class="kpi-percent">{{ acomptePercent }}%</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Non encaissé</div>
+              <div class="kpi-value">{{ pendingRevenue | number:'1.0-0' }}</div>
+              <div class="kpi-trend pending">{{ pendingPercent }}% en attente</div>
+            </div>
+          </div>
+
+          <!-- Chart + Invoices Row -->
+          <div class="row g-4">
+            <!-- Revenue Chart -->
+            <div class="col-lg-7">
+              <div class="chart-card">
+                <div class="chart-header">
+                  <div>
+                    <div class="chart-title">Revenus mensuels</div>
+                    <div class="chart-subtitle">Performance par session opérationnelle</div>
+                  </div>
+                  <div class="chart-legend">
+                    <span class="legend-item">
+                      <span class="legend-dot" style="background:#1e3a8a"></span>CONFIRMÉ
+                    </span>
+                    <span class="legend-item">
+                      <span class="legend-dot" style="background:#86efac"></span>POTENTIEL
+                    </span>
+                  </div>
+                </div>
+                <div class="chart-body">
+                  <div class="bar-chart" *ngIf="monthlyData.length > 0">
+                    <div class="bar-group" *ngFor="let d of monthlyData; let i = index">
+                      <div class="bar-stack">
+                        <div class="bar-confirmed" [style.height.%]="d.confirmedPercent"></div>
+                        <div class="bar-potential" [style.height.%]="d.potentialPercent"></div>
+                      </div>
+                      <span class="bar-label">{{ d.label }}</span>
+                      <span class="bar-max-badge" *ngIf="d.isMax">MAX</span>
+                    </div>
+                  </div>
+                  <div *ngIf="monthlyData.length === 0" class="chart-empty">
+                    <p>Aucune donnée disponible</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Invoices -->
+            <div class="col-lg-5">
+              <div class="invoices-card">
+                <div class="invoices-header">
+                  <span class="invoices-title">Factures récentes</span>
+                  <button class="btn-generate" (click)="generateInvoice()">+ Générer</button>
+                </div>
+
+                <div class="invoices-list" *ngIf="recentRows.length > 0">
+                  <div class="invoice-item" *ngFor="let r of recentRows">
+                    <div class="invoice-avatar">
+                      <i class="bi bi-person"></i>
+                    </div>
+                    <div class="invoice-info">
+                      <div class="invoice-name">{{ getPassengerName(r) }}</div>
+                      <div class="invoice-meta">{{ getVoyageName(r) }} • #INV-{{ r.id | slice:0:6 | uppercase }}</div>
+                    </div>
+                    <div class="invoice-amount">{{ r.totalPrice | number:'1.0-0' }} DT</div>
+                    <div class="invoice-status">
+                      <span class="badge-invoice" [class]="'inv-' + getInvoiceStatus(r)">
+                        {{ getInvoiceStatusLabel(r) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div *ngIf="recentRows.length === 0" class="invoices-empty">
+                  <p>Aucune facture récente</p>
+                </div>
+
+                <div class="invoices-footer" *ngIf="rows.length > 0">
+                  <a routerLink="/organizer/finances/history" class="view-all">VOIR TOUT L'HISTORIQUE</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="rows.length === 0" class="alert alert-info mt-4">
+            Aucune transaction.
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+</div>

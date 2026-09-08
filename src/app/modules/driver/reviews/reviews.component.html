@@ -1,0 +1,101 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+  <div class="main-col">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Avis des passagers</h1>
+        <p>{{ today | date:'EEEE d MMMM yyyy' }} - {{ avis.length }} avis reçus</p>
+      </div>
+      <div class="header-right">
+        <span class="online-badge">En ligne</span>
+        <a routerLink="/driver/publish" class="btn-publish"><i class="bi bi-plus-lg"></i>Publier un trajet</a>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner-border text-primary"></div></div>
+
+    <ng-container *ngIf="!loading">
+      <!-- Rating overview -->
+      <div class="rating-overview">
+        <div class="rating-left">
+          <div class="big-rating">{{ avgRating | number:'1.1-1' }}</div>
+          <div class="star-row">
+            <span *ngFor="let s of [1,2,3,4,5]" class="star-icon">{{ s <= avgRating ? '★' : '☆' }}</span>
+          </div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:4px">{{ avis.length }} avis</div>
+        </div>
+        <div class="rating-bars">
+          <div class="rating-bar-row" *ngFor="let n of [5,4,3,2,1]">
+            <span class="bar-star">{{ n }} <i class="bi bi-star-fill" style="font-size:11px"></i></span>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="getPercent(n)"></div>
+            </div>
+            <span class="bar-count">{{ getCounts()[n] || 0 }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="filter-tabs">
+          <button class="ftab" [class.ftab-active]="filterStar===0" (click)="filterStar=0;applyFilter()">Tous</button>
+          <button class="ftab" [class.ftab-active]="filterStar===5" (click)="filterStar=5;applyFilter()">5 étoiles</button>
+          <button class="ftab" [class.ftab-active]="filterStar===4" (click)="filterStar=4;applyFilter()">4 étoiles</button>
+        </div>
+        <input type="text" class="filter-search" placeholder="Destinations , date" [(ngModel)]="filterSearch">
+      </div>
+
+      <div *ngIf="filtered.length === 0" class="empty-state">Aucun avis</div>
+
+      <!-- 2-col grid -->
+      <div class="avis-grid">
+        <div class="avis-card" *ngFor="let a of filtered">
+          <div class="avis-card-header">
+            <div class="d-flex align-items-center gap-2">
+              <div class="avis-avatar">{{ a.passengerId?.charAt(0)?.toUpperCase() || 'P' }}</div>
+              <div>
+                <div class="avis-name">{{ a.passengerName || 'Passager vérifié' }}</div>
+                <div class="avis-route">{{ a.departureCity || 'Tunis' }} → {{ a.arrivalCity || 'Sfax' }}</div>
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="avis-stars">
+                <span *ngFor="let s of [1,2,3,4,5]" [style.color]="s<=a.rating ? '#f59e0b':'#d0d5dd'">★</span>
+              </div>
+              <div class="avis-date">{{ a.createdAt | date:'d MMMM yyyy' }}</div>
+            </div>
+          </div>
+          <p class="avis-comment">{{ a.comment || 'Très bon service.' }}</p>
+          <div class="avis-tags">
+            <span class="avis-tag">Ponctuel</span>
+            <span class="avis-tag">Propre</span>
+          </div>
+          <div class="driver-reply" *ngIf="a.driverReply">
+            <div class="reply-label">VOTRE REPONSE</div>
+            <div class="reply-text">{{ a.driverReply }}</div>
+          </div>
+          <button class="btn-reply" *ngIf="!a.driverReply && !a.replying" (click)="a.replying=true">Répondre</button>
+          <div *ngIf="a.replying" class="reply-input-row">
+            <input type="text" [(ngModel)]="a.replyText" placeholder="Votre réponse…" class="reply-input">
+            <button class="btn-accept" style="font-size:12px;padding:6px 14px" (click)="submitReply(a)">Envoyer</button>
+          </div>
+          <!-- Pagination info at bottom -->
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center mt-4" *ngIf="filtered.length > 0">
+        <span style="font-size:13px;color:#667085">Affichage 1-{{ filtered.length }} sur {{ avis.length }} avis</span>
+        <div class="pagination-row">
+          <button class="page-btn page-btn-active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <span style="padding:0 4px">...</span>
+          <button class="page-btn">{{ Math.ceil(avis.length/6) }}</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

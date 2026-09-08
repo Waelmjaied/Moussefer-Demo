@@ -1,0 +1,304 @@
+<!-- eslint-disable @angular-eslint/template/no-any -->
+<div class="voyages-page" [formGroup]="searchForm">
+  <app-header></app-header>
+
+  <!-- ═══════ HERO ═══════ -->
+  <section class="hero">
+    <div class="hero-inner">
+      <nav class="breadcrumb">
+        <span>Accueil</span>
+        <span class="sep">/</span>
+        <span class="current">Voyages organisés</span>
+      </nav>
+      <h1 class="hero-title">
+        Découvrez la Tunisie<br>
+        <span class="accent">autrement.</span>
+      </h1>
+      <p class="hero-sub">
+        Vivez des expériences uniques conçues par nos experts locaux.<br>
+        Transport, hébergement et découvertes authentiques, tout est prêt pour vous.
+      </p>
+      <div class="hero-stats">
+        @for (s of stats; track s.label) {
+          <div class="stat-item">
+            <strong>{{ s.value }}</strong>
+            <span>{{ s.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ SEARCH & CATEGORIES ═══════ -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Où voulez-vous aller ?"
+            formControlName="arrivalCity"
+            (keyup.enter)="onSearch()"
+          />
+        </div>
+
+        <div class="category-pills">
+          @for (cat of categories; track cat) {
+            <button
+              class="pill"
+              [class.active]="selectedCategory === cat"
+              (click)="selectCategory(cat)"
+            >
+              {{ cat }}
+            </button>
+          }
+        </div>
+
+        <span class="results-total">{{ filteredVoyageList.length }} voyages trouvés</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ MAIN LAYOUT ═══════ -->
+  <div class="container main-layout">
+    <!-- ── Sidebar ── -->
+    <aside class="filter-panel">
+      <h3 class="panel-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/>
+        </svg>
+        Affiner la recherche
+      </h3>
+
+      <!-- Budget -->
+      <div class="filter-block">
+        <label class="filter-label">Budget (DT/pers.)</label>
+        <div class="range-wrap">
+          <input
+            type="range"
+            min="50"
+            max="400"
+            step="10"
+            formControlName="maxPrice"
+            (change)="applyFilters()"
+          />
+          <div class="range-hints">
+            <span>50 DT</span>
+            <span>Jusqu'à {{ searchForm.value.maxPrice }} DT</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duration -->
+      <div class="filter-block">
+        <label class="filter-label">Durée du séjour</label>
+        <div class="duration-pills">
+          @for (d of durations; track d) {
+            <button
+              class="dur-pill"
+              [class.active]="selectedDuration === d"
+              (click)="selectDuration(d)"
+            >
+              {{ d }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Departure points -->
+      <div class="filter-block">
+        <label class="filter-label">Point de départ</label>
+        @for (city of departureCities; track city) {
+          <label class="custom-check">
+            <input
+              type="checkbox"
+              [checked]="selectedDepartureCities.includes(city)"
+              (change)="toggleDepartureCity(city)"
+            />
+            <span class="box"></span>
+            <span class="txt">{{ city }}</span>
+          </label>
+        }
+      </div>
+
+      <button class="btn-reset" (click)="resetFilters()">Réinitialiser</button>
+    </aside>
+
+    <!-- ── Results ── -->
+    <main class="results-area">
+      <div class="results-header">
+        <div>
+          <h2 class="section-title">Tous les voyages</h2>
+          <p class="section-sub">{{ filteredVoyageList.length }} escapades à découvrir en Tunisie</p>
+        </div>
+        <div class="sort-wrap">
+          <select [(ngModel)]="sortBy" [ngModelOptions]="{standalone: true}" (change)="sortVoyages()">
+            <option value="popular">Populaires</option>
+            <option value="price-asc">Prix croissant</option>
+            <option value="price-desc">Prix décroissant</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (loading) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Chargement des voyages…</p>
+        </div>
+      }
+
+      <!-- Empty -->
+      @if (!loading && noVoyageFound) {
+        <div class="empty-state">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="36" stroke="#2A358E" stroke-width="3" fill="#F5F7FA"/>
+            <circle cx="29" cy="34" r="3.5" fill="#2A358E"/>
+            <circle cx="51" cy="34" r="3.5" fill="#2A358E"/>
+            <path d="M28 52C28 52 32 46 40 46C48 46 52 52 52 52" stroke="#2A358E" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <h4>Aucun voyage trouvé</h4>
+          <p>Essayez de modifier vos critères de recherche</p>
+        </div>
+      }
+
+      <!-- Special Offer Banner -->
+      @if (!loading && priorityVoyage) {
+        <div
+          class="special-banner"
+          (click)="reserveVoyage(priorityVoyage.id)"
+        >
+          <div class="special-content">
+            <span class="special-badge">OFFRE SPÉCIALE</span>
+            <h3 class="special-title">{{ priorityVoyage.title }}</h3>
+            <p class="special-desc">
+              {{ $any(priorityVoyage).description || "Une expérience unique à ne pas manquer." }}
+            </p>
+            <div class="special-meta">
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                {{ priorityVoyage.departureDate | date:'dd MMM yyyy' }}
+              </span>
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Départ {{ priorityVoyage.departureCity }}
+              </span>
+              @if ($any(priorityVoyage).rating) {
+                <span class="rating">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  {{ $any(priorityVoyage).rating }} ({{ $any(priorityVoyage).reviewCount || 0 }} avis)
+                </span>
+              }
+            </div>
+          </div>
+          <div class="special-side">
+            <div class="special-price">
+              <strong>{{ priorityVoyage.pricePerSeat }}</strong>
+              <span>DT / pers.</span>
+            </div>
+            <button class="btn-special">Voir le détail →</button>
+          </div>
+        </div>
+      }
+
+      <!-- Grid -->
+      @if (!loading && !noVoyageFound) {
+        <div class="voyage-grid">
+          @for (voyage of displayedVoyages; track trackByVoyageId($index, voyage)) {
+            <article
+              class="voyage-card"
+              (click)="reserveVoyage(voyage.id)"
+            >
+              <div class="card-visual">
+                <img
+                  [src]="$any(voyage).imageUrl || $any(voyage).coverImage || 'assets/images/voyage-default.jpg'"
+                  [alt]="voyage.title"
+                  loading="lazy"
+                />
+                <div class="card-badges">
+                  @if ($any(voyage).duration) {
+                    <span class="badge">{{ $any(voyage).duration }}</span>
+                  }
+                  @if (voyage.availableSeats) {
+                    <span class="badge">{{ voyage.availableSeats }} places</span>
+                  }
+                </div>
+                <button class="btn-fav" (click)="$event.stopPropagation()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
+              </div>
+
+              <div class="card-body">
+                @if ($any(voyage).category || $any(voyage).type) {
+                  <span class="cat-label">
+                    {{ $any(voyage).category || $any(voyage).type }}
+                  </span>
+                }
+                <h3 class="card-title">{{ voyage.title }}</h3>
+                <div class="card-meta">
+                  <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {{ voyage.departureCity }} · {{ voyage.departureDate | date:'dd MMM yyyy' }}
+                  </span>
+                  @if ($any(voyage).features || $any(voyage).guide) {
+                    <span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                      {{ $any(voyage).features || 'Tout inclus · Guide certifié' }}
+                    </span>
+                  }
+                </div>
+                @if ($any(voyage).tags?.length) {
+                  <div class="card-tags">
+                    @for (tag of $any(voyage).tags; track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                }
+                <div class="card-footer">
+                  <div class="price-block">
+                    <strong>{{ voyage.pricePerSeat }} DT</strong>
+                    <span>/ pers.</span>
+                  </div>
+                  @if ($any(voyage).rating) {
+                    <div class="rating-block">
+                      <span class="stars">★★★★★</span>
+                      <span class="score">{{ $any(voyage).rating }}</span>
+                      <small>({{ $any(voyage).reviewCount || 0 }} avis)</small>
+                    </div>
+                  }
+                  <button class="btn-reserve">Réserver maintenant →</button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+
+      <!-- Pagination -->
+      @if (!loading && totalPages > 1) {
+        <nav class="pagination">
+          @for (p of pages; track p) {
+            <button
+              class="page-btn"
+              [class.active]="p === currentPage"
+              (click)="goToPage(p)"
+            >
+              {{ p + 1 }}
+            </button>
+          }
+          @if (totalPages > 5 && currentPage < totalPages - 2) {
+            <span class="ellipsis">…</span>
+          }
+          <button class="page-btn next" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+            Suivant →
+          </button>
+        </nav>
+      }
+    </main>
+  </div>
+  <app-footer></app-footer>
+</div>

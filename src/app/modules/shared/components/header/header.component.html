@@ -1,0 +1,40 @@
+<header class="modern-header">
+  <div class="header-container">
+    <a class="logo" routerLink="/">
+      <img src="assets/LOGO.png" alt="Moussefer" class="logo-img">
+    </a>
+
+    <nav class="nav-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Accueil</a>
+      <a routerLink="/passenger/search" routerLinkActive="active">Trajets</a>
+      <a routerLink="/passenger/collective-demand" routerLinkActive="active">Demande Collective</a>
+      <a routerLink="/passenger/voyages" routerLinkActive="active">Voyage Organise</a>
+    </nav>
+
+    <div class="header-actions">
+      <app-notification-bell class="notification-btn"></app-notification-bell>
+
+      <a routerLink="/passenger/profile" class="avatar-link" title="Mon profil">
+        <img [src]="userAvatar" alt="Avatar" class="avatar-img">
+      </a>
+
+      <div class="logout-wrapper">
+        <button class="logout-ring" (click)="logout(); $event.preventDefault()" title="Déconnexion">
+          <i class="bi bi-power"></i>
+          <span class="tooltip">Déconnexion</span>
+        </button>
+      </div>
+    </div>
+
+    <button class="mobile-toggle" (click)="toggleMobileMenu()" aria-label="Menu">
+      <i class="bi bi-list"></i>
+    </button>
+  </div>
+
+  <div class="mobile-menu" [class.open]="mobileMenuOpen">
+    <a routerLink="/" (click)="mobileMenuOpen = false">Accueil</a>
+    <a routerLink="/passenger/search" (click)="mobileMenuOpen = false">Trajets</a>
+    <a routerLink="/passenger/collective-demand" (click)="mobileMenuOpen = false">Demande Collective</a>
+    <a routerLink="/passenger/voyages" (click)="mobileMenuOpen = false">Voyage Organise</a>
+  </div>
+</header>

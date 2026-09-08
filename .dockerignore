@@ -1,0 +1,62 @@
+# ---------- Node / Dependencies ----------
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# ---------- Build output ----------
+dist
+tmp
+out-tsc
+.angular
+
+# ---------- Git / Version control ----------
+.git
+.gitignore
+.gitattributes
+
+# ---------- IDE / Editors ----------
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ---------- OS files ----------
+.DS_Store
+Thumbs.db
+
+# ---------- Testing ----------
+coverage
+*.spec.ts
+e2e
+test
+tests
+karma.conf.js
+jest.config.js
+
+# ---------- Docker ----------
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# ---------- CI/CD ----------
+.github
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# ---------- Documentation ----------
+README.md
+CHANGELOG.md
+docs
+
+# ---------- Misc ----------
+*.log
+.editorconfig
+.eslintrc*
+.prettierrc*
+.eslintcache

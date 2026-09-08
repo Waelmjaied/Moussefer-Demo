@@ -1,0 +1,310 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- SIDEBAR -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div class="header-left">
+            <h1 class="page-title">Gestion des stations (points GPS)</h1>
+            <p class="page-subtitle">Stations et points de dépôt</p>
+          </div>
+          @if (permissionService.isSuperAdmin()) {
+            <div class="header-actions">
+              <button class="btn btn-outline-secondary btn-sm" (click)="showImport = !showImport">
+                <i class="bi bi-upload"></i> Import JSON/CSV/Excel
+              </button>
+              <button class="btn btn-primary btn-sm" (click)="openCreateForm()">
+                <i class="bi bi-plus-circle"></i> Ajouter une station
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- ═══ IMPORT PANEL — UN SEUL CHAMP FUSIONNÉ ═══════════════════════════════════════ -->
+        @if (showImport && permissionService.isSuperAdmin()) {
+          <div class="panel import-panel">
+            <div class="panel-header">Importer des stations</div>
+            <div class="panel-body">
+              <p class="hint-text">
+                Formats acceptés : <strong>.json</strong> (tableau), <strong>.csv</strong> ou <strong>.xlsx</strong><br>
+                <code>id?,name,city,region,address,latitude,longitude</code>
+              </p>
+              <div class="file-upload-zone" [class.has-file]="selectedFile">
+                <input type="file" accept=".json,.csv,.xlsx,.xls" id="stationFile" (change)="onFileSelected($event)" hidden />
+                <label for="stationFile" class="upload-label">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span class="upload-title">Déposer un fichier ici</span>
+                  <span class="upload-subtitle">ou cliquez pour parcourir</span>
+                  <span class="upload-hint">JSON, CSV ou Excel jusqu'à 5 Mo</span>
+                </label>
+              </div>
+              @if (selectedFile) {
+                <div class="file-selected">
+                  <div class="file-info">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span class="file-name">{{ selectedFile.name }}</span>
+                    <span class="file-size">{{ (selectedFile.size / 1024).toFixed(1) }} Ko</span>
+                  </div>
+                  <button class="btn-icon-remove" (click)="removeFile()" title="Retirer">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              }
+              <div class="panel-actions">
+                <button class="btn btn-success btn-sm" (click)="submitImport()" [disabled]="importLoading || !selectedFile">
+                  @if (importLoading) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                  }
+                  Importer
+                </button>
+              </div>
+              @if (importResult) {
+                <div class="import-result">
+                  <span class="result-item success">{{ importResult.created }} créées</span>
+                  <span class="result-item info">{{ importResult.updated }} mises à jour</span>
+                  <span class="result-item warning">{{ importResult.failed }} échecs</span>
+                  @if (importResult.errors.length > 0) {
+                    <div class="import-errors">
+                      @for (err of importResult.errors; track $index) {
+                        <div class="error-line"><i class="bi bi-exclamation-triangle"></i> {{ err }}</div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Loading -->
+        @if (loading) {
+          <div class="loading-state loading-center">
+            <div class="spinner-modern spinner-border text-primary"></div>
+            <span>Chargement...</span>
+          </div>
+        }
+
+        <!-- Liste + Carte -->
+        @if (!loading) {
+          <div class="row">
+            <div class="col-md-6">
+              <div class="data-grid table-card">
+                <div class="table-container table-responsive">
+                  <table class="modern-table data-table">
+                    <thead>
+                    <tr>
+                      <th class="col-name">Nom</th>
+                      <th class="col-address">Adresse</th>
+                      <th class="col-coords">Coordonnées</th>
+                      @if (permissionService.isSuperAdmin()) {
+                        <th class="col-actions">Actions</th>
+                      }
+                    </tr>
+                    </thead>
+                    <tbody>
+                      @for (station of stations; track station.id) {
+                        <tr>
+                          <td class="cell-name">
+                            <strong>{{ station.name }}</strong>
+                          </td>
+                          <td class="cell-address">{{ station.address }}</td>
+                          <td class="cell-coords">
+                            <span class="coord-tag">Lat: {{ station.latitude }}</span>
+                            <span class="coord-tag">Lon: {{ station.longitude }}</span>
+                          </td>
+                          @if (permissionService.isSuperAdmin()) {
+                            <td>
+                              <div class="action-menu action-group">
+                                <button class="action-btn btn-action edit" (click)="openEditForm(station)" title="Modifier">
+                                  <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="action-btn btn-action info" (click)="loadSecondaryPoints(station)" title="Points secondaires">
+                                  <i class="bi bi-geo"></i>
+                                </button>
+                                <button class="action-btn btn-action delete" (click)="deleteStation(station.id)" title="Supprimer">
+                                  <i class="bi bi-trash"></i>
+                                </button>
+                              </div>
+                            </td>
+                          }
+                        </tr>
+                      }
+                      @if (stations.length === 0) {
+                        <tr class="empty-row">
+                          <td [attr.colspan]="permissionService.isSuperAdmin() ? 4 : 3" class="empty-state">
+                            <div class="empty-content">
+                              <i class="bi bi-geo-alt"></i>
+                              <p>Aucune station enregistrée.
+                                <button class="btn btn-link" (click)="openCreateForm()">Créer la première</button>
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card map-card">
+                <div class="card-header">Carte interactive</div>
+                <div class="card-body p-0">
+                  <div #mapContainer id="mapContainer" style="height: 400px; width: 100%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ═══ FORMULAIRE CREATE / EDIT ══════════════════════════════════════════════ -->
+        @if (showForm && permissionService.isSuperAdmin()) {
+          <div class="panel form-card">
+            <div class="panel-header form-header">{{ editMode ? 'Modifier la station' : 'Nouvelle station' }}</div>
+            <div class="panel-body form-body">
+              <form [formGroup]="stationForm" (ngSubmit)="onSubmit()">
+                <div class="form-grid form-row">
+                  <div class="form-field form-group">
+                    <label>Nom <span class="required">*</span></label>
+                    <input type="text" class="input-modern form-control" formControlName="name" placeholder="ex: Station Centrale">
+                  </div>
+                  <div class="form-field form-group">
+                    <label>Adresse <span class="required">*</span></label>
+                    <input type="text" class="input-modern form-control" formControlName="address" placeholder="ex: Avenue Habib Bourguiba">
+                  </div>
+                </div>
+                <div class="form-grid form-row">
+                  <div class="form-field form-group">
+                    <label>Latitude <span class="required">*</span></label>
+                    <input type="number" step="any" class="input-modern form-control" formControlName="latitude">
+                  </div>
+                  <div class="form-field form-group">
+                    <label>Longitude <span class="required">*</span></label>
+                    <input type="number" step="any" class="input-modern form-control" formControlName="longitude">
+                  </div>
+                  <div class="form-field form-group" style="display: flex; align-items: flex-end;">
+                    <button type="button" class="btn btn-outline-primary w-100" (click)="openMapModal()">
+                      <i class="bi bi-geo-alt"></i> Choisir sur la carte
+                    </button>
+                  </div>
+                </div>
+                <div class="panel-actions form-actions">
+                  <button type="submit" class="btn btn-success" [disabled]="stationForm.invalid">
+                    {{ editMode ? 'Enregistrer' : 'Créer' }}
+                  </button>
+                  <button type="button" class="btn btn-secondary" (click)="cancelForm()">Annuler</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Map Modal — choisir l'emplacement ══════════════════════════════════════════════ -->
+@if (showMapModal) {
+  <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-geo-alt me-2"></i>Choisir l'emplacement
+          </h5>
+          <button type="button" class="btn-close" (click)="closeMapModal()"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div #mapModalContainer style="height: 500px; width: 100%;"></div>
+        </div>
+        <div class="modal-footer">
+          <small class="text-muted me-auto">Cliquez sur la carte pour positionner le marqueur</small>
+          <button type="button" class="btn btn-primary" (click)="closeMapModal()">
+            <i class="bi bi-check-lg me-1"></i>Confirmer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ Secondary Points Panel ══════════════════════════════════════════════ -->
+@if (selectedStationForPoints) {
+  <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-geo me-2"></i>Points secondaires — {{ selectedStationForPoints.name }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeSecondaryPoints()"></button>
+        </div>
+        <div class="modal-body">
+          @if (permissionService.isSuperAdmin()) {
+            <div class="row g-2 mb-4">
+              <div class="col-md-5">
+                <input type="text" class="form-control form-control-sm"
+                       [(ngModel)]="newPointName" placeholder="Nom du point *">
+              </div>
+              <div class="col-md-5">
+                <input type="text" class="form-control form-control-sm"
+                       [(ngModel)]="newPointAddress" placeholder="Adresse (optionnel)">
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-primary btn-sm w-100"
+                        (click)="addSecondaryPoint()" [disabled]="!newPointName.trim()">
+                  <i class="bi bi-plus-lg"></i> Ajouter
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (pointsLoading) {
+            <div class="text-center py-3">
+              <div class="spinner-border spinner-border-sm text-primary"></div>
+            </div>
+          }
+
+          @if (!pointsLoading && secondaryPoints.length === 0) {
+            <div class="text-muted small">Aucun point secondaire pour cette station.</div>
+          }
+
+          @if (!pointsLoading && secondaryPoints.length > 0) {
+            <div class="list-group">
+              @for (pt of secondaryPoints; track pt.id) {
+                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                  <div>
+                    <strong class="small">{{ pt.name }}</strong>
+                    @if (pt.address) {
+                      <span class="text-muted small ms-2">— {{ pt.address }}</span>
+                    }
+                  </div>
+                  @if (permissionService.isSuperAdmin()) {
+                    <button class="btn btn-sm btn-outline-danger" (click)="removeSecondaryPoint(pt.id)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="closeSecondaryPoints()">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

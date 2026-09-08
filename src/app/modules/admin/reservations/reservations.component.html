@@ -1,0 +1,113 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Réservation</h1>
+            <p class="page-subtitle">{{ currentDate }} - Suivi et litiges</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher" [(ngModel)]="searchQuery" (input)="applyFilters()">
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-green">
+            <div class="kpi-label">Total réservation</div>
+            <div class="kpi-value">{{ totalRevenue | number:'1.0-0' }}DT</div>
+            <div class="kpi-trend up">▲ +{{ revenueIncrease }}% vs hier</div>
+          </div>
+          <div class="kpi-card kpi-white">
+            <div class="kpi-label">Litiges ouverts</div>
+            <div class="kpi-value blue">{{ openLitiges }}</div>
+            <div class="kpi-trend up-green">▲ +{{ litigesIncrease }} depuis hier</div>
+          </div>
+          <div class="kpi-card kpi-white">
+            <div class="kpi-label">Remboursements en attente</div>
+            <div class="kpi-value blue">{{ pendingRefunds }}</div>
+            <div class="kpi-trend total">Total {{ pendingRefundsAmount | number:'1.0-0' }} DT</div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+              <tr>
+                <th>ID</th>
+                <th>Passagers</th>
+                <th>Trajet</th>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let res of filteredReservations">
+                <td><span class="res-id">{{ res.displayId }}</span></td>
+                <td class="cell-passenger">{{ res.passengerName }}</td>
+                <td class="cell-route">{{ res.route }}</td>
+                <td class="cell-date">{{ res.displayDate }}</td>
+                <td class="cell-amount">{{ res.amount | number:'1.0-0' }} DT</td>
+                <td>
+                    <span class="status-badge-res" [class]="'status-' + getStatusClass(res.status)">
+                      {{ res.displayStatus }}
+                    </span>
+                </td>
+                <td>
+                  <div class="action-cell">
+                    <!-- Confirmé / Voir -->
+                    <button *ngIf="res.status === 'CONFIRMED'" class="btn-action-outline" (click)="viewReservation(res)">
+                      Voir
+                    </button>
+
+                    <!-- Litige / Résoudre + Rembourser -->
+                    <button *ngIf="res.status === 'LITIGE'" class="btn-action-green" (click)="resolveLitige(res)">
+                      Résoudre
+                    </button>
+                    <button *ngIf="res.status === 'LITIGE'" class="btn-action-outline" (click)="refundReservation(res)">
+                      Rembourser
+                    </button>
+
+                    <!-- Remboursement / Valider + Refuser -->
+                    <button *ngIf="res.status === 'REFUND_PENDING'" class="btn-action-outline" (click)="approveRefund(res)">
+                      Valider
+                    </button>
+                    <button *ngIf="res.status === 'REFUND_PENDING'" class="btn-action-red" (click)="rejectRefund(res)">
+                      Refuser
+                    </button>
+
+                    <!-- Confirmé avec refus -->
+                    <button *ngIf="res.status === 'CONFIRMED' && canRefuse(res)" class="btn-action-outline" (click)="refuseReservation(res)">
+                      Refuser
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div *ngIf="!loading && filteredReservations.length === 0" class="empty-state">
+          <p>Aucune réservation trouvée.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,104 @@
+<!-- Mobile hamburger -->
+<button class="sidebar-toggle" [class.hidden]="isMobileOpen" (click)="toggleSidebar()" aria-label="Ouvrir le menu">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- Backdrop overlay -->
+<div class="sidebar-overlay" [class.mobile-open]="isMobileOpen" (click)="closeSidebar()"></div>
+
+<div class="driver-sidebar" [class.mobile-open]="isMobileOpen">
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <img src="assets/logo-removebg-preview.png" alt="Logo" class="logo-img">
+  </div>
+
+  <!-- PRINCIPAL -->
+  <div class="sidebar-title">PRINCIPAL</div>
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/dashboard" routerLinkActive="active" (click)="closeSidebar()">
+        Tableau de bord
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/my-trajets" routerLinkActive="active" (click)="closeSidebar()">
+        Mes trajets
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link d-flex align-items-center justify-content-between px-3" routerLink="/driver/reservations" routerLinkActive="active" (click)="closeSidebar()">
+        <span>Demandes</span>
+        <span class="nav-badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/passengers" routerLinkActive="active" (click)="closeSidebar()">
+        Passagers
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link d-flex align-items-center justify-content-between px-3" routerLink="/driver/messages" routerLinkActive="active" (click)="closeSidebar()">
+        <span>Messages</span>
+        <span class="nav-badge" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/scan-qr" routerLinkActive="active"
+         (click)="closeSidebar()">
+        <i class="bi bi-qr-code-scan"></i> Scanner QR
+      </a>
+    </li>
+
+  </ul>
+
+  <!-- GESTION -->
+  <div class="sidebar-title">GESTION</div>
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/history" routerLinkActive="active" (click)="closeSidebar()">Historiques</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/reviews" routerLinkActive="active" (click)="closeSidebar()">Avis</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/revenues" routerLinkActive="active" (click)="closeSidebar()">Revenues</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/collective-requests" routerLinkActive="active" (click)="closeSidebar()">Demandes collectifs</a>
+    </li>
+  </ul>
+
+  <!-- COMPTE -->
+  <div class="sidebar-title">COMPTE</div>
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/Settings" routerLinkActive="active" (click)="closeSidebar()">Paramètres</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/driver/documents" routerLinkActive="active" (click)="closeSidebar()">
+        Profil
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link logout-link" href="#" (click)="logout(); $event.preventDefault(); closeSidebar()">Déconnexion</a>
+    </li>
+  </ul>
+
+  <!-- Driver footer profile -->
+  <div class="driver-footer">
+    <div class="separator"></div>
+    <div class="profile-container">
+      <div class="profile-photo-wrapper">
+        <div class="profile-initials">{{ initials }}</div>
+      </div>
+      <div class="profile-text">
+        <div class="profile-name">{{ driverName }}</div>
+        <div class="profile-status">
+          <span class="status-dot"></span> Chauffeur vérifié
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

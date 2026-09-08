@@ -1,0 +1,79 @@
+<div class="organizer-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-organizer-sidebar></app-organizer-sidebar>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Statistiques</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ agencyName }}</p>
+          </div>
+          <a routerLink="/organizer/my-voyages" class="btn-publish">+Publier un voyage</a>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <ng-container *ngIf="!loading">
+          <div class="content-grid">
+            <!-- Reservations Chart -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <span class="chart-title">Réservations — 8 semaines</span>
+              </div>
+              <div class="chart-body">
+                <div class="reservations-chart" *ngIf="weeklyData.length > 0">
+                  <div class="bar-group" *ngFor="let w of weeklyData">
+                    <div class="bar-stack">
+                      <div class="bar-confirmed" [style.height.%]="w.confirmedPercent"></div>
+                      <div class="bar-potential" [style.height.%]="w.pendingPercent"></div>
+                    </div>
+                    <span class="bar-label">{{ w.label }}</span>
+                  </div>
+                </div>
+                <div *ngIf="weeklyData.length === 0" class="chart-empty">
+                  <p>Aucune donnée disponible</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top Destinations -->
+            <div class="destinations-card">
+              <div class="destinations-header">
+                <span class="destinations-title">Top destinations</span>
+                <span class="destinations-subtitle">Villes les plus fréquentées</span>
+              </div>
+              <div class="destinations-list" *ngIf="topDestinations.length > 0">
+                <div class="destination-item" *ngFor="let d of topDestinations">
+                  <div class="destination-info">
+                    <span class="destination-name">{{ d.name }}</span>
+                    <span class="destination-count">{{ d.count }} rés.</span>
+                  </div>
+                  <div class="destination-bar-track">
+                    <div class="destination-bar" [style.width.%]="d.percent"></div>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="topDestinations.length === 0" class="destinations-empty">
+                <p>Aucune destination</p>
+              </div>
+              <div class="destinations-footer">
+                <button class="btn-view-detail" (click)="viewRegionDetail()">Voir le détail par région</button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+</div>

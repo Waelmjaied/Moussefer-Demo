@@ -1,0 +1,292 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Dashboard Analytics & KPIs</h1>
+            <p class="page-subtitle">{{ currentDate }} — Vue en temps réel — M09</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online">
+              <span class="status-dot"></span> En ligne
+            </span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher">
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+
+        <ng-container *ngIf="!loading">
+
+          <!-- ═════════════════════════════════════════════════════
+               ALERT BANNERS — Litige dynamique
+               ═════════════════════════════════════════════════════ -->
+          <div class="alert-banners">
+            <div class="alert-banner alert-dispute" *ngIf="pendingLitiges > 0">
+              <div class="alert-content">
+                <span class="alert-badge">
+                  {{ pendingLitiges }} litige{{ pendingLitiges > 1 ? 's' : '' }} non résolu{{ pendingLitiges > 1 ? 's' : '' }}
+                </span>
+                <span class="alert-text">— {{ litigeAlertText }}</span>
+              </div>
+              <button class="alert-action" routerLink="/admin/litiges">Traiter</button>
+            </div>
+            <div class="alert-banner alert-cancel">
+              <div class="alert-content">
+                <span class="alert-badge">Pic d'annulations détecté</span>
+                <span class="alert-text">— taux d'annulation +34% aujourd'hui sur la ligne Tunis-Sousse.</span>
+              </div>
+              <button class="alert-action" routerLink="/admin/annulations">Analyser</button>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════
+               KPI CARDS — 6 cards (litige ajouté)
+               ═════════════════════════════════════════════════════ -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Réservations aujourd'hui</div>
+              <div class="kpi-value">{{ todayReservations }}</div>
+              <div class="kpi-trend up">+{{ getChangePercentage(todayReservations, yesterdayReservations) }}% vs hier</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Revenus du jour (DT)</div>
+              <div class="kpi-value">{{ todayRevenue | number:'1.0-0' }}</div>
+              <div class="kpi-trend up">+{{ getChangePercentage(todayRevenue, yesterdayRevenue) }}% vs hier</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Louages actifs</div>
+              <div class="kpi-value">{{ activeLouages }}</div>
+              <div class="kpi-trend info">En ce moment</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Nouveaux inscrits</div>
+              <div class="kpi-value">{{ newSignups }}</div>
+              <div class="kpi-trend up">+9% vs hier</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Satisfaction globale</div>
+              <div class="kpi-value">{{ satisfactionScore }}</div>
+              <div class="kpi-trend info">Sur {{ satisfactionTotalReviews | number:'1.0-0' }} avis</div>
+            </div>
+
+            <!-- ▶︎ KPI Litige -->
+            <div class="kpi-card kpi-litige" routerLink="/admin/litiges">
+              <div class="kpi-label">Litiges en attente</div>
+              <div class="kpi-value" [class.text-danger]="pendingLitiges > 0">{{ pendingLitiges }}</div>
+              <div class="kpi-trend" [class.up]="pendingLitiges === 0" [class.down]="pendingLitiges > 0">
+                {{ pendingLitiges > 0 ? 'Intervention requise' : 'Aucun litige' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════
+               CHARTS ROW
+               ═════════════════════════════════════════════════════ -->
+          <div class="row g-4 mb-4">
+            <!-- Monthly Fees Chart -->
+            <div class="col-lg-7">
+              <div class="chart-card">
+                <div class="chart-header">
+                  <div class="chart-title">Total frais réservation - {{ monthName }}</div>
+                  <div class="chart-amount">{{ totalFeesMonth | number:'1.0-0' }} DT</div>
+                  <div class="chart-period">
+                    <span>Ce mois</span>
+                    <i class="bi bi-chevron-down"></i>
+                  </div>
+                </div>
+                <div class="chart-body">
+                  <div class="fees-chart" *ngIf="dailyFees.length > 0">
+                    <div class="fee-bar-group" *ngFor="let d of dailyFees">
+                      <div class="fee-bar-track">
+                        <div class="fee-bar" [style.height.%]="d.percent"></div>
+                      </div>
+                      <span class="fee-label">{{ d.date }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Destinations Donut -->
+            <div class="col-lg-5">
+              <div class="chart-card">
+                <div class="chart-header center">
+                  <span class="chart-title">Trajets par destination</span>
+                </div>
+                <div class="chart-body">
+                  <div class="destinations-chart" *ngIf="tripsByDestination.length > 0">
+                    <div class="donut-wrapper">
+                      <div class="donut-chart">
+                        <svg viewBox="0 0 36 36" class="donut">
+                          <path class="donut-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+                          <path *ngFor="let seg of donutSegments; let i = index"
+                                class="donut-seg"
+                                [attr.d]="seg.path"
+                                fill="none"
+                                [attr.stroke]="seg.color"
+                                stroke-width="3"
+                                [attr.stroke-dasharray]="seg.dashArray"
+                                [attr.stroke-dashoffset]="seg.dashOffset"></path>
+                        </svg>
+                        <div class="donut-center">
+                          <div class="donut-value">{{ totalTrips }}</div>
+                          <div class="donut-label">Trajets</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="donut-legend">
+                      <div class="legend-item" *ngFor="let dest of tripsByDestination">
+                        <span class="legend-dot" [style.background]="dest.color"></span>
+                        <span class="legend-name">{{ dest.destination }}</span>
+                        <span class="legend-percent">{{ dest.percentage }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═════════════════════════════════════════════════════
+               BOTTOM ROW — Widget litiges à la place de la map
+               ═════════════════════════════════════════════════════ -->
+          <div class="row g-4 mb-4">
+            <!-- Reservations by Day -->
+            <div class="col-lg-4">
+              <div class="chart-card">
+                <div class="chart-header">
+                  <span class="chart-title">Réservation par jour</span>
+                </div>
+                <div class="chart-body">
+                  <div class="day-list">
+                    <div class="day-item" *ngFor="let day of reservationsPerDay" [class.highlight]="day.highlight">
+                      <span class="day-name">{{ day.label }}</span>
+                      <div class="day-bar-track">
+                        <div class="day-bar" [style.width.%]="day.percent"></div>
+                      </div>
+                      <span class="day-value">{{ day.value }}DT</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Operational Analysis -->
+            <div class="col-lg-4">
+              <div class="chart-card">
+                <div class="chart-header">
+                  <span class="chart-title">Analyse opérationnelle</span>
+                </div>
+                <div class="chart-body">
+                  <div class="metric-list">
+                    <div class="metric-item">
+                      <div class="metric-info">
+                        <div class="metric-label">Taux de remplissage moyen</div>
+                        <div class="metric-sublabel">Places vendues/places disponibles</div>
+                      </div>
+                      <div class="metric-value">{{ fillRate }}%</div>
+                    </div>
+                    <div class="metric-item">
+                      <div class="metric-info">
+                        <div class="metric-label">Revenue par kilomètre</div>
+                        <div class="metric-sublabel">Basé sur {{ totalKm | number }} km parcourus</div>
+                      </div>
+                      <div class="metric-value">{{ revenuePerKm | number:'1.2-2' }} DT</div>
+                    </div>
+                    <div class="metric-item">
+                      <div class="metric-info">
+                        <div class="metric-label">Jours actif ce mois</div>
+                        <div class="metric-sublabel">Sur {{ totalDaysThisMonth }} jours calendaires</div>
+                      </div>
+                      <div class="metric-value">{{ activeDays }}/{{ totalDaysThisMonth }}</div>
+                    </div>
+                    <div class="metric-item">
+                      <div class="metric-info">
+                        <div class="metric-label">Comission Moussefer({{ commissionRate }}%)</div>
+                        <div class="metric-sublabel">Déduite automatiquement</div>
+                      </div>
+                      <div class="metric-value negative">-{{ commissionAmount | number:'1.1-1' }} DT</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ▶︎ Widget Litiges (remplace la map-card) -->
+            <div class="col-lg-4">
+              <div class="chart-card litige-widget">
+                <div class="chart-header">
+                  <span class="chart-title">Litiges récents</span>
+                  <a routerLink="/admin/litige" class="chart-link">Voir tout</a>
+                </div>
+                <div class="chart-body">
+                  <div class="litige-list-sm" *ngIf="recentLitiges.length > 0; else noLitigeWidget">
+                    <div class="litige-sm-item"
+                         *ngFor="let litige of recentLitiges"
+                         [class.urgent]="litige.priority === 'URGENT'"
+                         (click)="goToLitige(litige.id)">
+                      <div class="sm-priority" [class]="'sm-priority-' + (litige.priority | lowercase)"></div>
+                      <div class="sm-body">
+                        <div class="sm-top">
+                          <span class="sm-id">{{ litige.id }}</span>
+                          <span class="sm-time">{{ litige.timeAgo }}</span>
+                        </div>
+                        <div class="sm-title">{{ litige.title }}</div>
+                        <div class="sm-desc" *ngIf="litige.description">
+                          {{ litige.description | slice:0:45 }}{{ litige.description.length > 45 ? '...' : '' }}
+                        </div>
+                        <div class="sm-tags">
+                          <span class="sm-tag" [class]="'tag-' + (litige.priority | lowercase)">{{ litige.priority }}</span>
+                          <span class="sm-tag route" *ngIf="litige.route">{{ litige.route }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <ng-template #noLitigeWidget>
+                    <div class="widget-empty">
+                      <i class="bi bi-shield-check"></i>
+                      <p>Aucun litige en attente</p>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Log -->
+          <div class="activity-card">
+            <div class="activity-header">
+              <span class="activity-title">Journal d'activité récent</span>
+            </div>
+            <div class="activity-list" *ngIf="recentActivities.length > 0">
+              <div class="activity-item" *ngFor="let act of recentActivities">
+                <div class="activity-desc">
+                  <strong>{{ act.user }}</strong> {{ act.action }}
+                </div>
+                <span class="activity-badge" [class]="'badge-' + (act.type || 'info')">{{ act.details }}</span>
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

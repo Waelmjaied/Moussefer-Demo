@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+:host { font-family: 'Plus Jakarta Sans', sans-serif; display: block; }
+
+.reservations-page { padding: 28px 32px; background: #fafbfc; min-height: 100vh; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-title { font-size: 22px; font-weight: 700; color: #101828; margin: 0; }
+
+/* Filter tabs */
+.filter-tabs { display: flex; gap: 6px; background: #f2f4f7; border-radius: 10px; padding: 3px; margin-bottom: 22px; width: fit-content; }
+.ftab {
+  padding: 7px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #667085;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.ftab.active { background: #fff; color: #101828; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+
+/* Reservation card */
+.res-card {
+  background: #fff;
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  transition: box-shadow .2s;
+}
+.res-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.09); }
+
+.res-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f2f4f7;
+}
+.res-route { font-size: 16px; font-weight: 700; color: #101828; display: flex; align-items: center; gap: 8px; }
+.res-arrow { color: #12b76a; }
+.res-type-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+.type-trajet { background: #eff8ff; color: #175cd3; }
+.type-voyage { background: #f4f3ff; color: #5925dc; }
+
+.status-badge { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px; }
+.s-pending   { background: #fef9e7; color: #b45309; }
+.s-confirmed { background: #ecfdf5; color: #027a48; }
+.s-accepted  { background: #eff8ff; color: #175cd3; }
+.s-cancelled { background: #f2f4f7; color: #667085; }
+.s-refused   { background: #fef2f2; color: #b42318; }
+
+.res-card-body { padding: 16px 20px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.res-info { flex: 1; }
+.res-detail { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #667085; margin-bottom: 7px; }
+.res-detail i { width: 16px; color: #98a2b3; }
+.res-amount { font-size: 18px; font-weight: 700; color: #101828; text-align: right; }
+.res-amount-label { font-size: 11px; color: #98a2b3; text-align: right; }
+
+.res-actions { display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid #f2f4f7; flex-wrap: wrap; }
+.btn-action {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1.5px solid;
+  transition: all .15s;
+}
+.btn-msg-action { background: #ecfdf5; color: #027a48; border-color: #a6f4c5; }
+.btn-msg-action:hover { background: #d1fae5; }
+.btn-pay-action { background: #1e4d8c; color: #fff; border-color: #1e4d8c; }
+.btn-pay-action:hover { background: #163a6e; }
+.btn-cancel-action { background: #fff; color: #667085; border-color: #d0d5dd; }
+.btn-cancel-action:hover { border-color: #dc2626; color: #dc2626; }
+.btn-avis-action { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.btn-avis-action:hover { background: #fef3c7; }
+
+/* Empty state */
+.empty-reservations { text-align: center; padding: 60px 20px; }
+.empty-icon-large { font-size: 52px; color: #d0d5dd; margin-bottom: 14px; }
+.empty-title { font-size: 17px; font-weight: 700; color: #344054; margin-bottom: 8px; }
+.empty-sub { font-size: 14px; color: #98a2b3; margin-bottom: 22px; }
+.btn-search-now {
+  background: linear-gradient(135deg, #12b76a, #0ea070);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(18,183,106,.3);
+  transition: all .2s;
+}
+.btn-search-now:hover { transform: translateY(-1px); }
+
+/* Reviewed badge */
+.reviewed-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: #ecfdf5;
+  color: #027a48;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #a6f4c5;
+  border-radius: 8px;
+  white-space: nowrap;
+}

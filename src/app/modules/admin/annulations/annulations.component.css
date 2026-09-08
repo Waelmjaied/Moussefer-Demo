@@ -1,0 +1,177 @@
+.admin-dashboard { background: #f1f5f9; min-height: 100vh; }
+.container-fluid { width: 100%; padding: 0; margin: 0; }
+.row { display: flex; flex-wrap: wrap; margin: 0; }
+.sidebar-col { flex: 0 0 16.666667%; max-width: 16.666667%; padding: 0; }
+.main-col { flex: 0 0 83.333333%; max-width: 83.333333%; padding: 1.5rem 2rem; min-width: 0; }
+
+/* Header */
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+.page-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem; }
+.page-subtitle { color: #94a3b8; font-size: 0.95rem; margin: 0; }
+.header-actions { display: flex; align-items: center; gap: 0.75rem; }
+.status-badge-online { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; background: #dcfce7; color: #16a34a; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+.btn-icon { width: 40px; height: 40px; border-radius: 10px; border: none; background: white; color: #64748b; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.search-box { position: relative; }
+.search-box i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+.search-box input { padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.9rem; width: 180px; }
+
+/* Alert Banner */
+.alert-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.alert-content { display: flex; align-items: center; gap: 0.75rem; }
+.alert-icon { color: #ef4444; font-size: 1.1rem; }
+.alert-text { font-size: 0.9rem; color: #7f1d1d; }
+.alert-text strong { color: #991b1b; font-weight: 600; }
+.alert-actions { display: flex; gap: 0.5rem; }
+.btn-alert { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; border: none; }
+.btn-alert-ghost { background: transparent; color: #991b1b; }
+.btn-alert-ghost:hover { background: #fee2e2; }
+.btn-alert-primary { background: #ef4444; color: white; }
+.btn-alert-primary:hover { background: #dc2626; }
+
+/* KPI Grid */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.kpi-card { background: white; border-radius: 14px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(226,232,240,0.6); }
+.kpi-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; font-weight: 600; }
+.kpi-value { font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
+.kpi-value.red { color: #ef4444; }
+.kpi-value.blue { color: #3b82f6; }
+.kpi-value.dark { color: #1e3a8a; }
+.kpi-trend { font-size: 0.8rem; font-weight: 500; }
+.kpi-trend.up { color: #ef4444; }
+.kpi-trend.info { color: #94a3b8; }
+
+/* Charts Row */
+.charts-row { margin-bottom: 1.5rem; }
+.chart-card { background: white; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(226,232,240,0.6); height: 100%; }
+.chart-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f8fafc; }
+.chart-icon { color: #3b82f6; margin-right: 0.5rem; }
+.chart-title { font-size: 0.95rem; font-weight: 600; color: #1e293b; }
+.chart-legend { display: flex; gap: 1rem; font-size: 0.75rem; color: #64748b; }
+.legend-item { display: flex; align-items: center; gap: 0.35rem; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+.legend-dot.today { background: #22c55e; }
+.legend-dot.average { background: #e2e8f0; }
+.chart-body { padding: 1.25rem 1.5rem; }
+
+/* Causes IA */
+.cause-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+.cause-item { display: flex; flex-direction: column; gap: 0.4rem; }
+.cause-info { display: flex; justify-content: space-between; font-size: 0.85rem; }
+.cause-name { color: #475569; font-weight: 500; }
+.cause-percent { color: #1e293b; font-weight: 600; }
+.cause-bar-track { height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+.cause-bar { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+/* Recommandation IA */
+.ia-recommendation { background: #f8fafc; border-radius: 10px; padding: 1rem; border-left: 3px solid #3b82f6; }
+.rec-title { font-size: 0.8rem; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; }
+.rec-text { font-size: 0.8rem; color: #64748b; line-height: 1.5; margin: 0; }
+
+/* Distribution horaire */
+.hourly-chart { display: flex; align-items: flex-end; justify-content: space-between; gap: 0.75rem; height: 180px; padding-bottom: 1.5rem; }
+.hour-bar-group { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex: 1; }
+.hour-bars { display: flex; align-items: flex-end; gap: 0.25rem; height: 140px; width: 100%; justify-content: center; }
+.hour-bar { width: 14px; border-radius: 3px 3px 0 0; transition: height 0.6s ease; }
+.today-bar { background: #22c55e; }
+.avg-bar { background: #e2e8f0; }
+.hour-label { font-size: 0.75rem; color: #94a3b8; }
+
+/* Table */
+.table-card { background: white; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid rgba(226,232,240,0.6); overflow: hidden; }
+.table-responsive { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table thead th { text-align: left; padding: 1rem 1.25rem; color: #94a3b8; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; border-bottom: 1px solid #f1f5f9; background: #fafbfc; }
+.data-table tbody td { padding: 0.875rem 1.25rem; color: #475569; border-bottom: 1px solid #f8fafc; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.row-id { font-family: monospace; font-size: 0.8rem; color: #64748b; font-weight: 500; }
+
+/* Badges */
+.badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; }
+.badge-conducteur { background: #dbeafe; color: #1e3a8a; }
+.badge-passager { background: #fef3c7; color: #92400e; }
+
+.cause-text { font-size: 0.85rem; color: #64748b; }
+.cause-text.red { color: #dc2626; font-weight: 500; }
+
+.badge-refund { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; }
+.badge-refund-yes { background: #dcfce7; color: #166534; }
+.badge-refund-no { background: #fee2e2; color: #991b1b; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .page-header { flex-direction: column; gap: 1rem; }
+  .alert-banner { flex-direction: column; gap: 0.75rem; text-align: center; }
+
+  /* Reverse the row so main content comes first */
+  .admin-dashboard > .container-fluid > .row {
+    flex-direction: column-reverse;
+  }
+
+  /* Sidebar column: position absolute, completely out of flow */
+  .sidebar-col {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    padding: 0;
+    overflow: visible;
+    z-index: 1000;
+  }
+
+  /* Main content: full width, sits at top */
+  .main-col {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    padding: 1rem;
+    padding-top: 4.5rem;
+  }
+}
+@media (max-width: 768px) {
+  /* When sidebar is NOT open, hide everything except the mobile header */
+  .sidebar:not(.open) {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The mobile header is fixed and always visible */
+  .mobile-header {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    z-index: 1040;
+  }
+
+  /* When sidebar IS open, show it */
+  .sidebar.open {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Overlay always follows its own open state */
+  .sidebar-overlay:not(.open) {
+    display: none;
+  }
+  .sidebar-overlay.open {
+    display: block;
+  }
+}

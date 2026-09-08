@@ -1,0 +1,410 @@
+/* ===== BASE & POLICE ===== */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.auth-page {
+  min-height: 100vh;
+  background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
+  url('/assets/background.jpg.jpeg');
+  background-size: cover;
+  background-position: center;
+  font-family: 'Nunito', sans-serif;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== NAVIGATION ===== */
+.auth-nav {
+  padding: 20px 50px;
+}
+
+.nav-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo {
+  height: 50px;
+  cursor: pointer;
+  object-fit: contain;
+}
+
+.nav-btns {
+  display: flex;
+  gap: 15px;
+}
+
+.btn-green {
+  background: #5EC090;
+  color: white;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-green:hover {
+  background: #4aa97a;
+  transform: translateY(-2px);
+}
+
+.btn-blue {
+  background: #2e4a85;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-blue:hover {
+  background: #1e3a6b;
+  transform: translateY(-2px);
+}
+
+/* ===== CONTENEUR FORMULAIRE (remonté en haut) ===== */
+.auth-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 20px 20px 0 20px;
+}
+
+.auth-content {
+  width: 100%;
+  max-width: 520px;
+  padding: 10px 0 40px;
+}
+
+/* ===== TITRES ===== */
+.auth-content h1 {
+  font-family: 'Nunito';
+  font-weight: 800;
+  font-size: 48px;
+  line-height: 1.2;
+  color: #ffffff;
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+.subtitle {
+  font-family: 'Nunito';
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.3;
+  color: #ffffff;
+  margin-bottom: 32px;
+  opacity: 0.9;
+}
+
+/* ===== FORMULAIRE ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.input-group label {
+  font-family: 'Nunito';
+  font-weight: 600;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 14px;
+  gap: 10px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+}
+
+.input-wrapper i {
+  font-size: 20px;
+  color: #979797;
+  width: 26px;
+  text-align: center;
+  flex-shrink: 0;        /* ← empêche l'icône de rétrécir/disparaître */
+  user-select: none;
+}
+
+.input-wrapper input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: 'Nunito';
+  font-weight: 500;
+  font-size: 15px;
+  color: #111827;
+  outline: none;
+}
+
+.input-wrapper input::placeholder {
+  color: #8a8686;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+/* ===== OPTIONS (se souvenir / mot de passe oublié) ===== */
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.remember-me input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.forgot-pwd {
+  color: #62c391;
+  text-decoration: none;
+  font-weight: 700;
+  transition: opacity 0.2s;
+}
+
+.forgot-pwd:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+/* ===== BOUTON DE CONNEXION (dégradé) ===== */
+.btn-submit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  width: 100%;
+  background: linear-gradient(90deg, #5fc090 0%, #2a388c 100%);
+  border-radius: 98px;
+  border: none;
+  font-family: 'Nunito';
+  font-weight: 800;
+  font-size: 18px;
+  color: #fef5eb;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+  margin-top: 8px;
+}
+
+.btn-submit:hover {
+  transform: scale(0.98);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ===== LIEN CRÉER UN COMPTE ===== */
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-family: 'Nunito';
+  font-weight: 500;
+  font-size: 15px;
+  color: #ffffff;
+}
+
+.auth-footer a {
+  color: #62c391;
+  font-weight: 800;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.auth-footer a:hover {
+  border-bottom-color: #62c391;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .auth-nav {
+    padding: 15px 24px;
+  }
+  .logo {
+    height: 40px;
+  }
+  .btn-green,
+  .btn-blue {
+    padding: 6px 16px;
+    font-size: 0.8rem;
+  }
+  .auth-content h1 {
+    font-size: 36px;
+  }
+  .subtitle {
+    font-size: 16px;
+    margin-bottom: 28px;
+  }
+  .input-group label {
+    font-size: 14px;
+  }
+  .input-wrapper {
+    padding: 10px 12px;
+  }
+  .input-wrapper i {
+    font-size: 18px;
+  }
+  .input-wrapper input,
+  .input-wrapper input::placeholder {
+    font-size: 14px;
+  }
+  .btn-submit {
+    font-size: 16px;
+    padding: 10px 16px;
+  }
+  .form-options {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-flex {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .auth-content {
+    padding-top: 0;
+  }
+  .auth-content h1 {
+    font-size: 32px;
+  }
+}
+/* ── Password toggle ───────────────────────────── */
+.password-wrapper {
+  position: relative !important;
+}
+
+.password-wrapper input {
+  padding-right: 2.8rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  z-index: 2;
+  /* Override .input-wrapper i styles that might interfere */
+  font-size: 0 !important;
+  width: auto !important;
+}
+
+.toggle-password:hover {
+  color: #111827;
+}
+
+.toggle-password:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.toggle-password svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+/* ── Attempts / Ban alert banner ───────────────── */
+.attempts-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  animation: slideDown 0.3s ease;
+}
+
+.attempts-alert strong {
+  font-weight: 700;
+  font-size: 15px;
+  color: #ffc107;
+}
+
+.attempts-alert.banned {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.attempts-alert.banned strong {
+  color: #ef4444;
+}
+
+.attempts-alert b {
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Submit button when banned ─────────────────── */
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

@@ -1,0 +1,89 @@
+<div class="auth-page">
+  <nav class="auth-nav">
+    <div class="container nav-flex">
+      <img src="assets/logo-removebg-preview.png" alt="Moussefer" class="logo" routerLink="/">
+      <div class="nav-btns">
+        <button class="btn-green" routerLink="/auth/register">Se connecter</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-content">
+      <h1>Bon retour !</h1>
+      <p class="subtitle">Connectez-vous à votre espace Moussefer</p>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+
+        <!-- ═══ BAN / ATTEMPTS ALERT ═══ -->
+        <div *ngIf="failedAttempts > 0 || isBanned" class="attempts-alert" [class.banned]="isBanned">
+          <ng-container *ngIf="isBanned; else attemptsBlock">
+            <strong>Compte temporairement bloqué</strong>
+            <span>Réessayez dans <b>{{ banCountdown }}</b></span>
+          </ng-container>
+          <ng-template #attemptsBlock>
+            <strong>Attention</strong>
+            <span>Tentative {{ failedAttempts }}/5. Après 5 échecs, votre compte sera bloqué 15 minutes.</span>
+          </ng-template>
+        </div>
+        <!-- ═══════════════════════════ -->
+
+        <div class="input-group">
+          <label>Adresse email</label>
+          <div class="input-wrapper">
+            <i class="far fa-envelope"></i>
+            <input type="email" formControlName="email" placeholder="Email132@gmail.com">
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Mot de passe</label>
+          <div class="input-wrapper password-wrapper">
+            <i class="fas fa-key"></i>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Mot de passe"
+            >
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+            >
+              <!-- Eye (password hidden) -->
+              <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <!-- Eye-slash (password visible) -->
+              <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox"> Se souvenir de moi
+          </label>
+          <a routerLink="/auth/forgot-password" class="forgot-pwd">Mot de passe oublié ?</a>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loading || isBanned">
+          <ng-container *ngIf="isBanned; else normalBtn">
+            Bloqué — {{ banCountdown }}
+          </ng-container>
+          <ng-template #normalBtn>
+            {{ loading ? 'Connexion...' : 'Se connecter' }}
+          </ng-template>
+        </button>
+
+        <p class="auth-footer">
+          Pas de compte ? <a routerLink="/auth/register">Créer un compte !</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>

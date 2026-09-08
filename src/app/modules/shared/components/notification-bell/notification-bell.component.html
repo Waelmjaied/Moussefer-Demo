@@ -1,0 +1,54 @@
+<div class="bell-container" (click)="toggleDropdown()">
+  <i class="bi bi-bell-fill"></i>
+  <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+</div>
+
+<!-- Dropdown with #dropdownRef — will be moved to body by TS -->
+<div #dropdownRef class="notification-dropdown" [class.show]="isOpen" (click)="$event.stopPropagation()">
+  <div class="dropdown-header">
+    <div class="header-title">
+      <i class="bi bi-bell"></i>
+      <span>Notifications</span>
+    </div>
+    <div class="dropdown-actions">
+      <button class="action-btn mark-all" (click)="markAllAsRead()" [disabled]="unreadCount === 0">
+        Tout lire
+      </button>
+      <button class="action-btn clear-all" (click)="clearAll()" [disabled]="notifications.length === 0">
+        Effacer
+      </button>
+    </div>
+  </div>
+  <div class="dropdown-body">
+    <div *ngIf="notifications.length === 0" class="empty-state">
+      <i class="bi bi-bell-slash"></i>
+      <p>Aucune notification</p>
+    </div>
+    <div *ngFor="let notif of notifications"
+         class="notification-item"
+         [class.unread]="!notif.read"
+         (click)="onNotificationClick(notif)"
+         style="cursor: pointer;">
+      <div class="notification-icon">
+        <i class="bi" [class.bi-envelope]="!notif.read" [class.bi-envelope-open]="notif.read"></i>
+      </div>
+      <div class="notification-content">
+        <div class="notification-title">{{ notif.title }}</div>
+        <div class="notification-message">{{ notif.body }}</div>
+        <div class="notification-time">{{ notif.sentAt | date:'dd/MM HH:mm' }}</div>
+      </div>
+      <button *ngIf="!notif.read"
+              class="mark-read-btn"
+              (click)="markAsRead(notif.id, $event)"
+              title="Marquer comme lu">
+        <i class="bi bi-check-lg"></i>
+      </button>
+      <button class="mark-read-btn"
+              style="margin-left: 4px;"
+              (click)="deleteOne(notif.id, $event)"
+              title="Supprimer">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
+</div>

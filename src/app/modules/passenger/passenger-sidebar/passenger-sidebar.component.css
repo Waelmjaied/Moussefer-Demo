@@ -1,0 +1,297 @@
+/* ══════════════════════════════════════════
+   PASSENGER DASHBOARD LAYOUT
+   ══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #2A388C;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Overlay ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+.sidebar-overlay.open {
+  display: block;
+}
+
+/* ── Mobile Header ── */
+.mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e4e7ec;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.mobile-header .logo-img {
+  height: 32px;
+}
+
+.mobile-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-hamburger {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: #f0f2f7;
+  color: #344054;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-hamburger:hover {
+  background: #e4e7ec;
+}
+
+.mobile-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 14px !important;
+  border-width: 2px !important;
+}
+
+/* ── Left profile panel ── */
+.profile-panel {
+  width: 340px;
+  flex-shrink: 0;
+  background: rgb(240 242 247 / 0.78);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Avatar section */
+.avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 24px 24px;
+  text-align: center;
+}
+.avatar-wrap {
+  position: relative;
+  margin-bottom: 14px;
+}
+.avatar-circle {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #12b76a, #0ea070);
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 18px rgba(18,183,106,.25);
+}
+.avatar-online {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #12b76a;
+  border: 3px solid #f0f2f7;
+}
+.profile-name { font-size: 20px; font-weight: 700; color: #101828; margin: 0 0 4px; }
+.profile-email { font-size: 13px; color: #667085; margin: 0 0 16px; }
+.btn-edit-profile {
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid #e4e7ec;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #344054;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-edit-profile:hover { border-color: #12b76a; color: #12b76a; }
+
+/* Stats row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgb(240 242 247 / 0.42);
+  border-bottom: 1px solid rgb(240 242 247 / 0.42);
+  background: rgb(240 242 247 / 0.42);
+}
+.stat-cell {
+  text-align: center;
+  padding: 16px 8px;
+  border-right: 1px solid rgb(240 242 247 / 0.42);
+}
+.stat-cell:last-child { border-right: none; }
+.stat-num { font-size: 20px; font-weight: 700; color: #101828; }
+.stat-lbl { font-size: 11px; color: #98a2b3; margin-top: 2px; }
+
+/* Navigation sections */
+.nav-section { padding: 20px 16px 4px; }
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #98a2b3;
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+  margin-bottom: 3px;
+  transition: all .15s;
+  text-decoration: none;
+}
+.nav-item:hover { background: #fff; color: #101828; }
+.nav-item.active {
+  background: #d1fae5;
+  color: #027a48;
+  font-weight: 600;
+}
+.nav-item-left { display: flex; align-items: center; gap: 10px; }
+.nav-item i { font-size: 16px; width: 20px; }
+.nav-badge {
+  background: #12b76a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 8px;
+  min-width: 22px;
+  text-align: center;
+}
+.nav-badge-blue { background: #2A388C; }
+.nav-badge-amber { background: #f59e0b; }
+.nav-badge-emerald {
+  background: linear-gradient(135deg, #12b76a 0%, #027a48 100%);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Logout */
+.logout-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  margin: 0 16px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #dc2626;
+  transition: all .15s;
+  background: none;
+  border: none;
+  font-family: inherit;
+  width: calc(100% - 32px);
+}
+.logout-item:hover { background: #fef2f2; }
+
+/* ── Right content panel ── */
+.content-panel {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  overflow-y: auto;
+}
+
+/* Scrollbar */
+.profile-panel::-webkit-scrollbar { width: 3px; }
+.profile-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,.1); border-radius: 3px; }
+
+/* ══════════════════════════════════════════
+   MOBILE RESPONSIVE (< 768px)
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+  }
+
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .profile-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+
+  .profile-panel.open {
+    transform: translateX(0);
+  }
+
+  .content-panel {
+    width: 100%;
+    min-height: calc(100vh - 65px);
+  }
+
+  /* Avatar plus compact dans le drawer */
+  .profile-panel .avatar-section {
+    padding: 24px 20px 16px;
+  }
+
+  .profile-panel .avatar-circle {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+  }
+}
+
+/* Desktop: cacher le header mobile et overlay */
+@media (min-width: 769px) {
+  .mobile-header,
+  .sidebar-overlay {
+    display: none !important;
+  }
+}

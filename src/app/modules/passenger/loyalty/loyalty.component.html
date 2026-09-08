@@ -1,0 +1,231 @@
+<div class="loyalty-page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1><i class="bi bi-stars me-2"></i>Mes Points Fidélité</h1>
+      <p>Gagnez des points à chaque trajet et échangez-les contre des réductions</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-center">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (!account) {
+    <div class="empty-state-card">
+      <div class="empty-icon"><i class="bi bi-exclamation-triangle"></i></div>
+      <h3>Compte indisponible</h3>
+      <p>Impossible de récupérer ton compte fidélité. Réessaie dans un instant.</p>
+      <button class="btn-primary" (click)="loadAll()">Réessayer</button>
+    </div>
+  } @else {
+    <!-- ─────────── Hero card : balance + tier ─────────── -->
+    <div class="hero-card">
+      <div class="hero-left">
+        <div class="tier-pill" [style.background]="currentTier.bg" [style.color]="currentTier.color">
+          <i class="bi" [class]="currentTier.icon"></i> {{ currentTier.label }}
+        </div>
+        <div class="balance-label">Solde disponible</div>
+        <div class="balance-value">{{ account.points | number }} <span class="balance-unit">pts</span></div>
+        <div class="balance-equivalent">
+          <i class="bi bi-arrow-right-circle"></i>
+          Équivaut à <strong>{{ equivalentDt }} DT</strong> de réduction
+        </div>
+      </div>
+
+      <div class="hero-right">
+        @if (nextTier) {
+          <div class="next-tier-label">
+            Plus que <strong>{{ pointsToNext | number }} pts</strong> pour passer
+            <span [style.color]="nextTier.color">{{ nextTier.label }}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill"
+                 [style.width.%]="progressToNext"
+                 [style.background]="nextTier.color"></div>
+          </div>
+          <div class="progress-meta">
+            <span>{{ currentTier.label }}</span>
+            <span>{{ progressToNext }}%</span>
+            <span>{{ nextTier.label }}</span>
+          </div>
+        } @else {
+          <div class="max-tier">
+            <i class="bi bi-trophy-fill"></i>
+            <div>
+              <div class="max-tier-title">Niveau maximum atteint</div>
+              <div class="max-tier-sub">Tu profites des meilleurs avantages Moussefer</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ─────────── Stats row ─────────── -->
+    <div class="kpi-row">
+      <div class="kpi-card green-accent">
+        <div class="kpi-label">Total gagné</div>
+        <div class="kpi-value">{{ account.totalEarned | number }} <span>pts</span></div>
+        <div class="kpi-sub up"><i class="bi bi-arrow-up-short"></i> Cumul historique</div>
+      </div>
+      <div class="kpi-card purple-accent">
+        <div class="kpi-label">Total échangé</div>
+        <div class="kpi-value">{{ account.totalRedeemed | number }} <span>pts</span></div>
+        <div class="kpi-sub"><i class="bi bi-gift"></i> Réductions utilisées</div>
+      </div>
+      <div class="kpi-card blue-accent">
+        <div class="kpi-label">Économies réalisées</div>
+        <div class="kpi-value">{{ (account.totalRedeemed / pointsPerDt) | number:'1.0-2' }} <span>DT</span></div>
+        <div class="kpi-sub"><i class="bi bi-cash-coin"></i> Sur tes trajets</div>
+      </div>
+    </div>
+
+    <!-- ─────────── Redeem ─────────── -->
+    <div class="section-card">
+      <div class="section-head">
+        <h2><i class="bi bi-gift me-2"></i>Échanger mes points</h2>
+        <span class="hint">100 pts = 1 DT &nbsp;·&nbsp; minimum {{ minRedeem }} pts</span>
+      </div>
+
+      @if (availablePoints < minRedeem) {
+        <div class="redeem-locked">
+          <i class="bi bi-lock"></i>
+          Il te faut au moins <strong>{{ minRedeem }} pts</strong> pour échanger.
+          Plus que <strong>{{ minRedeem - availablePoints }} pts</strong> à gagner.
+        </div>
+      } @else {
+        <div class="quick-amounts">
+          <button class="qa-btn"
+                  [disabled]="100 > availablePoints"
+                  [class.active]="redeemAmount === 100"
+                  (click)="setQuickAmount(100)">
+            <span class="qa-pts">100 pts</span>
+            <span class="qa-dt">= 1 DT</span>
+          </button>
+          <button class="qa-btn"
+                  [disabled]="500 > availablePoints"
+                  [class.active]="redeemAmount === 500"
+                  (click)="setQuickAmount(500)">
+            <span class="qa-pts">500 pts</span>
+            <span class="qa-dt">= 5 DT</span>
+          </button>
+          <button class="qa-btn"
+                  [disabled]="1000 > availablePoints"
+                  [class.active]="redeemAmount === 1000"
+                  (click)="setQuickAmount(1000)">
+            <span class="qa-pts">1 000 pts</span>
+            <span class="qa-dt">= 10 DT</span>
+          </button>
+          <button class="qa-btn qa-max"
+                  [disabled]="availablePoints < minRedeem"
+                  (click)="setQuickAmount(Math.floor(availablePoints / minRedeem) * minRedeem)">
+            <span class="qa-pts">Tout</span>
+            <span class="qa-dt">= {{ equivalentDt }} DT</span>
+          </button>
+        </div>
+
+        <div class="redeem-form">
+          <div class="redeem-input-group">
+            <label>Montant à échanger</label>
+            <div class="redeem-input-wrap">
+              <input type="number"
+                     [(ngModel)]="redeemAmount"
+                     [step]="minRedeem"
+                     [min]="minRedeem"
+                     [max]="availablePoints"
+                     placeholder="Ex: 500"
+                     class="redeem-input">
+              <span class="redeem-suffix">pts</span>
+            </div>
+          </div>
+
+          <div class="redeem-arrow"><i class="bi bi-arrow-right"></i></div>
+
+          <div class="redeem-output">
+            <div class="redeem-output-label">Réduction obtenue</div>
+            <div class="redeem-output-value">{{ redeemEquivalentDt | number:'1.0-2' }} <span>DT</span></div>
+          </div>
+        </div>
+
+        <button class="btn-redeem"
+                [disabled]="!canRedeem"
+                (click)="redeem()">
+          @if (redeeming) {
+            <span class="spinner-border spinner-border-sm me-2"></span> Échange en cours…
+          } @else {
+            <i class="bi bi-check-circle me-2"></i> Confirmer l'échange
+          }
+        </button>
+      }
+    </div>
+
+    <!-- ─────────── Earn ways ─────────── -->
+    <div class="section-card">
+      <div class="section-head">
+        <h2><i class="bi bi-plus-circle me-2"></i>Comment gagner des points ?</h2>
+      </div>
+      <div class="earn-grid">
+        <div class="earn-tile">
+          <div class="earn-icon" style="background:#ecfdf5;color:#027a48"><i class="bi bi-geo-alt-fill"></i></div>
+          <div class="earn-body">
+            <div class="earn-title">Trajet louage</div>
+            <div class="earn-desc">10 points par DT payé</div>
+          </div>
+        </div>
+        <div class="earn-tile">
+          <div class="earn-icon" style="background:#f4ebff;color:#7e3af2"><i class="bi bi-map-fill"></i></div>
+          <div class="earn-body">
+            <div class="earn-title">Voyage organisé</div>
+            <div class="earn-desc">15 points par DT payé</div>
+          </div>
+        </div>
+        <div class="earn-tile">
+          <div class="earn-icon" style="background:#fef3c7;color:#b54708"><i class="bi bi-star-fill"></i></div>
+          <div class="earn-body">
+            <div class="earn-title">Laisser un avis</div>
+            <div class="earn-desc">50 points par avis</div>
+          </div>
+        </div>
+        <div class="earn-tile">
+          <div class="earn-icon" style="background:#dbeafe;color:#1d4ed8"><i class="bi bi-people-fill"></i></div>
+          <div class="earn-body">
+            <div class="earn-title">Parrainage</div>
+            <div class="earn-desc">200 points par filleul</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────── History ─────────── -->
+    <div class="section-card">
+      <div class="section-head">
+        <h2><i class="bi bi-clock-history me-2"></i>Historique</h2>
+        <span class="hint">{{ history.length }} transaction{{ history.length > 1 ? 's' : '' }}</span>
+      </div>
+
+      @if (history.length === 0) {
+        <div class="empty-history">
+          <i class="bi bi-inbox"></i>
+          <p>Aucune transaction pour l'instant. Réserve un trajet pour commencer à gagner des points !</p>
+        </div>
+      } @else {
+        <div class="history-list">
+          @for (t of history; track t.id) {
+            <div class="history-row">
+              <div class="history-icon" [style.color]="colorForType(t.type)" [style.background]="colorForType(t.type) + '14'">
+                <i class="bi" [class]="iconForType(t.type)"></i>
+              </div>
+              <div class="history-body">
+                <div class="history-title">{{ labelForType(t.type) }}</div>
+                <div class="history-desc">{{ t.description || (t.type === 'EARN' ? 'Points gagnés' : 'Échange de points') }}</div>
+                <div class="history-date">{{ t.createdAt | date:'d MMM yyyy à HH:mm' }}</div>
+              </div>
+              <div class="history-delta" [style.color]="colorForType(t.type)">
+                {{ t.points > 0 ? '+' : '' }}{{ t.points | number }} pts
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

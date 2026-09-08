@@ -1,0 +1,255 @@
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <app-admin-sidebar></app-admin-sidebar>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="kyc-container">
+
+      <!-- Header -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1><i class="bi bi-shield-check me-2"></i>Vérification KYC</h1>
+          <p>Examinez et approuvez les documents des chauffeurs</p>
+        </div>
+        <div class="pending-badge" *ngIf="pendingCount() > 0">
+          <i class="bi bi-hourglass-split"></i>
+          {{ pendingCount() }} en attente
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="filter-group">
+          <select class="modern-input" [(ngModel)]="filterType" (change)="applyFilters()">
+            <option *ngFor="let t of documentTypes" [value]="t.value">{{ t.label }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select class="modern-input" [(ngModel)]="filterStatus" (change)="applyFilters()">
+            <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+          </select>
+        </div>
+        <div class="filter-group search-group">
+          <i class="bi bi-search"></i>
+          <input type="text"
+                 class="modern-input"
+                 [(ngModel)]="searchQuery"
+                 (input)="applyFilters()"
+                 placeholder="Rechercher un chauffeur...">
+        </div>
+        <button class="btn-refresh" (click)="loadDocuments()" [disabled]="loading">
+          <i class="bi" [class.bi-arrow-clockwise]="!loading" [class.bi-arrow-repeat]="loading"></i>
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="loading-center">
+        <div class="spinner-border"></div>
+      </div>
+
+      <!-- Empty -->
+      <div *ngIf="!loading && groupedDocs.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-folder-check"></i>
+        </div>
+        <h3>Aucun document trouvé</h3>
+        <p>Tous les documents ont été traités ou aucun ne correspond aux filtres.</p>
+      </div>
+
+      <!-- Drivers list — one card per driver, with that driver's docs inside -->
+      <div class="drivers-list" *ngIf="!loading && groupedDocs.length > 0">
+        <div class="driver-group-card" *ngFor="let group of groupedDocs">
+
+          <!-- Group header: driver identity + counts + bulk action -->
+          <div class="group-header">
+            <div class="group-avatar">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="group-identity">
+              <div class="group-name">
+                <i class="bi bi-person"></i>
+                {{ group.driverName }}
+              </div>
+              <div class="group-email" *ngIf="group.driverEmail">
+                <i class="bi bi-envelope"></i>
+                {{ group.driverEmail }}
+              </div>
+              <div class="group-date">
+                <i class="bi bi-calendar3"></i>
+                Dernier dépôt : {{ formatDate(group.latestUpload) }}
+              </div>
+            </div>
+            <div class="group-stats">
+              <span class="stat-badge stat-pending" *ngIf="group.pendingCount > 0">
+                <i class="bi bi-hourglass-split"></i>
+                {{ group.pendingCount }} en attente
+              </span>
+              <span class="stat-badge stat-approved" *ngIf="group.approvedCount > 0">
+                <i class="bi bi-check-circle-fill"></i>
+                {{ group.approvedCount }} validé{{ group.approvedCount > 1 ? 's' : '' }}
+              </span>
+              <span class="stat-badge stat-rejected" *ngIf="group.rejectedCount > 0">
+                <i class="bi bi-x-circle-fill"></i>
+                {{ group.rejectedCount }} refusé{{ group.rejectedCount > 1 ? 's' : '' }}
+              </span>
+            </div>
+            <div class="group-actions" *ngIf="group.pendingCount > 0">
+              <button class="btn-approve-all"
+                      (click)="approveAllForDriver(group.driverId)"
+                      [disabled]="bulkProcessingDriverId === group.driverId">
+                <span *ngIf="bulkProcessingDriverId === group.driverId"
+                      class="spinner-border spinner-border-sm me-1"></span>
+                <i *ngIf="bulkProcessingDriverId !== group.driverId" class="bi bi-check-all"></i>
+                Tout approuver
+              </button>
+            </div>
+          </div>
+
+          <!-- Inner documents list -->
+          <div class="group-docs">
+            <div class="group-doc-row"
+                 *ngFor="let doc of group.documents"
+                 [class]="'row-' + doc.status.toLowerCase()">
+              <div class="row-icon">
+                <i class="bi" [class]="getDocTypeIcon(doc.documentType)"></i>
+              </div>
+              <div class="row-info">
+                <div class="row-title">{{ getDocTypeLabel(doc.documentType) }}</div>
+                <div class="row-meta">
+                  <i class="bi bi-calendar3"></i>
+                  Déposé le {{ formatDate(doc.uploadedAt) }}
+                </div>
+                <div class="row-reason" *ngIf="doc.rejectionReason">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  {{ doc.rejectionReason }}
+                </div>
+              </div>
+              <span class="status-pill" [class]="getStatusClass(doc.status)">
+                <i class="bi"
+                   [class.bi-hourglass-split]="doc.status === 'PENDING'"
+                   [class.bi-check-circle-fill]="doc.status === 'APPROVED'"
+                   [class.bi-x-circle-fill]="doc.status === 'REJECTED'"></i>
+                {{ getStatusLabel(doc.status) }}
+              </span>
+              <div class="row-actions">
+                <button class="btn-preview-sm" (click)="previewDocument(doc)" title="Voir">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <ng-container *ngIf="doc.status === 'PENDING'">
+                  <button class="btn-approve-sm"
+                          (click)="approveDocument(doc.id)"
+                          [disabled]="processingId === doc.id || bulkProcessingDriverId === group.driverId"
+                          title="Approuver">
+                    <span *ngIf="processingId === doc.id" class="spinner-border spinner-border-sm"></span>
+                    <i *ngIf="processingId !== doc.id" class="bi bi-check-lg"></i>
+                  </button>
+                  <button class="btn-reject-sm"
+                          (click)="openRejectModal(doc.id)"
+                          [disabled]="processingId === doc.id || bulkProcessingDriverId === group.driverId"
+                          title="Rejeter">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Preview Modal ═══ -->
+<div class="modal-backdrop" *ngIf="showPreviewModal" (click)="closePreview()"></div>
+<div class="preview-modal" *ngIf="showPreviewModal">
+  <div class="modal-content-wrapper">
+    <div class="modal-header">
+      <h3>
+        <i class="bi" [class]="getDocTypeIcon(selectedDoc!.documentType)"></i>
+        {{ getDocTypeLabel(selectedDoc!.documentType) }}
+      </h3>
+      <button class="btn-close-custom" (click)="closePreview()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="driver-detail">
+        <div class="detail-row">
+          <span class="detail-label">Chauffeur</span>
+          <span class="detail-value">{{ selectedDoc!.driverName }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Email</span>
+          <span class="detail-value">{{ selectedDoc!.driverEmail }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date de dépôt</span>
+          <span class="detail-value">{{ formatDate(selectedDoc!.uploadedAt) }}</span>
+        </div>
+      </div>
+
+      <div class="document-preview">
+        <img *ngIf="isImage(selectedDoc!.documentUrl)"
+             [src]="selectedDoc!.documentUrl"
+             alt="Document"
+             class="preview-image">
+        <div *ngIf="!isImage(selectedDoc!.documentUrl)" class="preview-file">
+          <i class="bi bi-file-earmark-pdf"></i>
+          <span>Document PDF</span>
+          <a [href]="selectedDoc!.documentUrl" target="_blank" class="btn-download">
+            <i class="bi bi-download"></i> Télécharger
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer" *ngIf="selectedDoc!.status === 'PENDING'">
+      <button class="btn-reject" (click)="openRejectModal(selectedDoc!.id); closePreview()">
+        <i class="bi bi-x-lg"></i> Rejeter
+      </button>
+      <button class="btn-approve"
+              (click)="approveDocument(selectedDoc!.id)"
+              [disabled]="processingId === selectedDoc!.id">
+        <span *ngIf="processingId === selectedDoc!.id" class="spinner-border spinner-border-sm"></span>
+        <i *ngIf="processingId !== selectedDoc!.id" class="bi bi-check-lg"></i>
+        Approuver le document
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Reject Modal ═══ -->
+<div class="modal-backdrop" *ngIf="showRejectModal" (click)="closeRejectModal()"></div>
+<div class="reject-modal" *ngIf="showRejectModal">
+  <div class="modal-content-wrapper">
+    <div class="modal-icon bg-danger-soft">
+      <i class="bi bi-exclamation-triangle text-danger"></i>
+    </div>
+    <h4 class="modal-title text-danger">Rejeter le document ?</h4>
+    <p class="modal-message">
+      Ce document sera rejeté et le chauffeur devra en soumettre un nouveau.
+    </p>
+
+    <div class="modal-input-group">
+      <label class="input-label">Motif du rejet *</label>
+      <textarea class="modern-input"
+                rows="3"
+                [(ngModel)]="rejectReason"
+                placeholder="Expliquez pourquoi ce document est rejeté..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeRejectModal()">Annuler</button>
+      <button class="btn-danger"
+              (click)="confirmReject()"
+              [disabled]="!rejectReason.trim() || processingId === rejectTargetId">
+        <span *ngIf="processingId === rejectTargetId" class="spinner-border spinner-border-sm me-1"></span>
+        Confirmer le rejet
+      </button>
+    </div>
+  </div>
+</div>

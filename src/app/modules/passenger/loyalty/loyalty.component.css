@@ -1,0 +1,523 @@
+/* ============================================
+   PASSENGER LOYALTY - Moussefer 2026
+   Aligned to existing passenger module palette
+   (navy #1e4d8c + green #027a48)
+   ============================================ */
+
+.loyalty-page {
+  padding: 28px 32px;
+  background: #fafbfc;
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: #1e3a6b;
+}
+
+/* ── Header ── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.page-header-left h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #101828;
+  margin: 0 0 4px;
+}
+.page-header-left p {
+  font-size: 14px;
+  color: #667085;
+  margin: 0;
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+/* ── Empty state ── */
+.empty-state-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 60px 24px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.empty-icon {
+  font-size: 56px;
+  color: #d0d5dd;
+  margin-bottom: 12px;
+}
+.empty-state-card h3 {
+  font-size: 18px;
+  margin: 0 0 6px;
+  color: #101828;
+}
+.empty-state-card p {
+  color: #667085;
+  margin: 0 0 16px;
+}
+.btn-primary {
+  background: #1e4d8c;
+  color: #fff;
+  border: 0;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:hover { background: #163a6e; }
+
+/* ──────── HERO CARD ──────── */
+.hero-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  padding: 28px 32px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #152a4d 0%, #1e4d8c 100%);
+  color: #fff;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(21,42,77,.18);
+  position: relative;
+  overflow: hidden;
+}
+.hero-card::before {
+  content: '';
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(94,192,144,.25) 0%, transparent 70%);
+}
+
+.tier-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.balance-label {
+  font-size: 13px;
+  opacity: .8;
+  margin-bottom: 6px;
+}
+.balance-value {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+.balance-unit {
+  font-size: 22px;
+  font-weight: 500;
+  opacity: .85;
+}
+.balance-equivalent {
+  margin-top: 14px;
+  font-size: 14px;
+  opacity: .9;
+}
+.balance-equivalent strong {
+  color: #5ec090;
+  font-weight: 700;
+}
+
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 1;
+}
+.next-tier-label {
+  font-size: 14px;
+  margin-bottom: 12px;
+  opacity: .95;
+}
+.next-tier-label strong { color: #5ec090; }
+.next-tier-label span { font-weight: 700; }
+
+.progress-track {
+  height: 10px;
+  background: rgba(255,255,255,.18);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .4s ease;
+}
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-top: 8px;
+  opacity: .75;
+}
+.progress-meta span:nth-child(2) { font-weight: 700; opacity: 1; }
+
+.max-tier {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.max-tier i {
+  font-size: 36px;
+  color: #f4d04e;
+}
+.max-tier-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.max-tier-sub {
+  font-size: 13px;
+  opacity: .85;
+}
+
+/* ──────── KPI ROW ──────── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  border-top: 3px solid;
+}
+.kpi-card.green-accent { border-top-color: #12b76a; }
+.kpi-card.purple-accent { border-top-color: #8b5cf6; }
+.kpi-card.blue-accent { border-top-color: #1d4ed8; }
+.kpi-label {
+  font-size: 12px;
+  color: #667085;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #101828;
+  line-height: 1;
+}
+.kpi-value span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #667085;
+}
+.kpi-sub {
+  font-size: 12px;
+  color: #667085;
+  margin-top: 8px;
+}
+.kpi-sub.up { color: #027a48; }
+
+/* ──────── SECTION CARD ──────── */
+.section-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.section-head h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  color: #101828;
+}
+.section-head .hint {
+  font-size: 12px;
+  color: #667085;
+}
+
+/* ── Redeem ── */
+.redeem-locked {
+  background: #f9fafb;
+  border: 1px dashed #d0d5dd;
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+  color: #667085;
+  font-size: 14px;
+}
+.redeem-locked i {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 6px;
+  color: #98a2b3;
+}
+
+.quick-amounts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.qa-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
+  background: #f9fafb;
+  border: 2px solid #eaecf0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.qa-btn:hover:not(:disabled) {
+  border-color: #1e4d8c;
+  background: #eff4fb;
+}
+.qa-btn.active {
+  border-color: #1e4d8c;
+  background: #eff4fb;
+  box-shadow: 0 0 0 3px rgba(30,77,140,.12);
+}
+.qa-btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.qa-btn.qa-max {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+.qa-btn.qa-max:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #12b76a;
+}
+.qa-pts {
+  font-weight: 700;
+  font-size: 15px;
+  color: #101828;
+}
+.qa-dt {
+  font-size: 12px;
+  color: #667085;
+}
+
+.redeem-form {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+.redeem-input-group label {
+  display: block;
+  font-size: 12px;
+  color: #667085;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.redeem-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #f9fafb;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  padding: 0 14px;
+}
+.redeem-input-wrap:focus-within {
+  border-color: #1e4d8c;
+  box-shadow: 0 0 0 3px rgba(30,77,140,.12);
+}
+.redeem-input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+  color: #101828;
+}
+.redeem-suffix {
+  font-size: 13px;
+  color: #667085;
+  font-weight: 500;
+}
+.redeem-arrow {
+  font-size: 22px;
+  color: #98a2b3;
+  padding: 0 4px 12px;
+}
+.redeem-output {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1px solid #a7f3d0;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.redeem-output-label {
+  font-size: 12px;
+  color: #027a48;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.redeem-output-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #027a48;
+}
+.redeem-output-value span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-redeem {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #12b76a 0%, #027a48 100%);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all .15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-redeem:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2,122,72,.3);
+}
+.btn-redeem:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ── Earn ways ── */
+.earn-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.earn-tile {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.earn-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.earn-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #101828;
+  margin-bottom: 2px;
+}
+.earn-desc {
+  font-size: 12px;
+  color: #667085;
+}
+
+/* ── History ── */
+.empty-history {
+  text-align: center;
+  padding: 32px 16px;
+  color: #98a2b3;
+}
+.empty-history i {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 8px;
+}
+.empty-history p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.history-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  background: #f9fafb;
+  border-radius: 10px;
+  transition: background .12s ease;
+}
+.history-row:hover { background: #f2f4f7; }
+.history-icon {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.history-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #101828;
+  margin-bottom: 1px;
+}
+.history-desc {
+  font-size: 13px;
+  color: #475467;
+}
+.history-date {
+  font-size: 11px;
+  color: #98a2b3;
+  margin-top: 2px;
+}
+.history-delta {
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+/* ──────── RESPONSIVE ──────── */
+@media (max-width: 1024px) {
+  .hero-card { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: 1fr; }
+  .quick-amounts { grid-template-columns: repeat(2, 1fr); }
+  .earn-grid { grid-template-columns: repeat(2, 1fr); }
+  .redeem-form { grid-template-columns: 1fr; }
+  .redeem-arrow { display: none; }
+}
+
+@media (max-width: 640px) {
+  .loyalty-page { padding: 16px; }
+  .balance-value { font-size: 36px; }
+  .earn-grid { grid-template-columns: 1fr; }
+  .page-header-left h1 { font-size: 20px; }
+}

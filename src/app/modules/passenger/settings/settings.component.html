@@ -1,0 +1,222 @@
+<div class="passenger-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-9 col-lg-10 px-md-4">
+
+        <!-- Header -->
+        <div class="d-flex align-items-center justify-content-between pt-4 pb-3 mb-4 border-bottom">
+          <div>
+            <h1 class="h2 mb-0">
+              <i class="bi bi-gear me-2"></i>Paramètres
+            </h1>
+            <p class="text-muted small mt-1 mb-0">Gérez vos préférences et la sécurité de votre compte</p>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+        </div>
+
+        <div class="row g-4" *ngIf="!isLoading">
+
+          <!-- Profile -->
+          <div class="col-md-6 col-xl-4">
+            <div class="card settings-card h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="icon-circle bg-primary-soft me-3">
+                    <i class="bi bi-person-circle text-primary"></i>
+                  </div>
+                  <div>
+                    <h5 class="card-title mb-0">Mon profil</h5>
+                    <p class="text-muted small mb-0">Informations personnelles</p>
+                  </div>
+                </div>
+
+                <p class="text-muted small mb-3">Modifiez votre photo, prénom, nom et numéro de téléphone.</p>
+
+                <div class="info-row mb-2">
+                  <i class="bi bi-envelope text-muted"></i>
+                  <span class="small text-secondary">{{ userEmail }}</span>
+                </div>
+                <div class="info-row mb-4" *ngIf="userProfile?.phoneNumber">
+                  <i class="bi bi-telephone text-muted"></i>
+                  <span class="small text-secondary">{{ userProfile?.phoneNumber }}</span>
+                </div>
+
+                <a routerLink="/passenger/profile" class="btn btn-primary w-100">
+                  <i class="bi bi-pencil me-1"></i>Modifier mon profil
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security -->
+          <div class="col-md-6 col-xl-4">
+            <div class="card settings-card h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="icon-circle bg-warning-soft me-3">
+                    <i class="bi bi-shield-lock text-warning"></i>
+                  </div>
+                  <div>
+                    <h5 class="card-title mb-0">Sécurité</h5>
+                    <p class="text-muted small mb-0">Mot de passe & accès</p>
+                  </div>
+                </div>
+
+                <p class="text-muted small mb-4">Gérez votre mot de passe et la sécurité de votre compte.</p> <br>
+                 <a routerLink="/auth/forgot-password" class="btn btn-outline-secondary w-100">
+                  <i class="bi bi-key me-1"></i>Changer le mot de passe
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="col-md-6 col-xl-4">
+            <div class="card settings-card h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="icon-circle bg-info-soft me-3">
+                    <i class="bi bi-bell text-info"></i>
+                  </div>
+                  <div>
+                    <h5 class="card-title mb-0">Notifications</h5>
+                    <p class="text-muted small mb-0">Alertes & emails</p>
+                  </div>
+                </div>
+
+                <p class="text-muted small mb-3">Choisissez vos préférences de notification.</p>
+
+                <!-- Email Toggle -->
+                <div class="toggle-row" [class.disabled-row]="showConfirmModal && confirmAction === 'email'">
+                  <div class="d-flex align-items-center gap-3 flex-grow-1">
+                    <div class="icon-circle-sm bg-primary-soft">
+                      <i class="bi bi-envelope-fill text-primary small"></i>
+                    </div>
+                    <div>
+                      <div class="fw-medium small">Email</div>
+                      <div class="text-muted smaller">Newsletters, promotions</div>
+                    </div>
+                  </div>
+                  <div class="form-check form-switch m-0">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           id="emailNotif"
+                           [checked]="emailNotificationsEnabled"
+                           (change)="onEmailToggle($event)">
+                  </div>
+                </div>
+
+                <!-- Push Toggle -->
+                <div class="toggle-row" [class.disabled-row]="showConfirmModal && confirmAction === 'push'">
+                  <div class="d-flex align-items-center gap-3 flex-grow-1">
+                    <div class="icon-circle-sm bg-success-soft">
+                      <i class="bi bi-phone-fill text-success small"></i>
+                    </div>
+                    <div>
+                      <div class="fw-medium small">Push</div>
+                      <div class="text-muted smaller">Alertes trajets, messages</div>
+                    </div>
+                  </div>
+                  <div class="form-check form-switch m-0">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           id="pushNotif"
+                           [checked]="pushNotificationsEnabled"
+                           (change)="onPushToggle($event)">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="col-md-6 col-xl-4">
+            <div class="card danger-card h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="icon-circle bg-danger-soft me-3">
+                    <i class="bi bi-exclamation-triangle text-danger"></i>
+                  </div>
+                  <div>
+                    <h5 class="card-title text-danger mb-0">Zone de danger</h5>
+                    <p class="text-muted small mb-0">Actions irréversibles</p>
+                  </div>
+                </div>
+
+                <p class="text-muted small mb-4">Ces actions affectent définitivement votre compte.</p>
+
+                <button (click)="onDeactivateAccount()"
+                        class="btn btn-outline-danger w-100"
+                        [disabled]="isDeactivating">
+                  <span *ngIf="isDeactivating" class="spinner-border spinner-border-sm me-1"></span>
+                  <i *ngIf="!isDeactivating" class="bi bi-person-x me-1"></i>
+                  {{ isDeactivating ? 'Traitement...' : 'Désactiver mon compte' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Confirmation Modal ─── -->
+  <div class="modal-backdrop" *ngIf="showConfirmModal" (click)="closeConfirmModal()"></div>
+
+  <div class="confirm-modal" *ngIf="showConfirmModal">
+    <div class="modal-content-wrapper">
+      <!-- Icon -->
+      <div class="modal-icon" [class]="confirmButtonClass === 'btn-danger' ? 'bg-danger-soft' : 'bg-warning-soft'">
+        <i class="bi" [class.bi-exclamation-triangle]="confirmButtonClass === 'btn-danger'"
+           [class.bi-question-circle]="confirmButtonClass !== 'btn-danger'"
+           [class.text-danger]="confirmButtonClass === 'btn-danger'"
+           [class.text-warning]="confirmButtonClass !== 'btn-danger'"></i>
+      </div>
+
+      <!-- Title -->
+      <h4 class="modal-title">{{ confirmTitle }}</h4>
+
+      <!-- Message -->
+      <p class="modal-message">{{ confirmMessage }}</p>
+
+      <!-- Warning -->
+      <div class="modal-warning" *ngIf="confirmWarning">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        {{ confirmWarning }}
+      </div>
+
+      <!-- Text Input -->
+      <div class="modal-input-group" *ngIf="confirmInputRequired">
+        <label class="input-label">Confirmation requise</label>
+        <input type="text"
+               class="form-control confirm-input"
+               [(ngModel)]="confirmInputValue"
+               [placeholder]="confirmInputPlaceholder || ''"
+               autocomplete="off"
+               #confirmInput>
+        <p class="input-hint">Cette action nécessite une confirmation explicite.</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button class="btn btn-outline-secondary" (click)="closeConfirmModal()">
+          Annuler
+        </button>
+        <button class="btn"
+                [class]="confirmButtonClass"
+                (click)="executeConfirmedAction()"
+                [disabled]="isConfirmButtonDisabled()">
+          <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-1"></span>
+          {{ confirmButtonText }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,207 @@
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-admin-sidebar></app-admin-sidebar>
+      </div>
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Rôles & Permissions</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ moduleCode }} — {{ pageTitle }}</p>
+          </div>
+          <div class="header-actions">
+            <span class="status-badge-online"><span class="status-dot"></span> En ligne</span>
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Rechercher">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Rôles définis -->
+        <div class="roles-section">
+          <div class="roles-section-header">
+            <h2 class="section-title">Rôles définis</h2>
+            <button class="btn-create-role" (click)="openCreateModal()">
+              <i class="bi bi-plus-lg"></i> Créer un rôle
+            </button>
+          </div>
+
+          <div class="roles-list">
+            <div class="role-card" *ngFor="let role of roles" [style.border-left-color]="role.color">
+              <div class="role-info">
+                <div class="role-name" [style.color]="role.color">{{ role.label }}</div>
+                <div class="role-desc">{{ role.description }}</div>
+              </div>
+              <div class="role-meta">
+                <span class="role-count" *ngIf="!role.isSystem">{{ role.userCount }} Users</span>
+                <span class="role-you" *ngIf="role.isSystem">Vous</span>
+                <div class="role-actions" *ngIf="!role.isSystem">
+                  <button class="btn-role-action view" (click)="viewRole(role)" title="Voir">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="btn-role-action edit" (click)="openEditModal(role)" title="Modifier">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn-role-action delete" (click)="deleteRole(role)" title="Supprimer">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs sélection rôle -->
+        <div class="role-tabs">
+          <button
+            *ngFor="let role of selectableRoles"
+            class="role-tab"
+            [class.active]="selectedRole?.id === role.id"
+            (click)="selectRole(role)">
+            {{ role.label }}
+          </button>
+        </div>
+
+        <!-- Tableau Permissions par module -->
+        <div class="permissions-card">
+          <div class="permissions-table-wrapper">
+            <table class="permissions-table">
+              <thead>
+              <tr>
+                <th class="col-module">Module</th>
+                <th class="col-action">Voir</th>
+                <th class="col-action">Créer</th>
+                <th class="col-action">Modifier</th>
+                <th class="col-action">Supprimer</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let perm of rolePermissions; let i = index">
+                <td class="col-module">{{ perm.module }}</td>
+                <td class="col-action">
+                  <button class="perm-toggle" [class.granted]="perm.view" (click)="togglePermission(i, 'view')">
+                    <i class="bi" [class.bi-check]="perm.view" [class.bi-dash]="!perm.view"></i>
+                  </button>
+                </td>
+                <td class="col-action">
+                  <button class="perm-toggle" [class.granted]="perm.create" (click)="togglePermission(i, 'create')">
+                    <i class="bi" [class.bi-check]="perm.create" [class.bi-dash]="!perm.create"></i>
+                  </button>
+                </td>
+                <td class="col-action">
+                  <button class="perm-toggle" [class.granted]="perm.edit" (click)="togglePermission(i, 'edit')">
+                    <i class="bi" [class.bi-check]="perm.edit" [class.bi-dash]="!perm.edit"></i>
+                  </button>
+                </td>
+                <td class="col-action">
+                  <button class="perm-toggle" [class.granted]="perm.delete" (click)="togglePermission(i, 'delete')">
+                    <i class="bi" [class.bi-check]="perm.delete" [class.bi-dash]="!perm.delete"></i>
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="permissions-footer">
+            <button class="btn-save" (click)="savePermissions()" [disabled]="saving">
+              <span *ngIf="!saving">Enregistrer</span>
+              <span *ngIf="saving"><i class="bi bi-arrow-repeat spin"></i> Enregistrement...</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════════════════════════════════
+       MODAL : Créer / Modifier un rôle
+       ═════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal($event)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <div class="modal-icon" *ngIf="isCreateMode"><i class="bi bi-plus-lg"></i></div>
+            <div class="modal-icon" *ngIf="!isCreateMode"><i class="bi bi-pencil"></i></div>
+            <h3 class="modal-title">{{ modalTitle }}</h3>
+          </div>
+          <button class="btn-close-modal" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="roleForm">
+            <div class="form-group">
+              <label>Nom du rôle <span class="required">*</span></label>
+              <input type="text" formControlName="name" placeholder="Ex: Admin Support, Superviseur">
+            </div>
+            <div class="form-group">
+              <label>Description <span class="required">*</span></label>
+              <textarea formControlName="description" rows="2" placeholder="Décrivez les responsabilités de ce rôle ses objectifs et son périmètre d'action..."></textarea>
+            </div>
+          </form>
+
+          <div class="form-section-title">Permissions par module</div>
+          <div class="modal-info-box">
+            Vous pouvez cliquer sur la carte ci-dessus pour définir la position précise ou entrer manuellement les coordonnées GPS.
+          </div>
+
+          <div class="permissions-table-wrapper">
+            <table class="permissions-table modal-permissions">
+              <thead>
+              <tr>
+                <th class="col-module">Module</th>
+                <th class="col-action">Voir</th>
+                <th class="col-action">Créer</th>
+                <th class="col-action">Modifier</th>
+                <th class="col-action">Supprimer</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let perm of modalPermissions; let i = index">
+                <td class="col-module">{{ perm.module }}</td>
+                <td class="col-action">
+                  <button class="perm-toggle" [class.granted]="perm.view" (click)="toggleModalPermission(i, 'view')">
+                    <i class="bi" [class.bi-check]="perm.view" [class.bi-dash]="!perm.view"></i>
+                  </button>
+                </td>
+                <td class="col-action">
+                  <button class="perm-toggle" [class.granted]="perm.create" (click)="toggleModalPermission(i, 'create')">
+                    <i class="bi" [class.bi-check]="perm.create" [class.bi-dash]="!perm.create"></i>
+                  </button>
+                </td>
+                <td class="col-action">
+                  <button class="perm-toggle" [class.granted]="perm.edit" (click)="toggleModalPermission(i, 'edit')">
+                    <i class="bi" [class.bi-check]="perm.edit" [class.bi-dash]="!perm.edit"></i>
+                  </button>
+                </td>
+                <td class="col-action">
+                  <button class="perm-toggle" [class.granted]="perm.delete" (click)="toggleModalPermission(i, 'delete')">
+                    <i class="bi" [class.bi-check]="perm.delete" [class.bi-dash]="!perm.delete"></i>
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeModal()">Annuler</button>
+          <button class="btn-submit" (click)="submitRole()" [disabled]="roleForm.invalid || saving">
+            <span *ngIf="!saving">{{ isCreateMode ? 'Créer le rôle' : 'Enregistrer' }} <i class="bi bi-plus-circle" *ngIf="isCreateMode"></i></span>
+            <span *ngIf="saving"><i class="bi bi-arrow-repeat spin"></i> ...</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

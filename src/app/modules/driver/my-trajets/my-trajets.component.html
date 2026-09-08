@@ -1,0 +1,226 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+  <div class="main-col">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Mes trajets</h1>
+        <p>{{ today | date:'EEEE d MMMM yyyy' }} - Bonjour {{ driverName }}</p>
+      </div>
+      <div class="header-right">
+        <span class="online-badge">En ligne</span>
+        <a routerLink="/driver/publish" class="btn-publish"><i class="bi bi-plus-lg"></i>Publier un trajet</a>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner-border text-primary"></div></div>
+
+    <ng-container *ngIf="!loading">
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-label">Trajet ce mois</div><div class="kpi-value">{{ kpiTotal }}</div></div>
+        <div class="kpi-card"><div class="kpi-label">En cours</div><div class="kpi-value">{{ kpiActive }}</div></div>
+        <div class="kpi-card"><div class="kpi-label">En attente <i class="bi bi-lock-fill"></i></div><div class="kpi-value">{{ kpiLocked }}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Programmés</div><div class="kpi-value">{{ kpiScheduled }}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Terminés</div><div class="kpi-value">{{ kpiDone }}</div></div>
+      </div>
+
+      <!-- En cours (ACTIVE only) -->
+      <ng-container *ngIf="active.length > 0">
+        <div class="section-title">En cours</div>
+        <div *ngFor="let t of active">
+          <div class="dcard trajet-highlighted">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div class="route-display mb-0">
+                <span class="route-city">{{ t.departureCity }}</span>
+                <div class="route-line"><div class="route-line-inner"><span class="duration-pill">{{ t.duration || '—' }}</span></div></div>
+                <span class="route-city">{{ t.arrivalCity }}</span>
+              </div>
+              <div class="d-flex gap-2">
+                <span class="status-pill s-active">En cours</span>
+                <span class="status-pill s-priority" *ngIf="t.priority">Prioritaire</span>
+              </div>
+            </div>
+            <div class="route-times"><span>Départ {{ t.departureDate | date:'HH:mm' }}</span><span>Arrivée {{ t.arrivalTime || '—' }}</span></div>
+            <hr style="border-color:#f0f2f7;margin:14px 0">
+            <div class="trajet-stats">
+              <div class="tstat"><div class="tstat-label">Date</div><div class="tstat-val" style="color:#12b76a">{{ t.departureDate | date:'d MMMM' }}</div></div>
+              <div class="tstat"><div class="tstat-label">Places</div><div class="tstat-val">{{ t.totalSeats }}</div></div>
+              <div class="tstat"><div class="tstat-label">Confirmés</div><div class="tstat-val">{{ t.totalSeats - t.availableSeats }}</div></div>
+
+              <!-- Editable Disponibilité for ACTIVE -->
+              <div class="tstat">
+                <div class="tstat-label">Disponibilité</div>
+                <div class="tstat-val" *ngIf="!editingSeats[t.id]" style="color:#12b76a">
+                  {{ t.availableSeats }}
+                  <button class="btn-link" style="font-size:11px;margin-left:4px;color:#1e3a6b;background:none;border:none;cursor:pointer"
+                          (click)="startEditSeats(t)" title="Modifier les places disponibles">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </div>
+                <div class="tstat-val" *ngIf="editingSeats[t.id]" style="display:flex;align-items:center;gap:6px">
+                  <input type="number" [(ngModel)]="newSeatCount[t.id]" min="0" [max]="t.availableSeats"
+                         class="form-control form-control-sm" style="width:55px;text-align:center">
+                  <button class="btn-accept" style="padding:2px 8px;font-size:12px" (click)="saveSeats(t.id)" title="Enregistrer">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                  <button class="btn-refuse" style="padding:2px 8px;font-size:12px" (click)="cancelEditSeats(t.id)" title="Annuler">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="tstat"><div class="tstat-label">Revenus</div><div class="tstat-val green">{{ (t.totalSeats - t.availableSeats) * t.pricePerSeat }} DT</div></div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mt-2">
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar-pile">
+                  <div class="avatar-xs av-a">A</div><div class="avatar-xs av-b">B</div><div class="avatar-xs av-c">C</div>
+                </div>
+                <span style="font-size:12px;color:#667085">{{ t.totalSeats - t.availableSeats }} passagers</span>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn-accept" style="background:#1e3a6b" (click)="markDeparted(t.id)">Marquer comme partie</button>
+                <!-- "Modifier" button now does the same as the pencil icon: edits seats -->
+                <button class="btn-banner" (click)="startEditSeats(t)">Modifier</button>
+                <button class="btn-refuse" (click)="cancelTrajet(t.id)">Annuler</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- En attente (LOCKED — in queue, waiting for the active driver to depart) -->
+      <ng-container *ngIf="locked.length > 0">
+        <div class="section-title">
+          <i class="bi bi-lock-fill"></i> En attente
+          <small class="section-subtitle">— le chauffeur en cours doit d'abord partir</small>
+        </div>
+        <div *ngFor="let t of locked">
+          <div class="dcard trajet-locked">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div class="route-display mb-0">
+                <span class="route-city">{{ t.departureCity }}</span>
+                <div class="route-line"><div class="route-line-inner"><span class="duration-pill">{{ t.duration || '—' }}</span></div></div>
+                <span class="route-city">{{ t.arrivalCity }}</span>
+              </div>
+              <div class="d-flex gap-2">
+                <span class="status-pill s-locked"><i class="bi bi-lock-fill"></i> En attente</span>
+                <span class="status-pill s-priority" *ngIf="t.priorityOrder">#{{ t.priorityOrder }} dans la file</span>
+              </div>
+            </div>
+            <div class="route-times"><span>Départ {{ t.departureDate | date:'HH:mm' }}</span><span>Arrivée {{ t.arrivalTime || '—' }}</span></div>
+            <div class="lock-notice">
+              <i class="bi bi-info-circle"></i>
+              Votre trajet sera activé automatiquement quand le chauffeur en tête de file
+              marquera son trajet comme parti (ou annulera). Les passagers ne peuvent pas
+              encore réserver chez vous.
+            </div>
+            <hr style="border-color:#f0f2f7;margin:14px 0">
+            <div class="trajet-stats">
+              <div class="tstat"><div class="tstat-label">Date</div><div class="tstat-val" style="color:#12b76a">{{ t.departureDate | date:'d MMMM' }}</div></div>
+              <div class="tstat"><div class="tstat-label">Places</div><div class="tstat-val">{{ t.totalSeats }}</div></div>
+              <div class="tstat"><div class="tstat-label">Position file</div><div class="tstat-val">#{{ t.priorityOrder || '—' }}</div></div>
+
+              <!-- Editable Disponibilité for LOCKED -->
+              <div class="tstat">
+                <div class="tstat-label">Disponibilité</div>
+                <div class="tstat-val" *ngIf="!editingSeats[t.id]" style="color:#12b76a">
+                  {{ t.availableSeats }}
+                  <button class="btn-link" style="font-size:11px;margin-left:4px;color:#1e3a6b;background:none;border:none;cursor:pointer"
+                          (click)="startEditSeats(t)" title="Modifier les places disponibles">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                </div>
+                <div class="tstat-val" *ngIf="editingSeats[t.id]" style="display:flex;align-items:center;gap:6px">
+                  <input type="number" [(ngModel)]="newSeatCount[t.id]" min="0" [max]="t.availableSeats"
+                         class="form-control form-control-sm" style="width:55px;text-align:center">
+                  <button class="btn-accept" style="padding:2px 8px;font-size:12px" (click)="saveSeats(t.id)" title="Enregistrer">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                  <button class="btn-refuse" style="padding:2px 8px;font-size:12px" (click)="cancelEditSeats(t.id)" title="Annuler">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="tstat"><div class="tstat-label">Revenus</div><div class="tstat-val">—</div></div>
+            </div>
+            <div class="d-flex align-items-center justify-content-end mt-2">
+              <div class="d-flex gap-2">
+                <!-- "Modifier" button now does the same as the pencil icon: edits seats -->
+                <button class="btn-banner" (click)="startEditSeats(t)">Modifier</button>
+                <button class="btn-refuse" (click)="cancelTrajet(t.id)">Annuler (quitter la file)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Programmés -->
+      <ng-container *ngIf="scheduled.length > 0">
+        <div class="section-title">Programmés</div>
+        <div *ngFor="let t of scheduled">
+          <div class="dcard">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div class="route-display mb-0">
+                <span class="route-city">{{ t.departureCity }}</span>
+                <div class="route-line"><div class="route-line-inner"><span class="duration-pill">{{ t.duration || '—' }}</span></div></div>
+                <span class="route-city">{{ t.arrivalCity }}</span>
+              </div>
+              <span class="status-pill s-scheduled">Programmé</span>
+            </div>
+            <div class="route-times"><span>Départ {{ t.departureDate | date:'HH:mm' }}</span><span>Arrivée {{ t.arrivalTime || '—' }}</span></div>
+            <hr style="border-color:#f0f2f7;margin:14px 0">
+            <div class="trajet-stats">
+              <div class="tstat"><div class="tstat-label">Date</div><div class="tstat-val" style="color:#12b76a">{{ t.departureDate | date:'d MMMM' }}</div></div>
+              <div class="tstat"><div class="tstat-label">Places</div><div class="tstat-val">{{ t.totalSeats }}</div></div>
+              <div class="tstat"><div class="tstat-label">Confirmés</div><div class="tstat-val">{{ t.totalSeats - t.availableSeats }}</div></div>
+              <div class="tstat"><div class="tstat-label">Disponibilité</div><div class="tstat-val">{{ t.availableSeats }}</div></div>
+              <div class="tstat"><div class="tstat-label">Revenus</div><div class="tstat-val">-</div></div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between mt-2">
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar-pile"><div class="avatar-xs av-a">A</div><div class="avatar-xs av-b">B</div><div class="avatar-xs av-c">C</div></div>
+                <span style="font-size:12px;color:#667085">{{ t.totalSeats - t.availableSeats }} passagers</span>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn-banner">Modifier</button>
+                <button class="btn-refuse">Annuler</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Terminés -->
+      <ng-container *ngIf="done.length > 0">
+        <div class="section-title">Récement terminés</div>
+        <div *ngFor="let t of done">
+          <div class="dcard" style="opacity:.85">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div class="route-display mb-0">
+                <span class="route-city">{{ t.departureCity }}</span>
+                <div class="route-line"><div class="route-line-inner"><span class="duration-pill">{{ t.duration || '—' }}</span></div></div>
+                <span class="route-city">{{ t.arrivalCity }}</span>
+              </div>
+              <span class="status-pill s-done">Terminé</span>
+            </div>
+            <div class="route-times"><span>Départ {{ t.departureDate | date:'HH:mm' }}</span></div>
+            <hr style="border-color:#f0f2f7;margin:14px 0">
+            <div class="trajet-stats">
+              <div class="tstat"><div class="tstat-label">Date</div><div class="tstat-val" style="color:#12b76a">{{ t.departureDate | date:'d MMMM' }}</div></div>
+              <div class="tstat"><div class="tstat-label">Places</div><div class="tstat-val">{{ t.totalSeats }}</div></div>
+              <div class="tstat"><div class="tstat-label">Confirmés</div><div class="tstat-val">{{ t.totalSeats - t.availableSeats }}</div></div>
+              <div class="tstat"><div class="tstat-label">Disponibilité</div><div class="tstat-val">{{ t.availableSeats }}</div></div>
+              <div class="tstat"><div class="tstat-label">Revenus</div><div class="tstat-val green">{{ (t.totalSeats - t.availableSeats) * t.pricePerSeat }} DT</div></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="empty-state" *ngIf="trajets.length === 0">
+        <i class="bi bi-map" style="font-size:40px;display:block;margin-bottom:12px"></i>
+        Aucun trajet trouvé
+      </div>
+    </ng-container>
+  </div>
+</div>

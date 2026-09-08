@@ -1,0 +1,111 @@
+<div class="driver-layout">
+  <app-driver-sidebar></app-driver-sidebar>
+  <div class="main-col">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Tableau de bord</h1>
+        <p>{{ today | date:'EEEE d MMMM yyyy' }} - Bonjour {{ driverName }}</p>
+      </div>
+      <div class="header-right">
+        <span class="online-badge">En ligne</span>
+        <a routerLink="/driver/publish" class="btn-publish"><i class="bi bi-plus-lg"></i>Publier un trajet</a>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-center"><div class="spinner-border text-primary"></div></div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- Pending alert banner -->
+      <div class="alert-banner" *ngIf="pendingReservations.length > 0">
+        <i class="bi bi-clock-history" style="font-size:18px;flex-shrink:0"></i>
+        <div class="alert-banner-text">
+          <strong>{{ pendingReservations.length }} demandes en attentes</strong>
+          - Vous avez moins de 15 minutes pour répondre. Passé ce délai le système passera automatiquement au louage suivant
+        </div>
+        <button class="btn-banner" routerLink="/driver/reservations">Voir les demandes</button>
+      </div>
+
+      <!-- KPI row -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Trajet ce mois</div>
+          <div class="kpi-value">{{ stats?.trajetsThisMonth || 0 }}</div>
+          <div class="kpi-sub up">+3 vs mois dernier</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Comission (DT)</div>
+          <div class="kpi-value" style="color:#12b76a">{{ stats?.revenueThisMonth || 0 }}</div>
+          <div class="kpi-sub up">+12% ce mois</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Note moyenne</div>
+          <div class="kpi-value">{{ stats?.averageRating || 0 | number:'1.1-1' }}</div>
+          <div class="kpi-sub up">Sur {{ stats?.totalAvis || 0 }} avis</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Demande en attente</div>
+          <div class="kpi-value">{{ pendingReservations.length }}</div>
+          <div class="kpi-sub warn">Répond avant 15min</div>
+        </div>
+      </div>
+
+      <!-- Active trip -->
+      <ng-container *ngIf="activeTrip">
+        <div class="dcard">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <span style="font-size:15px;font-weight:700;color:#1e3a6b">Trajet actif</span>
+              <span class="status-pill s-active">En cours</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <span style="font-size:13px;color:#667085">
+                Places <strong style="color:#1e3a6b">{{ activeTrip.confirmedSeats || 3 }}/{{ activeTrip.totalSeats || 5 }}</strong> confirmés
+              </span>
+              <button class="btn-banner" style="font-size:12px;padding:5px 12px;color:#667085">Modifier place(-1)</button>
+              <button class="btn-publish" style="padding:6px 14px;font-size:12px" (click)="markDeparted()">Marquer parti</button>
+            </div>
+          </div>
+          <div class="route-display">
+            <span class="route-city">{{ activeTrip.departureCity }}</span>
+            <div class="route-line">
+              <div class="route-line-inner">
+                <span class="duration-pill">{{ activeTrip.duration || '3h30' }}</span>
+              </div>
+            </div>
+            <span class="route-city">{{ activeTrip.arrivalCity }}</span>
+          </div>
+          <div class="route-times">
+            <span>Départ {{ activeTrip.departureTime || (activeTrip.departureDate | date:'HH:mm') }}</span>
+            <span>Arrivée {{ activeTrip.arrivalTime || '—' }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Pending reservation requests -->
+      <div class="section-title" *ngIf="pendingReservations.length > 0">
+        Demandes de réservation
+        <span class="section-badge">{{ pendingReservations.length }} nouveaux</span>
+      </div>
+
+      <div *ngFor="let r of pendingReservations">
+        <div class="req-card">
+          <div class="req-avatar">{{ r.passengerId.charAt(0).toUpperCase() || 'P' }}</div>
+          <div class="req-info">
+            <div class="req-name">{{ r.passengerName || 'Passager' }}</div>
+            <div class="req-detail">{{ r.seatsReserved }} place · {{ r.departureCity || '—' }} &nbsp;{{ r.arrivalCity || '—' }} · {{ r.createdAt | date:'d MMMM' }}</div>
+          </div>
+          <div class="req-meta">
+            <span class="timer-pill">12:18 restant</span>
+            <span class="place-pill">{{ r.seatsReserved }} place</span>
+            <button class="btn-accept" (click)="acceptReservation(r.id)">Accepter</button>
+            <button class="btn-refuse" (click)="refuseReservation(r.id)">Refuser</button>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

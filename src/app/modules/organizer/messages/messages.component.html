@@ -1,0 +1,223 @@
+<div class="organizer-dashboard">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar-col">
+        <app-organizer-sidebar></app-organizer-sidebar>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-col">
+
+        <!-- Page Header -->
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Messages</h1>
+            <p class="page-subtitle">{{ currentDate }} — {{ agencyName }}</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-icon"><i class="bi bi-bell"></i></button>
+            <button class="btn-publish" (click)="startNewConversation()">
+              <i class="bi bi-plus-lg me-1"></i>Nouveau message
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Layout -->
+        <div class="chat-layout">
+
+          <!-- Conversations Sidebar -->
+          <div class="conversations-sidebar">
+            <div class="sidebar-header">
+              <span class="sidebar-title">Conversations</span>
+              <span class="unread-badge" *ngIf="totalUnread > 0">{{ totalUnread }} non lues</span>
+            </div>
+
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" [(ngModel)]="searchQuery" placeholder="Rechercher..." (input)="filterConversations()">
+            </div>
+
+            <!-- Active Trips Section -->
+            <div class="conv-section" *ngIf="activeTrips.length > 0">
+              <div class="section-label">Trajet actif - {{ activeTrips[0]?.route || 'Tunis Sfax' }}</div>
+              <div class="conv-list">
+                <div class="conv-item"
+                     *ngFor="let conv of activeTrips"
+                     [class.active]="active?.id === conv.id"
+                     (click)="selectSession(conv)">
+                  <div class="conv-avatar" [style.background]="conv.avatarColor || '#dcfce7'" [style.color]="conv.avatarTextColor || '#16a34a'">
+                    {{ getInitials(conv.passengerName || conv.title) }}
+                  </div>
+                  <div class="conv-info">
+                    <div class="conv-name-row">
+                      <span class="conv-name">{{ conv.passengerName || conv.title }}</span>
+                      <span class="conv-time">{{ conv.lastMessageTime | date:'HH:mm' }}</span>
+                    </div>
+                    <div class="conv-preview">{{ conv.lastMessage || 'On arrive binetot' }}</div>
+                  </div>
+                  <div class="conv-status">
+                    <span class="status-dot online" *ngIf="conv.isOnline"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming Trips Section -->
+            <div class="conv-section" *ngIf="upcomingTrips.length > 0">
+              <div class="section-label">Prochain trajets</div>
+              <div class="conv-list">
+                <div class="conv-item"
+                     *ngFor="let conv of upcomingTrips"
+                     [class.active]="active?.id === conv.id"
+                     (click)="selectSession(conv)">
+                  <div class="conv-avatar" [style.background]="conv.avatarColor || '#e0e7ff'" [style.color]="conv.avatarTextColor || '#4f46e5'">
+                    {{ getInitials(conv.passengerName || conv.title) }}
+                  </div>
+                  <div class="conv-info">
+                    <div class="conv-name-row">
+                      <span class="conv-name">{{ conv.passengerName || conv.title }}</span>
+                      <span class="conv-time">{{ conv.lastMessageTime | date:'HH:mm' }}</span>
+                    </div>
+                    <div class="conv-preview">{{ conv.lastMessage || 'Merci pour le trajet' }}</div>
+                  </div>
+                  <div class="conv-status">
+                    <span class="status-dot online" *ngIf="conv.isOnline"></span>
+                    <span class="status-dot offline" *ngIf="!conv.isOnline"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Past Conversations -->
+            <div class="conv-section" *ngIf="pastConversations.length > 0">
+              <div class="section-label">Conversations</div>
+              <div class="conv-list">
+                <div class="conv-item"
+                     *ngFor="let conv of pastConversations"
+                     [class.active]="active?.id === conv.id"
+                     (click)="selectSession(conv)">
+                  <div class="conv-avatar" [style.background]="conv.avatarColor || '#fef3c7'" [style.color]="conv.avatarTextColor || '#d97706'">
+                    {{ getInitials(conv.passengerName || conv.title) }}
+                  </div>
+                  <div class="conv-info">
+                    <div class="conv-name-row">
+                      <span class="conv-name">{{ conv.passengerName || conv.title }}</span>
+                      <span class="conv-time">{{ conv.lastMessageTime | date:'EEE' }}</span>
+                    </div>
+                    <div class="conv-preview">{{ conv.lastMessage || 'Super . Merci' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="filteredSessions.length === 0 && !loading" class="empty-conv">
+              <p>Aucune conversation</p>
+            </div>
+          </div>
+
+          <!-- Chat Area -->
+          <div class="chat-area">
+
+            <!-- Empty State -->
+            <div *ngIf="!active" class="chat-empty">
+              <i class="bi bi-chat-square-text" style="font-size: 4rem; color: #e2e8f0;"></i>
+              <p>Sélectionnez une conversation</p>
+            </div>
+
+            <!-- Active Chat -->
+            <ng-container *ngIf="active">
+
+              <!-- Chat Header -->
+              <div class="chat-header">
+                <div class="chat-header-info">
+                  <div class="header-avatar" [style.background]="active.avatarColor || '#dcfce7'" [style.color]="active.avatarTextColor || '#16a34a'">
+                    {{ getInitials(active.passengerName || active.title) }}
+                  </div>
+                  <div class="header-meta">
+                    <div class="header-name">{{ active.passengerName || active.title }}</div>
+                    <div class="header-status">
+                      <span class="status-dot-online"></span>
+                      En ligne • {{ active.voyageTitle || active.title }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Trip Banner -->
+              <div class="trip-banner" *ngIf="active.tripInfo">
+                <span class="banner-dot"></span>
+                <span class="banner-text">
+                  Trajets en cours : <strong>{{ active.tripInfo.from }} → {{ active.tripInfo.to }}</strong>
+                </span>
+                <span class="banner-schedule">
+                  Départ {{ active.tripInfo.departureTime }} Arrivée {{ active.tripInfo.arrivalTime }}
+                </span>
+              </div>
+
+              <!-- Messages — FIX: added scrollAnchor id for direct JS access -->
+              <div class="messages-container" #messagesContainer id="messagesContainer">
+                <div *ngIf="loading" class="text-center py-3">
+                  <div class="spinner-border spinner-border-sm text-primary"></div>
+                </div>
+
+                <div *ngIf="!loading && active.messages.length === 0" class="empty-messages">
+                  <p>Aucun message</p>
+                </div>
+
+                <!-- FIX: messages wrapped in a single scroll-content div -->
+                <div class="messages-scroll-content">
+                  <div class="message-group" *ngFor="let m of active.messages">
+                    <!-- Received Message -->
+                    <div class="message received" *ngIf="m.senderId !== myId">
+                      <div class="message-avatar" [style.background]="active.avatarColor || '#dcfce7'" [style.color]="active.avatarTextColor || '#16a34a'">
+                        {{ getInitials(active.passengerName || active.title) }}
+                      </div>
+                      <div class="message-content">
+                        <div class="message-bubble">
+                          {{ m.content }}
+                        </div>
+                        <div class="message-time">{{ m.sentAt | date:'HH:mm' }}</div>
+                      </div>
+                    </div>
+
+                    <!-- Sent Message -->
+                    <div class="message sent" *ngIf="m.senderId === myId">
+                      <div class="message-content">
+                        <div class="message-bubble">
+                          {{ m.content }}
+                        </div>
+                        <div class="message-time">{{ m.sentAt | date:'HH:mm' }}</div>
+                      </div>
+                      <div class="message-avatar sender-avatar" [style.background]="myAvatarColor" [style.color]="myAvatarTextColor">
+                        {{ myInitials }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input Area -->
+              <div class="chat-input-area">
+                <div class="input-wrapper">
+                  <input type="text"
+                         [(ngModel)]="newMessage"
+                         placeholder="Ecrire un message......"
+                         (keyup.enter)="send()"
+                         [disabled]="sending">
+                  <button class="btn-emoji" type="button"><i class="bi bi-emoji-smile"></i></button>
+                </div>
+                <button class="btn-send" (click)="send()" [disabled]="!newMessage.trim() || sending">
+                  <i class="bi bi-send-fill" *ngIf="!sending"></i>
+                  <span *ngIf="sending" class="spinner-border spinner-border-sm"></span>
+                </button>
+              </div>
+
+            </ng-container>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
