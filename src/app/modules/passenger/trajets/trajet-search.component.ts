@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { Trajet } from '../../../core/models/trajet.model';
+import { MOCK_TRAJETS } from '../../../core/mock/mock-demo-data';
 import { TrajetService } from '../../../core/services/trajet.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -136,10 +137,12 @@ export class TrajetSearchComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.noTrajetFound = true;
-        this.noTrajetPopupMessage =
-          'Recherche indisponible pour le moment. Vous pouvez créer une demande collective pour être notifié.';
-        this.showNoTrajetPopup = true;
+        // DEMO FALLBACK: backend unreachable — show mock trajets instead of
+        // an error popup, so the page still looks alive for a live demo.
+        // Remove once a real backend is wired up permanently.
+        this.trajets = MOCK_TRAJETS;
+        this.filteredTrajetList = [...MOCK_TRAJETS];
+        this.noTrajetFound = false;
         this.loading = false;
       },
     });
@@ -162,7 +165,9 @@ export class TrajetSearchComponent implements OnInit {
       }
       return;
     }
-    this.router.navigate(['/passenger/reservation', trajet.id], { queryParams: { type: 'trajet' } });
+    this.router.navigate(['/passenger/reservation', trajet.id], {
+      queryParams: { type: 'trajet' },
+    });
   }
 
   goToCollectiveDemand(): void {

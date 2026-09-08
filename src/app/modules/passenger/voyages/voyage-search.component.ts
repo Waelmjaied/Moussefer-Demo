@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { VoyageService } from '../../../core/services/voyage.service';
 import { Voyage } from '../../../core/models/voyage.model';
+import { MOCK_VOYAGES } from '../../../core/mock/mock-demo-data';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 
@@ -179,7 +180,10 @@ export class VoyageSearchComponent implements OnInit {
             this.loading = false;
           },
           error: () => {
-            this.voyages = [];
+            // DEMO FALLBACK: backend unreachable — show mock voyages
+            // instead of an empty list. Remove once a real backend is
+            // wired up permanently.
+            this.voyages = MOCK_VOYAGES;
             this.applyFilters();
             this.loading = false;
           },
@@ -209,7 +213,11 @@ export class VoyageSearchComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.voyages = [];
+        // DEMO FALLBACK: backend unreachable — show mock voyages instead
+        // of an empty list. Remove once a real backend is wired up
+        // permanently.
+        this.voyages = MOCK_VOYAGES;
+        this.setPriorityVoyage();
         this.applyFilters();
         this.loading = false;
       },
