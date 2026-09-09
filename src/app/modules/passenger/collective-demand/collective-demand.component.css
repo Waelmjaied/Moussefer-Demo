@@ -1112,7 +1112,10 @@
   padding: 1.25rem 1.5rem 1rem;   /* aligns with .list-header padding */
   overflow-x: auto;               /* scrollable row on small screens */
   scrollbar-width: none;          /* Firefox */
+  -webkit-overflow-scrolling: touch; /* Smooth inertia scrolling on iOS */
+  scroll-snap-type: x mandatory;  /* Enables smooth snap scrolling on mobile */
 }
+
 .filter-bar::-webkit-scrollbar {
   display: none;                  /* Chrome/Safari */
 }
@@ -1133,6 +1136,8 @@
   white-space: nowrap;
   flex-shrink: 0;
   transition: all 0.25s ease;
+  scroll-snap-align: start;       /* Snaps cleanly into view when scrolling */
+  -webkit-tap-highlight-color: transparent; /* Removes blue tap flash on mobile */
 }
 
 .filter-btn i {
@@ -1150,12 +1155,14 @@
   line-height: 1.5;
 }
 
-/* Hover (inactive) */
-.filter-btn:hover:not(.active) {
-  border-color: #10b981;
-  color: #047857;
-  background: #ecfdf5;
-  transform: translateY(-1px);
+/* Hover (inactive) - Enabled only on devices with mouse/pointer */
+@media (hover: hover) {
+  .filter-btn:hover:not(.active) {
+    border-color: #10b981;
+    color: #047857;
+    background: #ecfdf5;
+    transform: translateY(-1px);
+  }
 }
 
 /* Active state — your brand gradient */
@@ -1171,4 +1178,33 @@
 .filter-btn.active .count {
   background: rgba(255, 255, 255, 0.25);
   color: #ffffff;
+}
+
+/* ---------- RESPONSIVE MOBILE OVERRIDES ---------- */
+@media (max-width: 640px) {
+  .filter-bar {
+    padding: 0.875rem 1rem;       /* Slightly tighter padding on mobile screens */
+    gap: 0.375rem;                /* Smaller gap between pill buttons */
+  }
+
+  /* Add invisible extra padding at the end of the flex container
+     so the last item doesn't stick flush to the screen edge */
+  .filter-bar::after {
+    content: '';
+    padding-right: 0.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.45rem 0.85rem;     /* Optimized tap area and height for mobile screen real estate */
+    font-size: 0.8rem;
+  }
+
+  .filter-btn i {
+    font-size: 0.875rem;
+  }
+
+  .filter-btn .count {
+    font-size: 0.68rem;
+    padding: 0.08rem 0.4rem;
+  }
 }
