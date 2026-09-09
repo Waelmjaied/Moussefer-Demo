@@ -358,28 +358,28 @@
         <div class="list-view">
           <div class="list-card">
 
-            <!-- ← AJOUTÉ: Filter bar -->
+            <!-- ← Filter bar -->
             <div class="filter-bar">
               <button
                 [class.active]="currentFilter === 'ACTIVE'"
                 (click)="setFilter('ACTIVE')"
                 class="filter-btn">
                 <i class="bi bi-lightning-charge"></i>
-                Actives ({{ activeCount }})
+                Actives <span class="count">{{ activeCount }}</span>
               </button>
               <button
                 [class.active]="currentFilter === 'HISTORY'"
                 (click)="setFilter('HISTORY')"
                 class="filter-btn">
                 <i class="bi bi-clock-history"></i>
-                Historique ({{ historyCount }})
+                Historique <span class="count">{{ historyCount }}</span>
               </button>
               <button
                 [class.active]="currentFilter === 'ALL'"
                 (click)="setFilter('ALL')"
                 class="filter-btn">
                 <i class="bi bi-list-ul"></i>
-                Toutes ({{ totalCount }})
+                Toutes <span class="count">{{ totalCount }}</span>
               </button>
             </div>
 

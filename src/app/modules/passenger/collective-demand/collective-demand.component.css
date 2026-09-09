@@ -1105,3 +1105,70 @@
 .search-hero-overlay {
   /* Optional: add more overlay if needed */
 }
+/* ---------- FILTER BAR ---------- */
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem 1rem;   /* aligns with .list-header padding */
+  overflow-x: auto;               /* scrollable row on small screens */
+  scrollbar-width: none;          /* Firefox */
+}
+.filter-bar::-webkit-scrollbar {
+  display: none;                  /* Chrome/Safari */
+}
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 9999px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.filter-btn i {
+  font-size: 0.95rem;
+}
+
+/* Inactive count bubble */
+.filter-btn .count {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  line-height: 1.5;
+}
+
+/* Hover (inactive) */
+.filter-btn:hover:not(.active) {
+  border-color: #10b981;
+  color: #047857;
+  background: #ecfdf5;
+  transform: translateY(-1px);
+}
+
+/* Active state — your brand gradient */
+.filter-btn.active {
+  background: linear-gradient(135deg, #12b76a 0%, #2a388c 100%);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Active count bubble */
+.filter-btn.active .count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}

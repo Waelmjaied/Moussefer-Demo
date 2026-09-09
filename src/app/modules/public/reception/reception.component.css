@@ -1243,3 +1243,49 @@
   font-size: 0.85rem;
   color: var(--text-muted);
 }
+/* ========== MOBILE FIX — TRAJETS & VOYAGES CAROUSELS ========== */
+@media (max-width: 768px) {
+  /* Make carousels swipeable with snap */
+  .trips-grid,
+  .org-grid {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;         /* Firefox */
+    gap: 16px;
+  }
+  .trips-grid::-webkit-scrollbar,
+  .org-grid::-webkit-scrollbar {
+    display: none;                 /* Chrome/Safari */
+  }
+
+  /* One card at a time, with a peek of the next */
+  .trip-card,
+  .org-card {
+    width: 82%;
+    scroll-snap-align: start;
+  }
+
+  /* Long city names must not overflow the smaller card */
+  .trip-route {
+    flex-wrap: wrap;
+    font-size: 1.15rem;
+  }
+  .city {
+    font-size: 1.05rem;
+  }
+
+  /* Tighter wrapper + smaller arrows */
+  .carousel-wrapper {
+    gap: 8px;
+  }
+  .carousel-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+@media (max-width: 768px) {
+  .banner-card {
+    width: 85% !important;
+  }
+}
