@@ -900,7 +900,21 @@
   .search-container { flex-direction: column; align-items: stretch; }
   .btn-search { width: 100%; justify-content: center; }
   .nav-container { flex-direction: column; text-align: center; }
-  .nav-links { gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .nav-links {
+    gap: 18px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    width: 100%;
+    padding: 0 4px;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links li a {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
   .nav-actions { justify-content: center; }
   .features-grid-3cols { grid-template-columns: 1fr; gap: 20px; }
   .feature-card { padding: 32px 20px; }
@@ -1245,25 +1259,42 @@
 }
 /* ========== MOBILE FIX — TRAJETS & VOYAGES CAROUSELS ========== */
 @media (max-width: 768px) {
-  /* Make carousels swipeable with snap */
+  /* Hide desktop-style arrow buttons on mobile — swipe is the
+     expected interaction on touch, and the arrows look clunky
+     crammed next to a single card. */
+  .carousel-btn {
+    display: none;
+  }
+  .carousel-wrapper {
+    gap: 0;
+  }
+
+  /* Swipeable, snapping carousels with a clean centered peek */
   .trips-grid,
   .org-grid {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
+    scroll-padding-left: 5%;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;         /* Firefox */
-    gap: 16px;
+    gap: 14px;
+    padding: 4px 5% 14px;          /* symmetric edge peek + room for shadow */
   }
   .trips-grid::-webkit-scrollbar,
   .org-grid::-webkit-scrollbar {
     display: none;                 /* Chrome/Safari */
   }
 
-  /* One card at a time, with a peek of the next */
+  /* One card at a time, slight peek of the next for affordance */
   .trip-card,
   .org-card {
-    width: 82%;
-    scroll-snap-align: start;
+    width: 88%;
+    scroll-snap-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+
+  .trip-card {
+    padding: 18px;
   }
 
   /* Long city names must not overflow the smaller card */
@@ -1275,13 +1306,21 @@
     font-size: 1.05rem;
   }
 
-  /* Tighter wrapper + smaller arrows */
-  .carousel-wrapper {
-    gap: 8px;
+  /* Voyage image thumb: slightly shorter on mobile for better proportion */
+  .org-thumb {
+    height: 170px;
   }
-  .carousel-btn {
-    width: 36px;
-    height: 36px;
+  .org-body {
+    padding: 16px;
+  }
+  .org-body h3 {
+    font-size: 1.05rem;
+  }
+
+  /* Stack action buttons vertically on very small cards for easier tapping */
+  .trip-card > div[style*="display:flex"],
+  .org-body > div[style*="display:flex"] {
+    flex-direction: column;
   }
 }
 @media (max-width: 768px) {
