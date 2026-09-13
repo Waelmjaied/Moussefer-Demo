@@ -1326,5 +1326,14 @@
 @media (max-width: 768px) {
   .banner-card {
     width: 85% !important;
+  }}
+/* ========== MOBILE — ROAD + LOUAGES ABOVE THE SEARCH CARD ========== */
+@media (max-width: 768px) {
+  .hero {
+    padding: 40px 0 40px;              /* photo stops at the search card — nothing under it */
+    margin-bottom: 40px;            /* keeps the spacing below the card */
+    background-size: auto 200%;     /* zoom the photo vertically */
+    background-position: 50% 150%;  /* pull the BOTTOM of the photo (road/louages) into the visible top area */
   }
 }
+
