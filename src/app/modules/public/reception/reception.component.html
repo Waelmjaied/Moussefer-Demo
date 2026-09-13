@@ -82,7 +82,7 @@
         <li><a routerLink="/" class="active">Accueil</a></li>
         <li><a (click)="onNavClick('/passenger/search')">Trajets</a></li>
         <li><a (click)="onNavClick('/passenger/collective-demand')">Demandes collectives</a></li>
-        <li><a (click)="onNavClick('/passenger/voyages')">Voyages organisés</a></li>
+        <li><a (click)="onNavClick('/passenger/voyages')">Excursions</a></li>
       </ul>
       <div class="nav-actions">
         <button *ngIf="!isAuthenticated()" class="btn-primary" (click)="goToLogin()">Se Connecter</button>
@@ -308,7 +308,7 @@
 
     <section class="section-spacing">
       <div class="tag-label">NOUVEAU SUR MOUSSEFER</div>
-      <h2 class="title-main">Voyages organisés</h2>
+      <h2 class="title-main">Excursions</h2>
       <div class="carousel-wrapper">
         <button class="carousel-btn prev" (click)="scroll(voyageScroll, -1)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2A388C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
