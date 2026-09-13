@@ -897,7 +897,7 @@
 @media (max-width: 768px) {
   .hero { padding: 40px 0; }
   .hero-content h1 { font-size: 1.8rem; }
-  .search-container { flex-direction: column; align-items: stretch; width: 100% }
+  .search-container { flex-direction: column; align-items: stretch; width: 90% }
   .btn-search { width: 100%; justify-content: center; }
   .nav-container { flex-direction: column; text-align: center; }
   .nav-links {
@@ -1328,12 +1328,5 @@
     width: 85% !important;
   }}
 /* ========== MOBILE — ROAD + LOUAGES ABOVE THE SEARCH CARD ========== */
-@media (max-width: 768px) {
-  .hero {
-    padding: 40px 0 40px;              /* photo stops at the search card — nothing under it */
-    margin-bottom: 40px;            /* keeps the spacing below the card */
-    background-size: auto 200%;     /* zoom the photo vertically */
-    background-position: 50% 130%;  /* pull the BOTTOM of the photo (road/louages) into the visible top area */
-  }
-}
+
 
