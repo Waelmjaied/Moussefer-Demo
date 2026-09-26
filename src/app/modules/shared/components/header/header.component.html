@@ -7,8 +7,8 @@
     <nav class="nav-links">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Accueil</a>
       <a routerLink="/passenger/search" routerLinkActive="active">Trajets</a>
-      <a routerLink="/passenger/collective-demand" routerLinkActive="active">Demande Collective</a>
-      <a routerLink="/passenger/voyages" routerLinkActive="active">Excursion</a>
+      <a routerLink="/passenger/collective-demand" routerLinkActive="active">Proposition Trajet</a>
+     <!-- <a routerLink="/passenger/voyages" routerLinkActive="active">Excursion</a> -->
     </nav>
 
     <div class="header-actions">
@@ -34,7 +34,7 @@
   <div class="mobile-menu" [class.open]="mobileMenuOpen">
     <a routerLink="/" (click)="mobileMenuOpen = false">Accueil</a>
     <a routerLink="/passenger/search" (click)="mobileMenuOpen = false">Trajets</a>
-    <a routerLink="/passenger/collective-demand" (click)="mobileMenuOpen = false">Demande Collective</a>
-    <a routerLink="/passenger/voyages" (click)="mobileMenuOpen = false">Excursion</a>
+    <a routerLink="/passenger/collective-demand" (click)="mobileMenuOpen = false">Proposition Trajet</a>
+   <!-- <a routerLink="/passenger/voyages" (click)="mobileMenuOpen = false">Excursion</a> -->
   </div>
 </header>

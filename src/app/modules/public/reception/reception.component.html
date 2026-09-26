@@ -81,8 +81,8 @@
       <ul class="nav-links">
         <li><a routerLink="/" class="active">Accueil</a></li>
         <li><a (click)="onNavClick('/passenger/search')">Trajets</a></li>
-        <li><a (click)="onNavClick('/passenger/collective-demand')">Demandes collectives</a></li>
-        <li><a (click)="onNavClick('/passenger/voyages')">Excursions</a></li>
+        <li><a (click)="onNavClick('/passenger/collective-demand')">Proposition Trajet</a></li>
+       <!-- <li><a (click)="onNavClick('/passenger/voyages')">Excursions</a></li> -->
       </ul>
       <div class="nav-actions">
         <button *ngIf="!isAuthenticated()" class="btn-primary" (click)="goToLogin()">Se Connecter</button>
@@ -305,7 +305,7 @@
         </div>
       </div>
     </section>
-
+<!--
     <section class="section-spacing">
       <div class="tag-label">NOUVEAU SUR MOUSSEFER</div>
       <h2 class="title-main">Excursions</h2>
@@ -343,6 +343,7 @@
         </button>
       </div>
     </section>
+    -->
 
     <section class="features-new">
       <div class="features-container">

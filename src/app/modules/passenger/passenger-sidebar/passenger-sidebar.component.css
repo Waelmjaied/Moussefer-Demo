@@ -6,7 +6,7 @@
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
-  background: #2A388C;
+  background: #2a388c;
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
@@ -52,8 +52,8 @@
   height: 40px;
   border-radius: 10px;
   border: none;
-  background: #f0f2f7;
-  color: #344054;
+  background: #2a388c;
+  color: #ffffff;
   font-size: 1.2rem;
   cursor: pointer;
   display: flex;
@@ -77,7 +77,7 @@
 .profile-panel {
   width: 340px;
   flex-shrink: 0;
-  background: rgb(240 242 247 / 0.78);
+  background: rgb(42 56 140);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -159,8 +159,8 @@
   border-right: 1px solid rgb(240 242 247 / 0.42);
 }
 .stat-cell:last-child { border-right: none; }
-.stat-num { font-size: 20px; font-weight: 700; color: #101828; }
-.stat-lbl { font-size: 11px; color: #98a2b3; margin-top: 2px; }
+.stat-num { font-size: 20px; font-weight: 700; color: #ffffff; }
+.stat-lbl { font-size: 13px; color: #ffffff; margin-top: 2px; }
 
 /* Navigation sections */
 .nav-section { padding: 20px 16px 4px; }
@@ -182,7 +182,7 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #344054;
+  color: #ffffff;
   margin-bottom: 3px;
   transition: all .15s;
   text-decoration: none;

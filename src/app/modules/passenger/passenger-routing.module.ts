@@ -22,12 +22,14 @@ import { PassengerLoyaltyComponent } from './loyalty/loyalty.component';
 const routes: Routes = [
   // ── Public pages (header/footer visible, no sidebar) ──
   { path: 'search', component: TrajetSearchComponent },
-  { path: 'voyages', component: VoyageSearchComponent },
+  //{ path: 'voyages', component: VoyageSearchComponent },
   { path: 'reservation/:id', component: ReservationDetailComponent },
   // Konnect mock checkout page — only relevant when KONNECT_MOCK_ENABLED=true
   // on the backend. The backend's fake payUrl redirects here.
   { path: 'konnect-mock', component: KonnectMockComponent },
   { path: 'collective-demand', component: CollectiveDemandComponent },
+  { path: 'voyages', redirectTo: '/passenger/search' },
+  { path: 'voyages/:id', redirectTo: '/passenger/search' },
 
   // ── Dashboard shell (profile sidebar, no global header) ──
   {

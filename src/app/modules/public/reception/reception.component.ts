@@ -93,7 +93,7 @@ export class ReceptionComponent implements OnInit {
     // FIX NG0100 : différer le chargement au prochain tick
     setTimeout(() => {
       this.loadTrajets();
-      this.loadVoyages();
+      // this.loadVoyages();  // disabled until voyages organisés launches
       this.loadBanners();
     }, 0);
   }
