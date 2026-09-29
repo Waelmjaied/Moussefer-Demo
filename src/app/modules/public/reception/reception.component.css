@@ -1327,6 +1327,77 @@
   .banner-card {
     width: 85% !important;
   }}
-/* ========== MOBILE — ROAD + LOUAGES ABOVE THE SEARCH CARD ========== */
+/* ========== MOBILE — 3-COLUMN GRID ========== */
+@media (max-width: 768px) {
 
+  /* Comment ça marche → 3 columns (perfect: 3 cards) */
+  .steps-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .step-card {
+    padding: 14px 8px;
+    min-width: 0;
+  }
+  .step-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  .step-card h3 {
+    font-size: 0.78rem;
+    margin-bottom: 4px;
+    line-height: 1.25;
+  }
+  .step-card p {
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
 
+  /* Pourquoi choisir Moussefer → 3 columns (perfect: 6 cards = 2 rows) */
+  .features-grid-3cols {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .feature-card {
+    padding: 14px 8px;
+  }
+  .icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .icon-circle svg {
+    width: 18px;
+    height: 18px;
+  }
+  .feature-card h3 {
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+  .feature-card p {
+    font-size: 0.65rem;
+    line-height: 1.3;
+  }
+
+  /* Testimonials → horizontal swipe carousel (3 cols would be unreadable) */
+  .reviews-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 5% 10px;
+  }
+  .reviews-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .review-card {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+  }
+}
