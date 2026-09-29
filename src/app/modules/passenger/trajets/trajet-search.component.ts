@@ -36,6 +36,9 @@ export class TrajetSearchComponent implements OnInit {
   showNoTrajetPopup = false;
   noTrajetPopupMessage = '';
 
+  // ─── Mobile filters panel toggle ───
+  showMobileFilters = false;
+
   // Flat filters
   filterMorning = false;
   filterAfternoon = false;
@@ -73,15 +76,16 @@ export class TrajetSearchComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Load all available trajets by default — the passenger expects to see
-    // what's available without having to type a search first. If they want
-    // to narrow down, they fill the form and click "Rechercher".
-    // Empty-form search returns every reservable (and queued) trajet.
     this.onSearch();
   }
 
   getInitial(id: string): string {
     return (id?.[0] || 'C').toUpperCase();
+  }
+
+  // ─── Mobile filters panel toggle ───
+  toggleMobileFilters(): void {
+    this.showMobileFilters = !this.showMobileFilters;
   }
 
   applyFilters(): void {
@@ -107,6 +111,12 @@ export class TrajetSearchComponent implements OnInit {
     if (this.filterDirect) list = list.filter((t) => !(t as any).hasIntermediateStops);
     if (this.filterMinSeats) list = list.filter((t) => t.availableSeats >= +this.filterMinSeats);
     this.filteredTrajetList = list;
+
+    // Mobile UX: collapse the panel after a filter is applied so the user
+    // immediately sees the updated results instead of scrolling past the panel.
+    if (window.innerWidth <= 768) {
+      this.showMobileFilters = false;
+    }
   }
 
   resetFilters(): void {
@@ -137,9 +147,6 @@ export class TrajetSearchComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        // DEMO FALLBACK: backend unreachable — show mock trajets instead of
-        // an error popup, so the page still looks alive for a live demo.
-        // Remove once a real backend is wired up permanently.
         this.trajets = MOCK_TRAJETS;
         this.filteredTrajetList = [...MOCK_TRAJETS];
         this.noTrajetFound = false;
@@ -149,10 +156,6 @@ export class TrajetSearchComponent implements OnInit {
   }
 
   reserveTrajet(trajet: Trajet): void {
-    // Defensive: the button is already disabled in the template when
-    // !reservable, but if a malformed event sneaks through (e.g. browser
-    // extension, stale list), surface a toast instead of routing to a
-    // reservation form that the backend will reject.
     if (!trajet.reservable) {
       if (trajet.status === 'LOCKED') {
         this.toast.info(

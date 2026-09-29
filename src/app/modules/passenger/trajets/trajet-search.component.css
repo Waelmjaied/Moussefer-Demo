@@ -1201,3 +1201,41 @@
   transform: none !important;
   box-shadow: none !important;
 }
+/* Toggle button — hidden on desktop, shown on mobile */
+.btn-filters-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #344054;
+  cursor: pointer;
+  font-family: var(--font);
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+@media (max-width: 768px) {
+  .btn-filters-toggle {
+    display: inline-flex;
+  }
+
+  /* Filter panel hidden by default on mobile */
+  .filter-panel {
+    display: none;
+  }
+
+  /* Shown when toggled open */
+  .filter-panel.mobile-open {
+    display: block;
+  }
+}
+@media (max-width: 768px) {
+  .filter-panel.mobile-open {
+    display: block !important;
+  }
+}

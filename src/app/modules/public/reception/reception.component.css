@@ -1401,3 +1401,7 @@
     scroll-snap-align: center;
   }
 }
+.nav-links {
+  justify-content: center;
+  gap: 28px;
+}

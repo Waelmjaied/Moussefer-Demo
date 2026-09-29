@@ -55,7 +55,7 @@
   <!-- Body -->
   <div class="body-wrap">
     <!-- Filter panel - full height -->
-    <div class="filter-panel">
+    <div class="filter-panel" [class.mobile-open]="showMobileFilters">
       <h3>Filtres</h3>
 
       <div class="filter-section-label">Heure de départ</div>
@@ -139,6 +139,12 @@
 
     <!-- Results -->
     <div class="results-area">
+      <button class="btn-filters-toggle" (click)="toggleMobileFilters()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+        </svg>
+        Filtres
+      </button>
       <div *ngIf="loading" class="text-center py-5">
         <div class="spinner-border" style="color:#12b76a"></div>
       </div>
