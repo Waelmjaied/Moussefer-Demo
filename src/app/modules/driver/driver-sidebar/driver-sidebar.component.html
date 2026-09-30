@@ -19,54 +19,74 @@
   <ul class="nav flex-column">
     <li class="nav-item">
       <a class="nav-link" routerLink="/driver/dashboard" routerLinkActive="active" (click)="closeSidebar()">
-        Tableau de bord
+        <i class="bi bi-speedometer2"></i>
+        <span>Tableau de bord</span>
       </a>
     </li>
     <li class="nav-item">
       <a class="nav-link" routerLink="/driver/my-trajets" routerLinkActive="active" (click)="closeSidebar()">
-        Mes trajets
+        <i class="bi bi-signpost-split"></i>
+        <span>Mes trajets</span>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link d-flex align-items-center justify-content-between px-3" routerLink="/driver/reservations" routerLinkActive="active" (click)="closeSidebar()">
-        <span>Demandes</span>
+      <a class="nav-link" routerLink="/driver/reservations" routerLinkActive="active" (click)="closeSidebar()">
+        <div class="nav-link-content">
+          <i class="bi bi-clock-history"></i>
+          <span>Demandes</span>
+        </div>
         <span class="nav-badge" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
       </a>
     </li>
     <li class="nav-item">
       <a class="nav-link" routerLink="/driver/passengers" routerLinkActive="active" (click)="closeSidebar()">
-        Passagers
+        <i class="bi bi-people"></i>
+        <span>Passagers</span>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link d-flex align-items-center justify-content-between px-3" routerLink="/driver/messages" routerLinkActive="active" (click)="closeSidebar()">
-        <span>Messages</span>
+      <a class="nav-link" routerLink="/driver/messages" routerLinkActive="active" (click)="closeSidebar()">
+        <div class="nav-link-content">
+          <i class="bi bi-chat-dots"></i>
+          <span>Messages</span>
+        </div>
         <span class="nav-badge" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" routerLink="/driver/scan-qr" routerLinkActive="active"
-         (click)="closeSidebar()">
-        <i class="bi bi-qr-code-scan"></i> Scanner QR
+      <a class="nav-link" routerLink="/driver/scan-qr" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="bi bi-qr-code-scan"></i>
+        <span>Scanner QR</span>
       </a>
     </li>
-
   </ul>
 
   <!-- GESTION -->
   <div class="sidebar-title">GESTION</div>
   <ul class="nav flex-column">
     <li class="nav-item">
-      <a class="nav-link" routerLink="/driver/history" routerLinkActive="active" (click)="closeSidebar()">Historiques</a>
+      <a class="nav-link" routerLink="/driver/history" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="bi bi-journal-text"></i>
+        <span>Historiques</span>
+      </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" routerLink="/driver/reviews" routerLinkActive="active" (click)="closeSidebar()">Avis</a>
+      <a class="nav-link" routerLink="/driver/reviews" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="bi bi-star"></i>
+        <span>Avis</span>
+      </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" routerLink="/driver/revenues" routerLinkActive="active" (click)="closeSidebar()">Revenues</a>
+      <a class="nav-link" routerLink="/driver/revenues" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="bi bi-wallet2"></i>
+        <span>Revenues</span>
+      </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" routerLink="/driver/collective-requests" routerLinkActive="active" (click)="closeSidebar()">Demandes collectifs</a>
+      <a class="nav-link" routerLink="/driver/collective-requests" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="bi bi-people-fill"></i>
+        <span>Demandes collectifs</span>
+      </a>
     </li>
   </ul>
 
@@ -74,15 +94,22 @@
   <div class="sidebar-title">COMPTE</div>
   <ul class="nav flex-column">
     <li class="nav-item">
-      <a class="nav-link" routerLink="/driver/Settings" routerLinkActive="active" (click)="closeSidebar()">Paramètres</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" routerLink="/driver/documents" routerLinkActive="active" (click)="closeSidebar()">
-        Profil
+      <a class="nav-link" routerLink="/driver/Settings" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="bi bi-gear"></i>
+        <span>Paramètres</span>
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link logout-link" href="#" (click)="logout(); $event.preventDefault(); closeSidebar()">Déconnexion</a>
+      <a class="nav-link" routerLink="/driver/documents" routerLinkActive="active" (click)="closeSidebar()">
+        <i class="bi bi-person-badge"></i>
+        <span>Profil</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link logout-link" href="#" (click)="logout(); $event.preventDefault(); closeSidebar()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Déconnexion</span>
+      </a>
     </li>
   </ul>
 
