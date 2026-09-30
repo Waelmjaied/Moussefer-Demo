@@ -25,117 +25,140 @@
       <img src="assets/logo-removebg-preview.png" alt="Logo" class="logo-img">
     </div>
 
+    <!-- PRINCIPAL -->
     <div class="sidebar-group">PRINCIPAL</div>
     <ul class="nav flex-column">
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-speedometer2"></i> Dashboard Analytics
+          <i class="bi bi-speedometer2"></i>
+          <span>Dashboard Analytics</span>
         </a>
       </li>
       <li class="nav-item" *ngIf="permissionService.isSuperAdmin()">
         <a class="nav-link" routerLink="/admin/api-monitoring" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-broadcast"></i> Monitoring API
+          <i class="bi bi-activity"></i>
+          <span>Monitoring API</span>
         </a>
       </li>
       <li class="nav-item" *ngIf="permissionService.isSuperAdmin()">
-      <a class="nav-link" routerLink="/admin/litiges" routerLinkActive="active" (click)="closeSidebar()">
-        <i class="bi bi-broadcast"></i> Litiges
-      </a>
-    </li>
+        <a class="nav-link" routerLink="/admin/litiges" routerLinkActive="active" (click)="closeSidebar()">
+          <i class="bi bi-exclamation-triangle"></i>
+          <span>Litiges</span>
+        </a>
+      </li>
       <li class="nav-item" *ngIf="permissionService.canViewStatistics()">
         <a class="nav-link" routerLink="/admin/statistics" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-graph-up"></i> Statistiques
+          <i class="bi bi-graph-up-arrow"></i>
+          <span>Statistiques</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/annulations" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-gear"></i> Annulations
+          <i class="bi bi-x-circle"></i>
+          <span>Annulations</span>
         </a>
       </li>
     </ul>
 
+    <!-- MODULES -->
     <div class="sidebar-group">MODULES</div>
     <ul class="nav flex-column">
       <li class="nav-item" *ngIf="permissionService.isSuperAdmin()">
         <a class="nav-link" routerLink="/admin/roles" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-shield-lock"></i> Rôles/Permissions
+          <i class="bi bi-shield-lock"></i>
+          <span>Rôles/Permissions</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/users" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-people"></i> Utilisateurs
+          <i class="bi bi-people"></i>
+          <span>Utilisateurs</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/trajets" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-map"></i> Trajets/Louages
+          <i class="bi bi-signpost-split"></i>
+          <span>Trajets/Louages</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/kyc" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-shield-check"></i> Vérification KYC
+          <i class="bi bi-person-check"></i>
+          <span>Vérification KYC</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/reservations" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-calendar-check"></i> Réservations
+          <i class="bi bi-calendar-check"></i>
+          <span>Réservations</span>
         </a>
       </li>
     </ul>
 
+    <!-- GESTION -->
     <div class="sidebar-group">GESTION</div>
     <ul class="nav flex-column">
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/payments" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-credit-card"></i> Paiements/Commission
+          <i class="bi bi-wallet2"></i>
+          <span>Paiements/Commission</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/banners" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-images"></i> Bannières Publicitaires
+          <i class="bi bi-images"></i>
+          <span>Bannières Publicitaires</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/promo-codes" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-ticket"></i> Codes Promotionnels
+          <i class="bi bi-ticket-perforated"></i>
+          <span>Codes Promotionnels</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/stations" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-geo-alt"></i> Stations GPS
+          <i class="bi bi-geo-alt"></i>
+          <span>Stations GPS</span>
         </a>
       </li>
     </ul>
 
+    <!-- SYSTEME -->
     <div class="sidebar-group">SYSTEME</div>
     <ul class="nav flex-column">
       <li class="nav-item" *ngIf="permissionService.canViewActivityLog()">
         <a class="nav-link" routerLink="/admin/activity-log" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-journal-text"></i> Journal d'activité
+          <i class="bi bi-journal-text"></i>
+          <span>Journal d'activité</span>
         </a>
       </li>
       <li class="nav-item" *ngIf="permissionService.canManageFares()">
         <a class="nav-link" routerLink="/admin/fares" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-currency-dollar"></i> Tarifs officiels
+          <i class="bi bi-tags"></i>
+          <span>Tarifs officiels</span>
         </a>
       </li>
       <li class="nav-item" *ngIf="permissionService.isSuperAdmin()">
         <a class="nav-link" routerLink="/admin/feature-toggles" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-toggles"></i> Feature Toggles
+          <i class="bi bi-toggle-on"></i>
+          <span>Feature Toggles</span>
         </a>
       </li>
       <li class="nav-item" *ngIf="permissionService.isSuperAdmin() || permissionService.isModerator()">
         <a class="nav-link" routerLink="/admin/send-notifications" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-send"></i> Envoyer notifications
+          <i class="bi bi-bell"></i>
+          <span>Envoyer notifications</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/admin/settings" routerLinkActive="active" (click)="closeSidebar()">
-          <i class="bi bi-gear"></i> Paramètres
+          <i class="bi bi-gear"></i>
+          <span>Paramètres</span>
         </a>
       </li>
-      <li>
-        <a class="nav-link logout-link" href="#" (click)="logout(); $event.preventDefault()">
+      <li class="nav-item">
+        <a class="nav-link logout-link" href="#" (click)="logout(); $event.preventDefault(); closeSidebar()">
           <i class="bi bi-box-arrow-right"></i>
           <span>Déconnexion</span>
         </a>
